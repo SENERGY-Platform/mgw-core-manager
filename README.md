@@ -1,0 +1,2 @@
+mgw-core-manager
+=======
