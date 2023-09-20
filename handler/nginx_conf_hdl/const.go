@@ -8,3 +8,13 @@ const (
 	setDirective       = "set"
 	serverDirective    = "server"
 )
+
+const (
+	CommentDeploymentIDKey = "did"
+	CommentExtPathKey      = "ext_path"
+	CommentIntPathKey      = "int_path"
+	CommentHostKey         = "host"
+	CommentPortKey         = "port"
+	CommentDelimiter       = " "
+	CommentItemDelimiter   = "="
+)
