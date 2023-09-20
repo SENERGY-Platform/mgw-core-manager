@@ -62,13 +62,21 @@ func writeConf(conf *gonginx.Config, path string) error {
 	return gonginx.WriteConfig(conf, gonginx.IndentedStyle, false)
 }
 
-func getEndpointDirectives(mID, dID, basePath, internalPath, host string, allowSubnets, denySubnets []string) ([]gonginx.IDirective, error) {
+func genEndpointDirectives(dID string, ept endpoint, extPath string, allowSubnets, denySubnets []string) ([]gonginx.IDirective, error) {
 	uID, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
 	}
 	varName := uID.String()
-	comment := []string{fmt.Sprintf("#mid=%s,did=%s", mID, dID)}
+	commentItems := map[string]string{
+		CommentDeploymentIDKey: ept.VarName,
+		CommentHostKey:         ept.Host,
+		CommentIntPathKey:      ept.Path,
+		CommentExtPathKey:      extPath,
+	}
+	if ept.Port != nil {
+		commentItems[CommentPortKey] = strconv.FormatInt(int64(*ept.Port), 10)
+	}
 	directives := []gonginx.IDirective{
 		newDirective(proxyPassDirective, []string{fmt.Sprintf("http://%s%s$1$is_args$args", varName, internalPath)}, nil, nil),
 	}
