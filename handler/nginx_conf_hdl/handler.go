@@ -14,6 +14,7 @@ type Handler struct {
 	tgtConfPath  string
 	allowSubnets []string
 	denySubnets  []string
+	endpoints    map[string]map[string]endpoint // {dID:{extPath:endpoint}}
 }
 
 type endpoint struct {
