@@ -16,6 +16,13 @@ type Handler struct {
 	denySubnets  []string
 }
 
+type endpoint struct {
+	Host    string
+	Port    *int
+	Path    string // intPath
+	VarName string // hash(DeploymentID, Host, Path)
+}
+
 func New(srcPath, tgtPath, endPntPath string, allowSubnets, denySubnets []string) *Handler {
 	return &Handler{
 		endPntPath:   endPntPath,
