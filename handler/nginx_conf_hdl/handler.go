@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/tufanbarisyildirim/gonginx"
 	"github.com/tufanbarisyildirim/gonginx/parser"
+	"strings"
 )
 
 type Handler struct {
@@ -73,4 +74,41 @@ func getEndpointDirectives(mID, dID, basePath, internalPath, host string, allowS
 		newDirective(setDirective, []string{fmt.Sprintf("$%s %s", varName, host)}, comment, nil),
 		newDirective(locationDirective, []string{fmt.Sprintf("~ ^/%s/%s/(.*)$", basePath, dID)}, comment, newBlock(directives)),
 	}, nil
+}
+
+func genComment(items map[string]string) string {
+	c := "#"
+	n := len(items) - 1
+	i := 0
+	for key, val := range items {
+		item := key + CommentItemDelimiter + val
+		if i < n {
+			c += item + CommentDelimiter
+		} else {
+			c += item
+		}
+		i++
+	}
+	return c
+}
+
+func parseComment(c string) (map[string]string, error) {
+	c, _ = strings.CutPrefix(c, "#")
+	if c == "" {
+		return nil, fmt.Errorf("parsing nginx config comment failed: empty")
+	}
+	items := strings.Split(c, CommentDelimiter)
+	m := make(map[string]string)
+	for _, item := range items {
+		parts := strings.Split(item, CommentItemDelimiter)
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("parsing nginx config comment failed: '%s' -> '%s'", c, item)
+		}
+		key := parts[0]
+		if key == "" {
+			return nil, fmt.Errorf("parsing nginx config comment failed: '%s' -> '%s'", c, item)
+		}
+		m[key] = parts[1]
+	}
+	return m, nil
 }
