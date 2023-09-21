@@ -1,36 +1,55 @@
 package nginx_conf_hdl
 
 import (
+	"encoding/json"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"strconv"
+	"strings"
 )
 
 type endpoint struct {
-	Host    string
-	Port    *int
-	Path    string // internal path
-	VarName string // hash(DeploymentID, Host, Path)
+	DeploymentID string `json:"d_id"`
+	Host         string `json:"host"`
+	Port         *int   `json:"port"`
+	IntPath      string `json:"int_path"`
+	ExtPath      string `json:"ext_path"`
+	VarName      string `json:"-"`
 }
 
-func newEndpoint(dID, host string, port *int, path string) *endpoint {
-	var hash string
-	if port != nil {
-		hash = util.GenHash(dID, host, strconv.FormatInt(int64(*port), 10), path)
-	} else {
-		util.GenHash(dID, host, path)
-	}
-	return &endpoint{
-		Host:    host,
-		Port:    port,
-		Path:    path,
-		VarName: hash,
+func newEndpoint(dID, host string, port *int, intPath, extPath string) endpoint {
+	return endpoint{
+		DeploymentID: dID,
+		Host:         host,
+		Port:         port,
+		IntPath:      intPath,
+		ExtPath:      extPath,
+		VarName:      util.GenHash(dID, extPath),
 	}
 }
 
-func (e *endpoint) FullPath() string {
-	s := e.VarName
+func parseEndpoint(s string) (endpoint, error) {
+	s, _ = strings.CutPrefix(s, "#")
+	var e endpoint
+	err := json.Unmarshal([]byte(s), &e)
+	if err != nil {
+		return endpoint{}, err
+	}
+	e.VarName = util.GenHash(e.DeploymentID, e.ExtPath)
+	return e, nil
+}
+
+func (e endpoint) ToString() (string, error) {
+	b, err := json.Marshal(e)
+	if err != nil {
+		return "", err
+	}
+	return "#" + string(b), err
+}
+
+func (e endpoint) FullIntPath() string {
+	s := "$" + e.VarName
 	if e.Port != nil {
 		s += ":" + strconv.FormatInt(int64(*e.Port), 10)
 	}
-	return s + e.Path
+	return s + e.IntPath
 }
