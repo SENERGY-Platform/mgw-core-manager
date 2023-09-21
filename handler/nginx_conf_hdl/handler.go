@@ -52,7 +52,7 @@ func writeConf(conf *gonginx.Config, path string) error {
 	return gonginx.WriteConfig(conf, gonginx.IndentedStyle, false)
 }
 
-func (h *Handler) setEndpoint(directives []gonginx.IDirective, ept endpoint, locationTemplate, proxyPassTemplate string) error {
+func setEndpoint(directives []gonginx.IDirective, ept endpoint, locationTemplate, proxyPassTemplate string, allowSubnets, denySubnets []string) error {
 	cmt, err := ept.GenComment()
 	if err != nil {
 		return err
@@ -61,10 +61,10 @@ func (h *Handler) setEndpoint(directives []gonginx.IDirective, ept endpoint, loc
 	locDirectives := []gonginx.IDirective{
 		newDirective(proxyPassDirective, []string{ept.GenProxyPassValue(proxyPassTemplate)}, nil, nil),
 	}
-	for _, subnet := range h.allowSubnets {
+	for _, subnet := range allowSubnets {
 		locDirectives = append(locDirectives, newDirective(allowDirective, []string{subnet}, nil, nil))
 	}
-	for _, subnet := range h.denySubnets {
+	for _, subnet := range denySubnets {
 		locDirectives = append(locDirectives, newDirective(denyDirective, []string{subnet}, nil, nil))
 	}
 	directives = append(directives, newDirective(locationDirective, []string{ept.GenLocationValue(locationTemplate)}, nil, newBlock(directives)))
