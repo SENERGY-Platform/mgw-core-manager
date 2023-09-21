@@ -1,7 +1,6 @@
 package nginx_conf_hdl
 
 import (
-	"fmt"
 	"github.com/tufanbarisyildirim/gonginx"
 	"github.com/tufanbarisyildirim/gonginx/parser"
 )
@@ -58,7 +57,7 @@ func (h *Handler) setEndpoint(directives []gonginx.IDirective, ept endpoint, loc
 	if err != nil {
 		return err
 	}
-	directives = append(directives, newDirective(setDirective, []string{fmt.Sprintf("$%s %s", ept.VarName, ept.Host)}, []string{cmt}, nil))
+	directives = append(directives, newDirective(setDirective, []string{ept.GenSetValue()}, []string{cmt}, nil))
 	locDirectives := []gonginx.IDirective{
 		newDirective(proxyPassDirective, []string{ept.GenProxyPassValue(proxyPassTemplate)}, nil, nil),
 	}
