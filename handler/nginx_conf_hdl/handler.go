@@ -2,10 +2,8 @@ package nginx_conf_hdl
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/tufanbarisyildirim/gonginx"
 	"github.com/tufanbarisyildirim/gonginx/parser"
-	"strconv"
 )
 
 type Handler struct {
