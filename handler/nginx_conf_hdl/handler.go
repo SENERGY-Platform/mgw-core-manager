@@ -53,32 +53,21 @@ func writeConf(conf *gonginx.Config, path string) error {
 	return gonginx.WriteConfig(conf, gonginx.IndentedStyle, false)
 }
 
-func genEndpointDirectives(dID string, ept endpoint, extPath string, allowSubnets, denySubnets []string) ([]gonginx.IDirective, error) {
-	uID, err := uuid.NewRandom()
+func (h *Handler) setEndpoint(directives []gonginx.IDirective, ept endpoint, locationTemplate, proxyPassTemplate string) error {
+	cmt, err := ept.GenComment()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	varName := uID.String()
-	commentItems := map[string]string{
-		CommentDeploymentIDKey: ept.VarName,
-		CommentHostKey:         ept.Host,
-		CommentIntPathKey:      ept.Path,
-		CommentExtPathKey:      extPath,
+	directives = append(directives, newDirective(setDirective, []string{fmt.Sprintf("$%s %s", ept.VarName, ept.Host)}, []string{cmt}, nil))
+	locDirectives := []gonginx.IDirective{
+		newDirective(proxyPassDirective, []string{ept.GenProxyPassValue(proxyPassTemplate)}, nil, nil),
 	}
-	if ept.Port != nil {
-		commentItems[CommentPortKey] = strconv.FormatInt(int64(*ept.Port), 10)
+	for _, subnet := range h.allowSubnets {
+		locDirectives = append(locDirectives, newDirective(allowDirective, []string{subnet}, nil, nil))
 	}
-	directives := []gonginx.IDirective{
-		newDirective(proxyPassDirective, []string{fmt.Sprintf("http://%s%s$1$is_args$args", varName, internalPath)}, nil, nil),
+	for _, subnet := range h.denySubnets {
+		locDirectives = append(locDirectives, newDirective(denyDirective, []string{subnet}, nil, nil))
 	}
-	for _, subnet := range allowSubnets {
-		directives = append(directives, newDirective(allowDirective, []string{subnet}, nil, nil))
-	}
-	for _, subnet := range denySubnets {
-		directives = append(directives, newDirective(denyDirective, []string{subnet}, nil, nil))
-	}
-	return []gonginx.IDirective{
-		newDirective(setDirective, []string{fmt.Sprintf("$%s %s", varName, host)}, comment, nil),
-		newDirective(locationDirective, []string{fmt.Sprintf("~ ^/%s/%s/(.*)$", basePath, dID)}, comment, newBlock(directives)),
-	}, nil
+	directives = append(directives, newDirective(locationDirective, []string{ept.GenLocationValue(locationTemplate)}, nil, newBlock(directives)))
+	return nil
 }
