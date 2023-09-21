@@ -46,10 +46,17 @@ func (e endpoint) GenComment() (string, error) {
 	return "#" + string(b), err
 }
 
-func (e endpoint) FullIntPath() string {
-	s := "$" + e.VarName
-	if e.Port != nil {
-		s += ":" + strconv.FormatInt(int64(*e.Port), 10)
+func (e endpoint) GenProxyPassValue(template string) string {
+	template = strings.Replace(template, "{var}", "$"+e.VarName, -1)
+	var port string
+	if e.Port != nil && *e.Port != 80 {
+		port = ":" + strconv.FormatInt(int64(*e.Port), 10)
 	}
-	return s + e.IntPath
+	template = strings.Replace(template, "{port}", port, -1)
+	return strings.Replace(template, "{path}", e.IntPath, -1)
+}
+
+func (e endpoint) GenLocationValue(template string) string {
+	template = strings.Replace(template, "{did}", e.DeploymentID, -1)
+	return strings.Replace(template, "{path}", e.ExtPath, -1)
 }
