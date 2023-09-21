@@ -13,7 +13,7 @@ type endpoint struct {
 	Port         *int   `json:"port"`
 	IntPath      string `json:"int_path"`
 	ExtPath      string `json:"ext_path"`
-	VarName      string `json:"-"`
+	varName      string
 }
 
 func newEndpoint(dID, host string, port *int, intPath, extPath string) endpoint {
@@ -23,7 +23,7 @@ func newEndpoint(dID, host string, port *int, intPath, extPath string) endpoint 
 		Port:         port,
 		IntPath:      intPath,
 		ExtPath:      extPath,
-		VarName:      util.GenHash(dID, extPath),
+		varName:      util.GenHash(dID, extPath),
 	}
 }
 
@@ -34,7 +34,7 @@ func parseEndpoint(s string) (endpoint, error) {
 	if err != nil {
 		return endpoint{}, err
 	}
-	e.VarName = util.GenHash(e.DeploymentID, e.ExtPath)
+	e.varName = util.GenHash(e.DeploymentID, e.ExtPath)
 	return e, nil
 }
 
@@ -47,7 +47,7 @@ func (e endpoint) GenComment() (string, error) {
 }
 
 func (e endpoint) GenProxyPassValue(template string) string {
-	template = strings.Replace(template, "{var}", "$"+e.VarName, -1)
+	template = strings.Replace(template, "{var}", "$"+e.varName, -1)
 	var port string
 	if e.Port != nil && *e.Port != 80 {
 		port = ":" + strconv.FormatInt(int64(*e.Port), 10)
