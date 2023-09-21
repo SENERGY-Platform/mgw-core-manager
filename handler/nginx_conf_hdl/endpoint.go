@@ -38,7 +38,7 @@ func parseEndpoint(s string) (endpoint, error) {
 	return e, nil
 }
 
-func (e endpoint) ToString() (string, error) {
+func (e endpoint) GenComment() (string, error) {
 	b, err := json.Marshal(e)
 	if err != nil {
 		return "", err
