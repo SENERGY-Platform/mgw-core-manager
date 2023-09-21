@@ -2,6 +2,7 @@ package nginx_conf_hdl
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"strconv"
 	"strings"
@@ -59,4 +60,8 @@ func (e endpoint) GenProxyPassValue(template string) string {
 func (e endpoint) GenLocationValue(template string) string {
 	template = strings.Replace(template, "{did}", e.DeploymentID, -1)
 	return strings.Replace(template, "{path}", e.ExtPath, -1)
+}
+
+func (e endpoint) GenSetValue() string {
+	return fmt.Sprintf("$%s %s", e.varName, e.Host)
 }
