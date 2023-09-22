@@ -23,3 +23,8 @@ const (
 	HeaderApiVer    = "X-Api-Version"
 	HeaderSrvName   = "X-Service"
 )
+
+const (
+	StandardEndpoint EndpointType = iota
+	DefaultGuiEndpoint
+)
