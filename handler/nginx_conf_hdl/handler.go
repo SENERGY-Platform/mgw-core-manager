@@ -43,6 +43,34 @@ func (h *Handler) readEndpoints() error {
 	return nil
 }
 
+func (h *Handler) writeEndpoints() error {
+	var directives []gonginx.IDirective
+	for _, directive := range h.srcConfBlock.GetDirectives() {
+		if directive.GetName() == serverDirective {
+			var srvDirectives []gonginx.IDirective
+			block := directive.GetBlock()
+			if block != nil {
+				srvDirectives = block.GetDirectives()
+			}
+			for _, dMap := range h.endpoints {
+				for _, e := range dMap {
+					err := setEndpoint(srvDirectives, e, h.templates[e.TmplTypeMap[locationTmpl]], h.templates[e.TmplTypeMap[proxyPassTmpl]], h.allowSubnets, h.denySubnets)
+					if err != nil {
+						return err
+					}
+				}
+			}
+			directives = append(directives, newDirective(directive.GetName(), directive.GetParameters(), directive.GetComment(), newBlock(srvDirectives)))
+		} else {
+			directives = append(directives, directive)
+		}
+	}
+	return writeConf(&gonginx.Config{
+		Block:    newBlock(directives),
+		FilePath: h.tgtConfPath,
+	})
+}
+
 func getEndpoints(block gonginx.IBlock) (map[string]map[string]endpoint, error) {
 	endpoints := make(map[string]map[string]endpoint)
 	for _, directive := range block.GetDirectives() {
