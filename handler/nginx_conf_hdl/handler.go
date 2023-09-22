@@ -11,7 +11,7 @@ type Handler struct {
 	allowSubnets []string
 	denySubnets  []string
 	endpoints    map[string]map[string]endpoint // {dID:{extPath:endpoint}}
-	srcConf      gonginx.IBlock
+	srcConfBlock gonginx.IBlock
 }
 
 func New(tgtConfPath, endPntPath string, allowSubnets, denySubnets []string) *Handler {
