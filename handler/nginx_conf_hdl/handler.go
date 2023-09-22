@@ -5,6 +5,7 @@ import (
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/tufanbarisyildirim/gonginx"
 	"github.com/tufanbarisyildirim/gonginx/parser"
+	"os"
 )
 
 type Handler struct {
