@@ -10,6 +10,7 @@ type Handler struct {
 	tgtConfPath  string
 	allowSubnets []string
 	denySubnets  []string
+	templates    map[int]string
 	endpoints    map[string]map[string]endpoint // {dID:{extPath:endpoint}}
 	srcConfBlock gonginx.IBlock
 }
