@@ -8,3 +8,10 @@ const (
 	setDirective       = "set"
 	serverDirective    = "server"
 )
+
+const (
+	varPlaceholder   = "{var}"
+	portPlaceholder  = "{port}"
+	pathPlaceholder  = "{path}"
+	depIDPlaceholder = "{did}"
+)

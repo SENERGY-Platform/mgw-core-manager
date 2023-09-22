@@ -48,18 +48,18 @@ func (e endpoint) GenComment() (string, error) {
 }
 
 func (e endpoint) GenProxyPassValue(template string) string {
-	template = strings.Replace(template, "{var}", "$"+e.varName, -1)
+	template = strings.Replace(template, varPlaceholder, "$"+e.varName, -1)
 	var port string
 	if e.Port != nil && *e.Port != 80 {
 		port = ":" + strconv.FormatInt(int64(*e.Port), 10)
 	}
-	template = strings.Replace(template, "{port}", port, -1)
-	return strings.Replace(template, "{path}", e.IntPath, -1)
+	template = strings.Replace(template, portPlaceholder, port, -1)
+	return strings.Replace(template, pathPlaceholder, e.IntPath, -1)
 }
 
 func (e endpoint) GenLocationValue(template string) string {
-	template = strings.Replace(template, "{did}", e.DeploymentID, -1)
-	return strings.Replace(template, "{path}", e.ExtPath, -1)
+	template = strings.Replace(template, depIDPlaceholder, e.DeploymentID, -1)
+	return strings.Replace(template, pathPlaceholder, e.ExtPath, -1)
 }
 
 func (e endpoint) GenSetValue() string {
