@@ -15,3 +15,15 @@ const (
 	pathPlaceholder  = "{path}"
 	depIDPlaceholder = "{did}"
 )
+
+const (
+	locationTmpl = iota
+	proxyPassTmpl
+)
+
+const (
+	StandardLocationTmpl = iota
+	StandardProxyPassTmpl
+	DefaultGuiLocationTmpl
+	DefaultGuiProxyPassTmpl
+)
