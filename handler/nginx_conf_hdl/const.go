@@ -1,5 +1,7 @@
 package nginx_conf_hdl
 
+import "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+
 const (
 	locationDirective  = "location"
 	proxyPassDirective = "proxy_pass"
@@ -27,3 +29,14 @@ const (
 	DefaultGuiLocationTmpl
 	DefaultGuiProxyPassTmpl
 )
+
+var EndpointTypeMap = map[int]map[int]int{
+	model.StandardEndpoint: {
+		locationTmpl:  StandardLocationTmpl,
+		proxyPassTmpl: StandardProxyPassTmpl,
+	},
+	model.DefaultGuiEndpoint: {
+		locationTmpl:  DefaultGuiLocationTmpl,
+		proxyPassTmpl: DefaultGuiProxyPassTmpl,
+	},
+}
