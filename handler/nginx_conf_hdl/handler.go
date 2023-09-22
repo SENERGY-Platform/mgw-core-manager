@@ -7,18 +7,16 @@ import (
 
 type Handler struct {
 	endPntPath   string
-	srcConfPath  string
 	tgtConfPath  string
 	allowSubnets []string
 	denySubnets  []string
 	endpoints    map[string]map[string]endpoint // {dID:{extPath:endpoint}}
 }
 
-func New(srcPath, tgtPath, endPntPath string, allowSubnets, denySubnets []string) *Handler {
+func New(tgtConfPath, endPntPath string, allowSubnets, denySubnets []string) *Handler {
 	return &Handler{
 		endPntPath:   endPntPath,
-		srcConfPath:  srcPath,
-		tgtConfPath:  tgtPath,
+		tgtConfPath:  tgtConfPath,
 		allowSubnets: allowSubnets,
 		denySubnets:  denySubnets,
 	}
