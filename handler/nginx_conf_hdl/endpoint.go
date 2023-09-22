@@ -15,14 +15,11 @@ type endpoint struct {
 	varName     string
 }
 
-func newEndpoint(dID, host string, port *int, intPath, extPath string) endpoint {
+func newEndpoint(e model.Endpoint, tmplTypeMap map[int]int) endpoint {
 	return endpoint{
-		DeploymentID: dID,
-		Host:         host,
-		Port:         port,
-		IntPath:      intPath,
-		ExtPath:      extPath,
-		varName:      util.GenHash(dID, extPath),
+		Endpoint:    e,
+		TmplTypeMap: tmplTypeMap,
+		varName:     util.GenHash(e.DeploymentID, e.ExtPath),
 	}
 }
 
