@@ -117,8 +117,7 @@ func readConf(path string) (*gonginx.Config, error) {
 	return p.Parse(), err
 }
 
-func writeConf(conf *gonginx.Config, path string) error {
-	conf.FilePath = path
+func writeConf(conf *gonginx.Config) error {
 	return gonginx.WriteConfig(conf, gonginx.IndentedStyle, false)
 }
 
