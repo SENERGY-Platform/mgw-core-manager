@@ -9,11 +9,12 @@ import (
 )
 
 type endpoint struct {
-	DeploymentID string `json:"d_id"`
-	Host         string `json:"host"`
-	Port         *int   `json:"port"`
-	IntPath      string `json:"int_path"`
-	ExtPath      string `json:"ext_path"`
+	DeploymentID string      `json:"d_id"`
+	Host         string      `json:"host"`
+	Port         *int        `json:"port"`
+	IntPath      string      `json:"int_path"`
+	ExtPath      string      `json:"ext_path"`
+	TmplTypeMap  map[int]int `json:"tmpl_type_map"`
 	varName      string
 }
 
