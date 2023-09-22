@@ -3,19 +3,16 @@ package nginx_conf_hdl
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"strconv"
 	"strings"
 )
 
 type endpoint struct {
-	DeploymentID string      `json:"d_id"`
-	Host         string      `json:"host"`
-	Port         *int        `json:"port"`
-	IntPath      string      `json:"int_path"`
-	ExtPath      string      `json:"ext_path"`
-	TmplTypeMap  map[int]int `json:"tmpl_type_map"`
-	varName      string
+	model.Endpoint
+	TmplTypeMap map[int]int `json:"tmpl_type_map"`
+	varName     string
 }
 
 func newEndpoint(dID, host string, port *int, intPath, extPath string) endpoint {
