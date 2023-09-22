@@ -1,6 +1,8 @@
 package nginx_conf_hdl
 
 import (
+	"fmt"
+	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/tufanbarisyildirim/gonginx"
 	"github.com/tufanbarisyildirim/gonginx/parser"
 )
@@ -22,6 +24,24 @@ func New(tgtConfPath, endPntPath string, allowSubnets, denySubnets []string) *Ha
 		allowSubnets: allowSubnets,
 		denySubnets:  denySubnets,
 	}
+}
+
+func (h *Handler) Init(baseConfPath string) error {
+	conf, err := readConf(baseConfPath)
+	if err != nil {
+		return err
+	}
+	h.srcConfBlock = conf.Block
+	_, err = os.Stat(h.tgtConfPath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return err
+		}
+		// create file
+	} else {
+		// recreate file
+	}
+	return nil
 }
 
 func (h *Handler) Add(e model.Endpoint, t model.EndpointType) error {
