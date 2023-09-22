@@ -23,6 +23,48 @@ func New(tgtConfPath, endPntPath string, allowSubnets, denySubnets []string) *Ha
 	}
 }
 
+func (h *Handler) readEndpoints() error {
+	conf, err := readConf(h.tgtConfPath)
+	if err != nil {
+		return err
+	}
+	for _, directive := range conf.GetDirectives() {
+		if directive.GetName() == serverDirective {
+			block := directive.GetBlock()
+			if block != nil {
+				h.endpoints, err = getEndpoints(block)
+				if err != nil {
+					return err
+				}
+			}
+			break
+		}
+	}
+	return nil
+}
+
+func getEndpoints(block gonginx.IBlock) (map[string]map[string]endpoint, error) {
+	endpoints := make(map[string]map[string]endpoint)
+	for _, directive := range block.GetDirectives() {
+		if directive.GetName() == setDirective {
+			comment := directive.GetComment()
+			if len(comment) > 0 {
+				e, err := parseEndpoint(comment[0])
+				if err != nil {
+					return nil, err
+				}
+				dMap, ok := endpoints[e.DeploymentID]
+				if !ok {
+					dMap = make(map[string]endpoint)
+					endpoints[e.DeploymentID] = dMap
+				}
+				dMap[e.ExtPath] = e
+			}
+		}
+	}
+	return endpoints, nil
+}
+
 func newDirective(name string, parameters, comment []string, block gonginx.IBlock) *gonginx.Directive {
 	return &gonginx.Directive{
 		Block:      block,
