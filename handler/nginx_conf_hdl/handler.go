@@ -68,6 +68,8 @@ func (h *Handler) Add(e model.Endpoint, t model.EndpointType) error {
 	}
 	h.locations[loc] = struct{}{}
 	dMap[e.ExtPath] = ept
+	return nil
+}
 }
 
 func (h *Handler) readEndpoints() error {
