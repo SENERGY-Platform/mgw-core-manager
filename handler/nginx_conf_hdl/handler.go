@@ -39,6 +39,7 @@ func (h *Handler) Init(baseConfPath string) error {
 		if !os.IsNotExist(err) {
 			return err
 		}
+		h.endpoints = make(map[string]map[string]endpoint)
 		conf.FilePath = h.tgtConfPath
 		return writeConf(conf)
 	} else {
