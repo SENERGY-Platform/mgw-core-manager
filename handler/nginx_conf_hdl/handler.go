@@ -85,6 +85,7 @@ func (h *Handler) readEndpoints() error {
 
 func (h *Handler) writeEndpoints() error {
 	var directives []gonginx.IDirective
+	var err error
 	for _, directive := range h.srcConfBlock.GetDirectives() {
 		if directive.GetName() == serverDirective {
 			var srvDirectives []gonginx.IDirective
@@ -94,7 +95,7 @@ func (h *Handler) writeEndpoints() error {
 			}
 			for _, dMap := range h.endpoints {
 				for _, e := range dMap {
-					err := setEndpoint(srvDirectives, e, h.templates[e.TmplTypeMap[locationTmpl]], h.templates[e.TmplTypeMap[proxyPassTmpl]], h.allowSubnets, h.denySubnets)
+					srvDirectives, err = setEndpoint(srvDirectives, e, h.templates[e.TmplTypeMap[locationTmpl]], h.templates[e.TmplTypeMap[proxyPassTmpl]], h.allowSubnets, h.denySubnets)
 					if err != nil {
 						return err
 					}
@@ -160,10 +161,10 @@ func writeConf(conf *gonginx.Config) error {
 	return gonginx.WriteConfig(conf, gonginx.IndentedStyle, false)
 }
 
-func setEndpoint(directives []gonginx.IDirective, ept endpoint, locationTemplate, proxyPassTemplate string, allowSubnets, denySubnets []string) error {
+func setEndpoint(directives []gonginx.IDirective, ept endpoint, locationTemplate, proxyPassTemplate string, allowSubnets, denySubnets []string) ([]gonginx.IDirective, error) {
 	cmt, err := ept.GenComment()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	directives = append(directives, newDirective(setDirective, []string{ept.GenSetValue()}, []string{cmt}, nil))
 	locDirectives := []gonginx.IDirective{
@@ -175,6 +176,6 @@ func setEndpoint(directives []gonginx.IDirective, ept endpoint, locationTemplate
 	for _, subnet := range denySubnets {
 		locDirectives = append(locDirectives, newDirective(denyDirective, []string{subnet}, nil, nil))
 	}
-	directives = append(directives, newDirective(locationDirective, []string{ept.GenLocationValue(locationTemplate)}, nil, newBlock(directives)))
-	return nil
+	directives = append(directives, newDirective(locationDirective, []string{ept.GenLocationValue(locationTemplate)}, nil, newBlock(locDirectives)))
+	return directives, nil
 }
