@@ -70,6 +70,23 @@ func (h *Handler) Add(e model.Endpoint, t model.EndpointType) error {
 	dMap[e.ExtPath] = ept
 	return nil
 }
+
+func (h *Handler) Remove(dID, extPath string) error {
+	if dMap, ok := h.endpoints[dID]; ok {
+		if _, ok := dMap[extPath]; ok {
+			delete(dMap, extPath)
+			return nil
+		}
+	}
+	return model.NewNotFoundError(fmt.Errorf("endpoint '%s' not found for '%s'", extPath, dID))
+}
+
+func (h *Handler) RemoveAll(dID string) error {
+	if _, ok := h.endpoints[dID]; ok {
+		delete(h.endpoints, dID)
+		return nil
+	}
+	return model.NewNotFoundError(fmt.Errorf("no endpoints found for '%s'", dID))
 }
 
 func (h *Handler) readEndpoints() error {
