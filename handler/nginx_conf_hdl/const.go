@@ -30,7 +30,7 @@ const (
 	DefaultGuiProxyPassTmpl
 )
 
-var EndpointTypeMap = map[int]map[int]int{
+var endpointTypeMap = map[int]map[int]int{
 	model.StandardEndpoint: {
 		locationTmpl:  StandardLocationTmpl,
 		proxyPassTmpl: StandardProxyPassTmpl,

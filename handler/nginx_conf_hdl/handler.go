@@ -54,7 +54,7 @@ func (h *Handler) Add(e model.Endpoint, t model.EndpointType) error {
 	if e2, ok := dMap[e.ExtPath]; ok {
 		return fmt.Errorf("duplicate endpoint for '%s': %s -> %s & %s", e.DeploymentID, e.ExtPath, e.IntPath, e2.IntPath)
 	}
-	dMap[e.ExtPath] = newEndpoint(e, EndpointTypeMap[t])
+	dMap[e.ExtPath] = newEndpoint(e, endpointTypeMap[t])
 	return nil
 }
 
