@@ -15,6 +15,7 @@ type Handler struct {
 	denySubnets  []string
 	templates    map[int]string
 	endpoints    map[string]map[string]endpoint // {dID:{extPath:endpoint}}
+	locations    map[string]struct{}
 	srcConfBlock gonginx.IBlock
 }
 
