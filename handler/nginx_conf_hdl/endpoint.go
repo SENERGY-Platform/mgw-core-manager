@@ -11,15 +11,15 @@ import (
 
 type endpoint struct {
 	model.Endpoint
-	TmplTypeMap map[int]int `json:"tmpl_type_map"`
-	varName     string
+	Type    model.EndpointType `json:"type"`
+	varName string
 }
 
-func newEndpoint(e model.Endpoint, tmplTypeMap map[int]int) endpoint {
+func newEndpoint(e model.Endpoint, t model.EndpointType) endpoint {
 	return endpoint{
-		Endpoint:    e,
-		TmplTypeMap: tmplTypeMap,
-		varName:     util.GenHash(e.DeploymentID, e.ExtPath),
+		Endpoint: e,
+		Type:     t,
+		varName:  util.GenHash(e.DeploymentID, e.ExtPath),
 	}
 }
 
@@ -42,7 +42,8 @@ func (e endpoint) GenComment() (string, error) {
 	return "#" + string(b), err
 }
 
-func (e endpoint) GenProxyPassValue(template string) string {
+func (e endpoint) GenProxyPassValue(templates map[int]string) string {
+	template := templates[endpointTypeMap[e.Type][proxyPassTmpl]]
 	template = strings.Replace(template, varPlaceholder, "$"+e.varName, -1)
 	var port string
 	if e.Port != nil && *e.Port != 80 {
@@ -52,7 +53,8 @@ func (e endpoint) GenProxyPassValue(template string) string {
 	return strings.Replace(template, pathPlaceholder, e.IntPath, -1)
 }
 
-func (e endpoint) GenLocationValue(template string) string {
+func (e endpoint) GenLocationValue(templates map[int]string) string {
+	template := templates[endpointTypeMap[e.Type][locationTmpl]]
 	template = strings.Replace(template, depIDPlaceholder, e.DeploymentID, -1)
 	return strings.Replace(template, pathPlaceholder, e.ExtPath, -1)
 }
