@@ -41,6 +41,7 @@ func (h *Handler) Init(baseConfPath string) error {
 			return err
 		}
 		h.endpoints = make(map[string]map[string]endpoint)
+		h.locations = map[string]struct{}{}
 		conf.FilePath = h.tgtConfPath
 		return writeConf(conf)
 	} else {
@@ -73,7 +74,7 @@ func (h *Handler) readEndpoints() error {
 		if directive.GetName() == serverDirective {
 			block := directive.GetBlock()
 			if block != nil {
-				h.endpoints, err = getEndpoints(block)
+				h.endpoints, h.locations, err = getEndpoints(block, h.templates)
 				if err != nil {
 					return err
 				}
@@ -96,7 +97,7 @@ func (h *Handler) writeEndpoints() error {
 			}
 			for _, dMap := range h.endpoints {
 				for _, e := range dMap {
-					srvDirectives, err = setEndpoint(srvDirectives, e, h.templates[e.TmplTypeMap[locationTmpl]], h.templates[e.TmplTypeMap[proxyPassTmpl]], h.allowSubnets, h.denySubnets)
+					srvDirectives, err = setEndpoint(srvDirectives, e, h.templates, h.allowSubnets, h.denySubnets)
 					if err != nil {
 						return err
 					}
@@ -113,15 +114,16 @@ func (h *Handler) writeEndpoints() error {
 	})
 }
 
-func getEndpoints(block gonginx.IBlock) (map[string]map[string]endpoint, error) {
+func getEndpoints(block gonginx.IBlock, templates map[int]string) (map[string]map[string]endpoint, map[string]struct{}, error) {
 	endpoints := make(map[string]map[string]endpoint)
+	locations := make(map[string]struct{})
 	for _, directive := range block.GetDirectives() {
 		if directive.GetName() == setDirective {
 			comment := directive.GetComment()
 			if len(comment) > 0 {
 				e, err := parseEndpoint(comment[0])
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 				dMap, ok := endpoints[e.DeploymentID]
 				if !ok {
@@ -129,10 +131,11 @@ func getEndpoints(block gonginx.IBlock) (map[string]map[string]endpoint, error) 
 					endpoints[e.DeploymentID] = dMap
 				}
 				dMap[e.ExtPath] = e
+				locations[e.GenLocationValue(templates)] = struct{}{}
 			}
 		}
 	}
-	return endpoints, nil
+	return endpoints, locations, nil
 }
 
 func newDirective(name string, parameters, comment []string, block gonginx.IBlock) *gonginx.Directive {
