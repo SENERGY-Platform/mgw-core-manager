@@ -38,11 +38,14 @@ func (h *Handler) Init(baseConfPath string) error {
 		if !os.IsNotExist(err) {
 			return err
 		}
-		// create file
+		conf.FilePath = h.tgtConfPath
+		return writeConf(conf)
 	} else {
-		// recreate file
+		if err = h.readEndpoints(); err != nil {
+			return err
+		}
+		return h.writeEndpoints()
 	}
-	return nil
 }
 
 func (h *Handler) Add(e model.Endpoint, t model.EndpointType) error {
