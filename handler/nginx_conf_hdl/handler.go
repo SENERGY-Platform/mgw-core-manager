@@ -59,7 +59,8 @@ func (h *Handler) Add(e model.Endpoint, t model.EndpointType) error {
 		h.endpoints[e.DeploymentID] = dMap
 	}
 	if e2, ok := dMap[e.ExtPath]; ok {
-		return fmt.Errorf("duplicate endpoint for '%s': '%s' -> '%s' & '%s'", e.DeploymentID, e.ExtPath, e.IntPath, e2.IntPath)
+	ept := newEndpoint(e, t)
+	loc := ept.GenLocationValue(h.templates)
 	}
 	dMap[e.ExtPath] = newEndpoint(e, endpointTypeMap[t])
 	return nil
@@ -165,14 +166,14 @@ func writeConf(conf *gonginx.Config) error {
 	return gonginx.WriteConfig(conf, gonginx.IndentedStyle, false)
 }
 
-func setEndpoint(directives []gonginx.IDirective, ept endpoint, locationTemplate, proxyPassTemplate string, allowSubnets, denySubnets []string) ([]gonginx.IDirective, error) {
+func setEndpoint(directives []gonginx.IDirective, ept endpoint, templates map[int]string, allowSubnets, denySubnets []string) ([]gonginx.IDirective, error) {
 	cmt, err := ept.GenComment()
 	if err != nil {
 		return nil, err
 	}
 	directives = append(directives, newDirective(setDirective, []string{ept.GenSetValue()}, []string{cmt}, nil))
 	locDirectives := []gonginx.IDirective{
-		newDirective(proxyPassDirective, []string{ept.GenProxyPassValue(proxyPassTemplate)}, nil, nil),
+		newDirective(proxyPassDirective, []string{ept.GenProxyPassValue(templates)}, nil, nil),
 	}
 	for _, subnet := range allowSubnets {
 		locDirectives = append(locDirectives, newDirective(allowDirective, []string{subnet}, nil, nil))
@@ -180,6 +181,6 @@ func setEndpoint(directives []gonginx.IDirective, ept endpoint, locationTemplate
 	for _, subnet := range denySubnets {
 		locDirectives = append(locDirectives, newDirective(denyDirective, []string{subnet}, nil, nil))
 	}
-	directives = append(directives, newDirective(locationDirective, []string{ept.GenLocationValue(locationTemplate)}, nil, newBlock(locDirectives)))
+	directives = append(directives, newDirective(locationDirective, []string{ept.GenLocationValue(templates)}, nil, newBlock(locDirectives)))
 	return directives, nil
 }
