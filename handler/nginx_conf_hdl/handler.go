@@ -59,11 +59,15 @@ func (h *Handler) Add(e model.Endpoint, t model.EndpointType) error {
 		h.endpoints[e.DeploymentID] = dMap
 	}
 	if e2, ok := dMap[e.ExtPath]; ok {
+		return model.NewInvalidInputError(fmt.Errorf("duplicate endpoint for '%s': '%s' -> '%s' & '%s'", e.DeploymentID, e.ExtPath, e.IntPath, e2.IntPath))
+	}
 	ept := newEndpoint(e, t)
 	loc := ept.GenLocationValue(h.templates)
+	if _, ok = h.locations[loc]; ok {
+		return model.NewInvalidInputError(fmt.Errorf("duplicate location '%s'", loc))
 	}
-	dMap[e.ExtPath] = newEndpoint(e, endpointTypeMap[t])
-	return nil
+	h.locations[loc] = struct{}{}
+	dMap[e.ExtPath] = ept
 }
 
 func (h *Handler) readEndpoints() error {
