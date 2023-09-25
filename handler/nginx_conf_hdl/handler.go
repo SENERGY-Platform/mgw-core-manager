@@ -18,12 +18,13 @@ type Handler struct {
 	srcConfBlock gonginx.IBlock
 }
 
-func New(tgtConfPath, endPntPath string, allowSubnets, denySubnets []string) *Handler {
+func New(tgtConfPath, endPntPath string, allowSubnets, denySubnets []string, templates map[int]string) *Handler {
 	return &Handler{
 		endPntPath:   endPntPath,
 		tgtConfPath:  tgtConfPath,
 		allowSubnets: allowSubnets,
 		denySubnets:  denySubnets,
+		templates:    templates,
 	}
 }
 
