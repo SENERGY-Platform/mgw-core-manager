@@ -3,6 +3,7 @@ package nginx_conf_hdl
 import (
 	"fmt"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"github.com/tufanbarisyildirim/gonginx"
 	"github.com/tufanbarisyildirim/gonginx/parser"
 	"io"
@@ -10,47 +11,43 @@ import (
 )
 
 type Handler struct {
+	confPath     string
 	endPntPath   string
-	tgtConfPath  string
 	allowSubnets []string
 	denySubnets  []string
 	templates    map[int]string
 	endpoints    map[string]map[string]endpoint // {dID:{extPath:endpoint}}
 	locations    map[string]struct{}
-	srcConfBlock gonginx.IBlock
 }
 
-func New(tgtConfPath, endPntPath string, allowSubnets, denySubnets []string, templates map[int]string) *Handler {
+func New(confPath, endPntPath string, allowSubnets, denySubnets []string, templates map[int]string) *Handler {
 	return &Handler{
+		confPath:     confPath,
 		endPntPath:   endPntPath,
-		tgtConfPath:  tgtConfPath,
 		allowSubnets: allowSubnets,
 		denySubnets:  denySubnets,
 		templates:    templates,
 	}
 }
 
-func (h *Handler) Init(baseConfPath string) error {
-	conf, err := readConf(baseConfPath)
-	if err != nil {
-		return err
-	}
-	h.srcConfBlock = conf.Block
-	_, err = os.Stat(h.tgtConfPath)
+func (h *Handler) Init() error {
+	_, err := os.Stat(h.confPath)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return err
 		}
-		h.endpoints = make(map[string]map[string]endpoint)
-		h.locations = map[string]struct{}{}
-		conf.FilePath = h.tgtConfPath
-		return writeConf(conf)
-	} else {
-		if err = h.readEndpoints(); err != nil {
+		_, err = os.Create(h.confPath)
+		if err != nil {
 			return err
 		}
-		return h.writeEndpoints()
 	}
+	p, err := parser.NewParser(h.confPath)
+	if err != nil {
+		return err
+	}
+	conf := p.Parse()
+	h.endpoints, h.locations, err = getEndpoints(conf.GetDirectives(), h.templates)
+	return nil
 }
 
 func (h *Handler) Add(e model.Endpoint, t model.EndpointType) error {
@@ -90,59 +87,39 @@ func (h *Handler) RemoveAll(dID string) error {
 	return model.NewNotFoundError(fmt.Errorf("no endpoints found for '%s'", dID))
 }
 
-func (h *Handler) readEndpoints() error {
-	conf, err := readConf(h.tgtConfPath)
+func (h *Handler) writeEndpoints() error {
+	var directives []gonginx.IDirective
+	var err error
+	for _, dMap := range h.endpoints {
+		for _, e := range dMap {
+			directives, err = setEndpoint(directives, e, h.templates, h.allowSubnets, h.denySubnets)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	err = copy(h.confPath, h.confPath+".bk")
 	if err != nil {
 		return err
 	}
-	for _, directive := range conf.GetDirectives() {
-		if directive.GetName() == serverDirective {
-			block := directive.GetBlock()
-			if block != nil {
-				h.endpoints, h.locations, err = getEndpoints(block, h.templates)
-				if err != nil {
-					return err
-				}
-			}
-			break
+	err = gonginx.WriteConfig(&gonginx.Config{
+		Block:    newBlock(directives),
+		FilePath: h.confPath,
+	}, gonginx.IndentedStyle, false)
+	if err != nil {
+		e := copy(h.confPath+".bk", h.confPath)
+		if e != nil {
+			util.Logger.Error(e)
 		}
+		return err
 	}
 	return nil
 }
 
-func (h *Handler) writeEndpoints() error {
-	var directives []gonginx.IDirective
-	var err error
-	for _, directive := range h.srcConfBlock.GetDirectives() {
-		if directive.GetName() == serverDirective {
-			var srvDirectives []gonginx.IDirective
-			block := directive.GetBlock()
-			if block != nil {
-				srvDirectives = block.GetDirectives()
-			}
-			for _, dMap := range h.endpoints {
-				for _, e := range dMap {
-					srvDirectives, err = setEndpoint(srvDirectives, e, h.templates, h.allowSubnets, h.denySubnets)
-					if err != nil {
-						return err
-					}
-				}
-			}
-			directives = append(directives, newDirective(directive.GetName(), directive.GetParameters(), directive.GetComment(), newBlock(srvDirectives)))
-		} else {
-			directives = append(directives, directive)
-		}
-	}
-	return writeConf(&gonginx.Config{
-		Block:    newBlock(directives),
-		FilePath: h.tgtConfPath,
-	})
-}
-
-func getEndpoints(block gonginx.IBlock, templates map[int]string) (map[string]map[string]endpoint, map[string]struct{}, error) {
+func getEndpoints(directives []gonginx.IDirective, templates map[int]string) (map[string]map[string]endpoint, map[string]struct{}, error) {
 	endpoints := make(map[string]map[string]endpoint)
 	locations := make(map[string]struct{})
-	for _, directive := range block.GetDirectives() {
+	for _, directive := range directives {
 		if directive.GetName() == setDirective {
 			comment := directive.GetComment()
 			if len(comment) > 0 {
@@ -176,18 +153,6 @@ func newBlock(directives []gonginx.IDirective) *gonginx.Block {
 	return &gonginx.Block{
 		Directives: directives,
 	}
-}
-
-func readConf(path string) (*gonginx.Config, error) {
-	p, err := parser.NewParser(path)
-	if err != nil {
-		return nil, err
-	}
-	return p.Parse(), err
-}
-
-func writeConf(conf *gonginx.Config) error {
-	return gonginx.WriteConfig(conf, gonginx.IndentedStyle, false)
 }
 
 func setEndpoint(directives []gonginx.IDirective, ept endpoint, templates map[int]string, allowSubnets, denySubnets []string) ([]gonginx.IDirective, error) {
