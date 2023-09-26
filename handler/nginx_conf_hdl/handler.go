@@ -5,6 +5,7 @@ import (
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/tufanbarisyildirim/gonginx"
 	"github.com/tufanbarisyildirim/gonginx/parser"
+	"io"
 	"os"
 )
 
@@ -206,4 +207,19 @@ func setEndpoint(directives []gonginx.IDirective, ept endpoint, templates map[in
 	}
 	directives = append(directives, newDirective(locationDirective, []string{ept.GenLocationValue(templates)}, nil, newBlock(locDirectives)))
 	return directives, nil
+}
+
+func copy(src, dst string) error {
+	sFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sFile.Close()
+	dFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer dFile.Close()
+	_, err = io.Copy(dFile, sFile)
+	return err
 }
