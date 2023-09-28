@@ -27,6 +27,8 @@ const (
 	StandardProxyPassTmpl
 	DefaultGuiLocationTmpl
 	DefaultGuiProxyPassTmpl
+	NamedLocationTmpl
+	NamedProxyPassTmpl
 )
 
 var endpointTypeMap = map[int]map[int]int{
@@ -37,5 +39,9 @@ var endpointTypeMap = map[int]map[int]int{
 	model.DefaultGuiEndpoint: {
 		locationTmpl:  DefaultGuiLocationTmpl,
 		proxyPassTmpl: DefaultGuiProxyPassTmpl,
+	},
+	model.NamedEndpoint: {
+		locationTmpl:  NamedLocationTmpl,
+		proxyPassTmpl: NamedProxyPassTmpl,
 	},
 }

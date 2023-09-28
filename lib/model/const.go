@@ -27,4 +27,5 @@ const (
 const (
 	StandardEndpoint EndpointType = iota
 	DefaultGuiEndpoint
+	NamedEndpoint
 )
