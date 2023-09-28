@@ -8,6 +8,7 @@ import (
 	"github.com/tufanbarisyildirim/gonginx/parser"
 	"io"
 	"os"
+	"sync"
 )
 
 type Handler struct {
@@ -18,6 +19,7 @@ type Handler struct {
 	templates    map[int]string
 	endpoints    map[string]map[string]endpoint // {dID:{extPath:endpoint}}
 	locations    map[string]struct{}
+	m            sync.RWMutex
 }
 
 func New(confPath, endPntPath string, allowSubnets, denySubnets []string, templates map[int]string) *Handler {
@@ -50,26 +52,21 @@ func (h *Handler) Init() error {
 	return nil
 }
 
-func (h *Handler) Add(e model.Endpoint, t model.EndpointType) error {
-	dMap, ok := h.endpoints[e.DeploymentID]
-	if !ok {
-		dMap = make(map[string]endpoint)
-		h.endpoints[e.DeploymentID] = dMap
+func (h *Handler) Add(endpoints []model.Endpoint) error {
+	h.m.Lock()
+	defer h.m.Unlock()
+	for _, e := range endpoints {
+		err := h.add(e)
+		if err != nil {
+			return err
+		}
 	}
-	if e2, ok := dMap[e.ExtPath]; ok {
-		return model.NewInvalidInputError(fmt.Errorf("duplicate endpoint for '%s': '%s' -> '%s' & '%s'", e.DeploymentID, e.ExtPath, e.IntPath, e2.IntPath))
-	}
-	ept := newEndpoint(e, t)
-	loc := ept.GenLocationValue(h.templates)
-	if _, ok = h.locations[loc]; ok {
-		return model.NewInvalidInputError(fmt.Errorf("duplicate location '%s'", loc))
-	}
-	h.locations[loc] = struct{}{}
-	dMap[e.ExtPath] = ept
 	return nil
 }
 
 func (h *Handler) Remove(dID, extPath string) error {
+	h.m.Lock()
+	defer h.m.Unlock()
 	if dMap, ok := h.endpoints[dID]; ok {
 		if _, ok := dMap[extPath]; ok {
 			delete(dMap, extPath)
@@ -80,11 +77,32 @@ func (h *Handler) Remove(dID, extPath string) error {
 }
 
 func (h *Handler) RemoveAll(dID string) error {
+	h.m.Lock()
+	defer h.m.Unlock()
 	if _, ok := h.endpoints[dID]; ok {
 		delete(h.endpoints, dID)
 		return nil
 	}
 	return model.NewNotFoundError(fmt.Errorf("no endpoints found for '%s'", dID))
+}
+
+func (h *Handler) add(e model.Endpoint) error {
+	dMap, ok := h.endpoints[e.DeploymentID]
+	if !ok {
+		dMap = make(map[string]endpoint)
+		h.endpoints[e.DeploymentID] = dMap
+	}
+	if e2, ok := dMap[e.ExtPath]; ok {
+		return model.NewInvalidInputError(fmt.Errorf("duplicate endpoint for '%s': '%s' -> '%s' & '%s'", e.DeploymentID, e.ExtPath, e.IntPath, e2.IntPath))
+	}
+	ept := newEndpoint(e)
+	loc := ept.GenLocationValue(h.templates)
+	if _, ok = h.locations[loc]; ok {
+		return model.NewInvalidInputError(fmt.Errorf("duplicate location '%s'", loc))
+	}
+	h.locations[loc] = struct{}{}
+	dMap[e.ExtPath] = ept
+	return nil
 }
 
 func (h *Handler) writeEndpoints() error {
