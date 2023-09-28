@@ -17,7 +17,7 @@ type endpoint struct {
 func newEndpoint(e model.Endpoint) endpoint {
 	return endpoint{
 		Endpoint: e,
-		ID:       util.GenHash(e.DeploymentID, e.ExtPath),
+		ID:       genID(e),
 	}
 }
 
@@ -28,7 +28,7 @@ func parseEndpoint(s string) (endpoint, error) {
 	if err != nil {
 		return endpoint{}, err
 	}
-	e.ID = util.GenHash(e.DeploymentID, e.ExtPath)
+	e.ID = genID(e.Endpoint)
 	return e, nil
 }
 
@@ -59,4 +59,8 @@ func (e endpoint) GenLocationValue(templates map[int]string) string {
 
 func (e endpoint) GenSetValue() string {
 	return fmt.Sprintf("$%s %s", e.ID, e.Host)
+}
+
+func genID(e model.Endpoint) string {
+	return util.GenHash(strconv.FormatInt(int64(e.Type), 10), e.DeploymentID, e.ExtPath)
 }
