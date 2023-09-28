@@ -11,10 +11,10 @@ const (
 )
 
 const (
-	varPlaceholder   = "{var}"
-	portPlaceholder  = "{port}"
-	pathPlaceholder  = "{path}"
-	depIDPlaceholder = "{did}"
+	varPlaceholder  = "{var}"
+	portPlaceholder = "{port}"
+	pathPlaceholder = "{path}"
+	refPlaceholder  = "{ref}"
 )
 
 const (

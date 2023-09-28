@@ -10,26 +10,21 @@ import (
 )
 
 type endpoint struct {
-	ID string `json:"id"`
 	model.Endpoint
+	proxyPassVal string
+	locationVal  string
+	setVal       string
 }
 
-func newEndpoint(e model.Endpoint) endpoint {
+func newEndpoint(e model.Endpoint, templates map[int]string) endpoint {
+	locVal := genLocationValue(e, templates)
+	e.ID = util.GenHash(locVal)
 	return endpoint{
-		Endpoint: e,
-		ID:       genID(e),
+		Endpoint:     e,
+		proxyPassVal: genProxyPassValue(e, templates),
+		locationVal:  locVal,
+		setVal:       genSetValue(e),
 	}
-}
-
-func parseEndpoint(s string) (endpoint, error) {
-	s, _ = strings.CutPrefix(s, "#")
-	var e endpoint
-	err := json.Unmarshal([]byte(s), &e)
-	if err != nil {
-		return endpoint{}, err
-	}
-	e.ID = genID(e.Endpoint)
-	return e, nil
 }
 
 func (e endpoint) GenComment() (string, error) {
@@ -40,7 +35,19 @@ func (e endpoint) GenComment() (string, error) {
 	return "#" + string(b), err
 }
 
-func (e endpoint) GenProxyPassValue(templates map[int]string) string {
+func (e endpoint) GetLocationValue() string {
+	return e.locationVal
+}
+
+func (e endpoint) GetProxyPassValue() string {
+	return e.proxyPassVal
+}
+
+func (e endpoint) GetSetValue() string {
+	return e.setVal
+}
+
+func genProxyPassValue(e model.Endpoint, templates map[int]string) string {
 	template := templates[endpointTypeMap[e.Type][proxyPassTmpl]]
 	template = strings.Replace(template, varPlaceholder, "$"+e.ID, -1)
 	var port string
@@ -51,16 +58,12 @@ func (e endpoint) GenProxyPassValue(templates map[int]string) string {
 	return strings.Replace(template, pathPlaceholder, e.IntPath, -1)
 }
 
-func (e endpoint) GenLocationValue(templates map[int]string) string {
+func genLocationValue(e model.Endpoint, templates map[int]string) string {
 	template := templates[endpointTypeMap[e.Type][locationTmpl]]
-	template = strings.Replace(template, depIDPlaceholder, e.DeploymentID, -1)
+	template = strings.Replace(template, refPlaceholder, e.Ref, -1)
 	return strings.Replace(template, pathPlaceholder, e.ExtPath, -1)
 }
 
-func (e endpoint) GenSetValue() string {
+func genSetValue(e model.Endpoint) string {
 	return fmt.Sprintf("$%s %s", e.ID, e.Host)
-}
-
-func genID(e model.Endpoint) string {
-	return util.GenHash(strconv.FormatInt(int64(e.Type), 10), e.DeploymentID, e.ExtPath)
 }

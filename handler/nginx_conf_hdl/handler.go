@@ -2,6 +2,7 @@ package nginx_conf_hdl
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
@@ -9,6 +10,7 @@ import (
 	"github.com/tufanbarisyildirim/gonginx/parser"
 	"io"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -18,8 +20,7 @@ type Handler struct {
 	allowSubnets []string
 	denySubnets  []string
 	templates    map[int]string
-	endpoints    map[string]map[string]endpoint // {dID:{extPath:endpoint}}
-	locations    map[string]struct{}
+	endpoints    map[string]endpoint
 	m            sync.RWMutex
 }
 
@@ -49,7 +50,7 @@ func (h *Handler) Init() error {
 		return err
 	}
 	conf := p.Parse()
-	h.endpoints, h.locations, err = getEndpoints(conf.GetDirectives(), h.templates)
+	h.endpoints, err = getEndpoints(conf.GetDirectives(), h.templates)
 	return nil
 }
 
@@ -57,16 +58,11 @@ func (h *Handler) List(ctx context.Context) ([]model.Endpoint, error) {
 	h.m.RLock()
 	defer h.m.RUnlock()
 	var endpoints []model.Endpoint
-	for _, dMap := range h.endpoints {
+	for _, e := range h.endpoints {
 		if ctx.Err() != nil {
 			return nil, model.NewInternalError(ctx.Err())
 		}
-		for _, e := range dMap {
-			if ctx.Err() != nil {
-				return nil, model.NewInternalError(ctx.Err())
-			}
-			endpoints = append(endpoints, e.Endpoint)
-		}
+		endpoints = append(endpoints, e.Endpoint)
 	}
 	return endpoints, nil
 }
@@ -74,107 +70,111 @@ func (h *Handler) List(ctx context.Context) ([]model.Endpoint, error) {
 func (h *Handler) Add(ctx context.Context, endpoints []model.Endpoint) error {
 	h.m.Lock()
 	defer h.m.Unlock()
+	endpointsCopy := make(map[string]endpoint)
+	for id, e := range h.endpoints {
+		endpointsCopy[id] = e
+	}
 	for _, e := range endpoints {
-		err := h.add(e)
-		if err != nil {
-			return err
+		ept := newEndpoint(e, h.templates)
+		if ept2, ok := endpointsCopy[ept.ID]; ok {
+			return model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
+		}
+		endpointsCopy[ept.ID] = ept
+	}
+	return h.update(ctx, endpointsCopy)
+}
+
+func (h *Handler) Remove(ctx context.Context, id string) error {
+	h.m.Lock()
+	defer h.m.Unlock()
+	if _, ok := h.endpoints[id]; !ok {
+		return model.NewNotFoundError(fmt.Errorf("endpoint '%s' not found", id))
+	}
+	endpointsCopy := make(map[string]endpoint)
+	for id2, e := range h.endpoints {
+		endpointsCopy[id2] = e
+	}
+	delete(endpointsCopy, id)
+	return h.update(ctx, endpointsCopy)
+}
+
+func (h *Handler) RemoveAll(ctx context.Context, ref string) error {
+	h.m.Lock()
+	defer h.m.Unlock()
+	endpointsCopy := make(map[string]endpoint)
+	for id, e := range h.endpoints {
+		if e.Ref != ref {
+			endpointsCopy[id] = e
 		}
 	}
+	if len(h.endpoints) == len(endpointsCopy) {
+		return model.NewNotFoundError(fmt.Errorf("no endpoints found for '%s'", ref))
+	}
+	return h.update(ctx, endpointsCopy)
+}
+
+func (h *Handler) update(ctx context.Context, endpoints map[string]endpoint) error {
+	directives, err := getDirectives(endpoints, h.allowSubnets, h.denySubnets)
+	if err != nil {
+		return model.NewInternalError(err)
+	}
+	if ctx.Err() != nil {
+		return model.NewInternalError(ctx.Err())
+	}
+	if err = writeConfig(directives, h.confPath); err != nil {
+		return model.NewInternalError(err)
+	}
+	h.endpoints = endpoints
 	return nil
 }
 
-func (h *Handler) Remove(ctx context.Context, dID, extPath string) error {
-	h.m.Lock()
-	defer h.m.Unlock()
-	if dMap, ok := h.endpoints[dID]; ok {
-		if _, ok := dMap[extPath]; ok {
-			delete(dMap, extPath)
-			return nil
-		}
-	}
-	return model.NewNotFoundError(fmt.Errorf("endpoint '%s' not found for '%s'", extPath, dID))
-}
-
-func (h *Handler) RemoveAll(ctx context.Context, dID string) error {
-	h.m.Lock()
-	defer h.m.Unlock()
-	if _, ok := h.endpoints[dID]; ok {
-		delete(h.endpoints, dID)
-		return nil
-	}
-	return model.NewNotFoundError(fmt.Errorf("no endpoints found for '%s'", dID))
-}
-
-func (h *Handler) add(e model.Endpoint) error {
-	dMap, ok := h.endpoints[e.DeploymentID]
-	if !ok {
-		dMap = make(map[string]endpoint)
-		h.endpoints[e.DeploymentID] = dMap
-	}
-	if e2, ok := dMap[e.ExtPath]; ok {
-		return model.NewInvalidInputError(fmt.Errorf("duplicate endpoint for '%s': '%s' -> '%s' & '%s'", e.DeploymentID, e.ExtPath, e.IntPath, e2.IntPath))
-	}
-	ept := newEndpoint(e)
-	loc := ept.GenLocationValue(h.templates)
-	if _, ok = h.locations[loc]; ok {
-		return model.NewInvalidInputError(fmt.Errorf("duplicate location '%s'", loc))
-	}
-	h.locations[loc] = struct{}{}
-	dMap[e.ExtPath] = ept
-	return nil
-}
-
-func (h *Handler) writeEndpoints() error {
+func getDirectives(endpoints map[string]endpoint, allowSubnets, denySubnets []string) ([]gonginx.IDirective, error) {
 	var directives []gonginx.IDirective
-	var err error
-	for _, dMap := range h.endpoints {
-		for _, e := range dMap {
-			directives, err = setEndpoint(directives, e, h.templates, h.allowSubnets, h.denySubnets)
-			if err != nil {
-				return err
-			}
+	for _, e := range endpoints {
+		cmt, err := e.GenComment()
+		if err != nil {
+			return nil, err
 		}
-	}
-	err = copy(h.confPath, h.confPath+".bk")
-	if err != nil {
-		return err
-	}
-	err = gonginx.WriteConfig(&gonginx.Config{
-		Block:    newBlock(directives),
-		FilePath: h.confPath,
-	}, gonginx.IndentedStyle, false)
-	if err != nil {
-		e := copy(h.confPath+".bk", h.confPath)
-		if e != nil {
-			util.Logger.Error(e)
+		directives = append(directives, newDirective(setDirective, []string{e.GetSetValue()}, []string{cmt}, nil))
+		locDirectives := []gonginx.IDirective{
+			newDirective(proxyPassDirective, []string{e.GetProxyPassValue()}, nil, nil),
 		}
-		return err
+		for _, subnet := range allowSubnets {
+			locDirectives = append(locDirectives, newDirective(allowDirective, []string{subnet}, nil, nil))
+		}
+		for _, subnet := range denySubnets {
+			locDirectives = append(locDirectives, newDirective(denyDirective, []string{subnet}, nil, nil))
+		}
+		directives = append(directives, newDirective(locationDirective, []string{e.GetLocationValue()}, nil, newBlock(locDirectives)))
 	}
-	return nil
+	return directives, nil
 }
 
-func getEndpoints(directives []gonginx.IDirective, templates map[int]string) (map[string]map[string]endpoint, map[string]struct{}, error) {
-	endpoints := make(map[string]map[string]endpoint)
-	locations := make(map[string]struct{})
+func getEndpoints(directives []gonginx.IDirective, templates map[int]string) (map[string]endpoint, error) {
+	endpoints := make(map[string]endpoint)
 	for _, directive := range directives {
 		if directive.GetName() == setDirective {
 			comment := directive.GetComment()
 			if len(comment) > 0 {
-				e, err := parseEndpoint(comment[0])
+				e, err := getEndpoint(comment[0], templates)
 				if err != nil {
-					return nil, nil, err
+					return nil, err
 				}
-				dMap, ok := endpoints[e.DeploymentID]
-				if !ok {
-					dMap = make(map[string]endpoint)
-					endpoints[e.DeploymentID] = dMap
-				}
-				dMap[e.ExtPath] = e
-				locations[e.GenLocationValue(templates)] = struct{}{}
+				endpoints[e.ID] = e
 			}
 		}
 	}
-	return endpoints, locations, nil
+	return endpoints, nil
+}
+
+func getEndpoint(s string, templates map[int]string) (endpoint, error) {
+	s, _ = strings.CutPrefix(s, "#")
+	var e model.Endpoint
+	err := json.Unmarshal([]byte(s), &e)
+	if err != nil {
+		return endpoint{}, err
+	}
+	return newEndpoint(e, templates), nil
 }
 
 func newDirective(name string, parameters, comment []string, block gonginx.IBlock) *gonginx.Directive {
@@ -192,25 +192,6 @@ func newBlock(directives []gonginx.IDirective) *gonginx.Block {
 	}
 }
 
-func setEndpoint(directives []gonginx.IDirective, ept endpoint, templates map[int]string, allowSubnets, denySubnets []string) ([]gonginx.IDirective, error) {
-	cmt, err := ept.GenComment()
-	if err != nil {
-		return nil, err
-	}
-	directives = append(directives, newDirective(setDirective, []string{ept.GenSetValue()}, []string{cmt}, nil))
-	locDirectives := []gonginx.IDirective{
-		newDirective(proxyPassDirective, []string{ept.GenProxyPassValue(templates)}, nil, nil),
-	}
-	for _, subnet := range allowSubnets {
-		locDirectives = append(locDirectives, newDirective(allowDirective, []string{subnet}, nil, nil))
-	}
-	for _, subnet := range denySubnets {
-		locDirectives = append(locDirectives, newDirective(denyDirective, []string{subnet}, nil, nil))
-	}
-	directives = append(directives, newDirective(locationDirective, []string{ept.GenLocationValue(templates)}, nil, newBlock(locDirectives)))
-	return directives, nil
-}
-
 func copy(src, dst string) error {
 	sFile, err := os.Open(src)
 	if err != nil {
@@ -224,4 +205,23 @@ func copy(src, dst string) error {
 	defer dFile.Close()
 	_, err = io.Copy(dFile, sFile)
 	return err
+}
+
+func writeConfig(directives []gonginx.IDirective, path string) error {
+	err := copy(path, path+".bk")
+	if err != nil {
+		return err
+	}
+	err = gonginx.WriteConfig(&gonginx.Config{
+		Block:    newBlock(directives),
+		FilePath: path,
+	}, gonginx.IndentedStyle, false)
+	if err != nil {
+		e := copy(path+".bk", path)
+		if e != nil {
+			util.Logger.Error(e)
+		}
+		return err
+	}
+	return nil
 }
