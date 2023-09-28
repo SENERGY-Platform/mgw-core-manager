@@ -8,7 +8,6 @@ const (
 	allowDirective     = "allow"
 	denyDirective      = "deny"
 	setDirective       = "set"
-	serverDirective    = "server"
 )
 
 const (
