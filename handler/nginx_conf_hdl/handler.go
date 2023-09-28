@@ -1,6 +1,7 @@
 package nginx_conf_hdl
 
 import (
+	"context"
 	"fmt"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
@@ -52,19 +53,25 @@ func (h *Handler) Init() error {
 	return nil
 }
 
-func (h *Handler) List() ([]model.Endpoint, error) {
+func (h *Handler) List(ctx context.Context) ([]model.Endpoint, error) {
 	h.m.RLock()
 	defer h.m.RUnlock()
 	var endpoints []model.Endpoint
 	for _, dMap := range h.endpoints {
+		if ctx.Err() != nil {
+			return nil, model.NewInternalError(ctx.Err())
+		}
 		for _, e := range dMap {
+			if ctx.Err() != nil {
+				return nil, model.NewInternalError(ctx.Err())
+			}
 			endpoints = append(endpoints, e.Endpoint)
 		}
 	}
 	return endpoints, nil
 }
 
-func (h *Handler) Add(endpoints []model.Endpoint) error {
+func (h *Handler) Add(ctx context.Context, endpoints []model.Endpoint) error {
 	h.m.Lock()
 	defer h.m.Unlock()
 	for _, e := range endpoints {
@@ -76,7 +83,7 @@ func (h *Handler) Add(endpoints []model.Endpoint) error {
 	return nil
 }
 
-func (h *Handler) Remove(dID, extPath string) error {
+func (h *Handler) Remove(ctx context.Context, dID, extPath string) error {
 	h.m.Lock()
 	defer h.m.Unlock()
 	if dMap, ok := h.endpoints[dID]; ok {
@@ -88,7 +95,7 @@ func (h *Handler) Remove(dID, extPath string) error {
 	return model.NewNotFoundError(fmt.Errorf("endpoint '%s' not found for '%s'", extPath, dID))
 }
 
-func (h *Handler) RemoveAll(dID string) error {
+func (h *Handler) RemoveAll(ctx context.Context, dID string) error {
 	h.m.Lock()
 	defer h.m.Unlock()
 	if _, ok := h.endpoints[dID]; ok {
