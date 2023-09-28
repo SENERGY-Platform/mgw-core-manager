@@ -11,14 +11,12 @@ import (
 
 type endpoint struct {
 	model.Endpoint
-	Type    model.EndpointType `json:"type"`
 	varName string
 }
 
-func newEndpoint(e model.Endpoint, t model.EndpointType) endpoint {
+func newEndpoint(e model.Endpoint) endpoint {
 	return endpoint{
 		Endpoint: e,
-		Type:     t,
 		varName:  util.GenHash(e.DeploymentID, e.ExtPath),
 	}
 }
