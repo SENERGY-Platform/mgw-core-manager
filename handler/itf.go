@@ -19,6 +19,7 @@ package handler
 import "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 
 type GatewayEndpointHandler interface {
+	List() ([]model.Endpoint, error)
 	Add(endpoints []model.Endpoint) error
 	Remove(dID, extPath string) error
 	RemoveAll(dID string) error

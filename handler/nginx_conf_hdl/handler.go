@@ -52,6 +52,18 @@ func (h *Handler) Init() error {
 	return nil
 }
 
+func (h *Handler) List() ([]model.Endpoint, error) {
+	h.m.RLock()
+	defer h.m.RUnlock()
+	var endpoints []model.Endpoint
+	for _, dMap := range h.endpoints {
+		for _, e := range dMap {
+			endpoints = append(endpoints, e.Endpoint)
+		}
+	}
+	return endpoints, nil
+}
+
 func (h *Handler) Add(endpoints []model.Endpoint) error {
 	h.m.Lock()
 	defer h.m.Unlock()
