@@ -25,6 +25,10 @@ const (
 )
 
 const (
+	GWConfEndpoint = "endpoints"
+)
+
+const (
 	StandardEndpoint EndpointType = iota
 	DefaultGuiEndpoint
 	NamedEndpoint
