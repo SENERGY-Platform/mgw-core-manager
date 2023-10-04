@@ -27,3 +27,10 @@ type GatewayEndpointHandler interface {
 	Remove(ctx context.Context, id string) error
 	RemoveAll(ctx context.Context, ref string) error
 }
+
+type JobHandler interface {
+	List(filter model.JobFilter) []model.Job
+	Get(id string) (model.Job, error)
+	Create(desc string, tFunc func(context.Context, context.CancelFunc) error) (string, error)
+	Cancel(id string) error
+}
