@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nginx_conf_hdl
+package nginx_hdl
 
 import "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 
