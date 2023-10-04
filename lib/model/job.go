@@ -16,29 +16,23 @@
 
 package model
 
-const ServiceName = "core-manager"
+import "time"
 
-const (
-	HeaderRequestID = "X-Request-ID"
-	HeaderApiVer    = "X-Api-Version"
-	HeaderSrvName   = "X-Service"
-)
+type Job struct {
+	ID          string     `json:"id"`
+	Error       any        `json:"error"`
+	Created     time.Time  `json:"created"`
+	Started     *time.Time `json:"started"`
+	Completed   *time.Time `json:"completed"`
+	Canceled    *time.Time `json:"canceled"`
+	Description string     `json:"description"`
+}
 
-const (
-	GWConfEndpoint = "endpoints"
-)
+type JobStatus = string
 
-const (
-	StandardEndpoint EndpointType = iota
-	DefaultGuiEndpoint
-	NamedEndpoint
-)
-
-const (
-	JobPending   JobStatus = "pending"
-	JobRunning   JobStatus = "running"
-	JobCanceled  JobStatus = "canceled"
-	JobCompleted JobStatus = "completed"
-	JobError     JobStatus = "error"
-	JobOK        JobStatus = "ok"
-)
+type JobFilter struct {
+	Status   JobStatus
+	SortDesc bool
+	Since    time.Time
+	Until    time.Time
+}
