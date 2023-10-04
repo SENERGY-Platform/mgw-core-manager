@@ -20,10 +20,12 @@ import "github.com/SENERGY-Platform/mgw-core-manager/handler"
 
 type Api struct {
 	gwEndpointHdl handler.GatewayEndpointHandler
+	jobHandler    handler.JobHandler
 }
 
-func New(gwEndpointHdl handler.GatewayEndpointHandler) *Api {
+func New(gwEndpointHdl handler.GatewayEndpointHandler, jobHdl handler.JobHandler) *Api {
 	return &Api{
 		gwEndpointHdl: gwEndpointHdl,
+		jobHandler:    jobHdl,
 	}
 }
