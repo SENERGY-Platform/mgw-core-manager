@@ -2,8 +2,10 @@ github.com/SENERGY-Platform/gin-middleware v0.4.2 h1:x69gn6Fj65lqLJ3nqDWx9nPkKn9
 github.com/SENERGY-Platform/gin-middleware v0.4.2/go.mod h1:uOIEAJeDM2LutlWQOGta22uMH8k8zlnZGylYYj8/vZg=
 github.com/SENERGY-Platform/go-cc-job-handler v0.1.1 h1:GPCu5g1BJrsG43GCnSBqZn8sv5h1Do5m/aGd0tH+JRk=
 github.com/SENERGY-Platform/go-cc-job-handler v0.1.1/go.mod h1:d6rFDQujHvp+tsUrlBOH0pavyicI079l6sUAFEOZRoE=
-github.com/SENERGY-Platform/go-service-base v0.11.2 h1:3BzdJZWRWVrGc3Y2fwrmFt3sBU3s8PtvtcUAnw99c2Y=
-github.com/SENERGY-Platform/go-service-base v0.11.2/go.mod h1:NyMDXzkC/5oRzaMZ1wbFlXTnLoyo3CXM8q1eSloMuBo=
+github.com/SENERGY-Platform/go-service-base v0.12.0 h1:sxjqf8McLTPIZfSea09+y3+xj9whKmF15laeFO0lJqc=
+github.com/SENERGY-Platform/go-service-base v0.12.0/go.mod h1:NyMDXzkC/5oRzaMZ1wbFlXTnLoyo3CXM8q1eSloMuBo=
+github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib v0.9.1 h1:o/eSYCJwEHWta0ymMvl//BZBkOcYmc3ECLoq2K6hp80=
+github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib v0.9.1/go.mod h1:c/Vyc7y6HGGs+FY2braWT+MxqDy0AZIQ+SMFnhJGtcc=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.10.0-rc/go.mod h1:ElCzW+ufi8qKqNW0FY314xriJhyJhuoJ3gFZdAHF7NM=
 github.com/bytedance/sonic v1.10.1 h1:7a1wuFXL1cMy7a3f7/VFcEtriuXQnUBhtoVfOZiaysc=
