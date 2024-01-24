@@ -16,16 +16,19 @@
 
 package api
 
-import "github.com/SENERGY-Platform/mgw-core-manager/handler"
+import (
+	job_hdl "github.com/SENERGY-Platform/go-service-base/job-hdl"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler"
+)
 
 type Api struct {
 	gwEndpointHdl handler.GatewayEndpointHandler
-	jobHandler    handler.JobHandler
+	jobHandler    job_hdl.JobHandler
 }
 
-func New(gwEndpointHdl handler.GatewayEndpointHandler, jobHdl handler.JobHandler) *Api {
+func New(gwEndpointHdl handler.GatewayEndpointHandler, jobHandler job_hdl.JobHandler) *Api {
 	return &Api{
 		gwEndpointHdl: gwEndpointHdl,
-		jobHandler:    jobHdl,
+		jobHandler:    jobHandler,
 	}
 }
