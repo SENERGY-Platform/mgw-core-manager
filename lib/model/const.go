@@ -33,12 +33,3 @@ const (
 	DefaultGuiEndpoint
 	NamedEndpoint
 )
-
-const (
-	JobPending   JobStatus = "pending"
-	JobRunning   JobStatus = "running"
-	JobCanceled  JobStatus = "canceled"
-	JobCompleted JobStatus = "completed"
-	JobError     JobStatus = "error"
-	JobOK        JobStatus = "ok"
-)
