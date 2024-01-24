@@ -18,6 +18,7 @@ package lib
 
 import (
 	"context"
+	job_hdl_lib "github.com/SENERGY-Platform/go-service-base/job-hdl/lib"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 )
 
@@ -26,4 +27,5 @@ type Api interface {
 	AddEndpoints(ctx context.Context, endpoints []model.Endpoint) error
 	RemoveEndpoint(ctx context.Context, id string) error
 	RemoveEndpoints(ctx context.Context, ref string) error
+	job_hdl_lib.Api
 }
