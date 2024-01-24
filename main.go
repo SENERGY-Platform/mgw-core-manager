@@ -20,8 +20,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	gin_mw "github.com/SENERGY-Platform/gin-middleware"
-	"github.com/SENERGY-Platform/go-service-base/srv-base"
+	"github.com/SENERGY-Platform/gin-middleware"
+	"github.com/SENERGY-Platform/go-cc-job-handler/ccjh"
+	"github.com/SENERGY-Platform/go-service-base/job-hdl"
+	sb_util "github.com/SENERGY-Platform/go-service-base/util"
+	"github.com/SENERGY-Platform/go-service-base/watchdog"
 	"github.com/SENERGY-Platform/mgw-core-manager/api"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
@@ -54,7 +57,7 @@ func main() {
 	logFile, err := util.InitLogger(config.Logger)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
-		var logFileError *srv_base.LogFileError
+		var logFileError *sb_util.LogFileError
 		if errors.As(err, &logFileError) {
 			ec = 1
 			return
@@ -66,11 +69,40 @@ func main() {
 
 	util.Logger.Printf("%s %s", model.ServiceName, version)
 
-	util.Logger.Debugf("config: %s", srv_base.ToJsonStr(config))
+	util.Logger.Debugf("config: %s", sb_util.ToJsonStr(config))
 
-	watchdog := srv_base.NewWatchdog(util.Logger, syscall.SIGINT, syscall.SIGTERM)
+	watchdog.Logger = util.Logger
+	wtchdg := watchdog.New(syscall.SIGINT, syscall.SIGTERM)
 
-	mApi := api.New()
+	ccHandler := ccjh.New(config.Jobs.BufferSize)
+
+	job_hdl.Logger = util.Logger
+	job_hdl.ErrCodeMapper = util.GetErrCode
+	job_hdl.NewNotFoundErr = model.NewNotFoundError
+	job_hdl.NewInvalidInputError = model.NewInvalidInputError
+	job_hdl.NewInternalErr = model.NewInternalError
+	jobCtx, jobCF := context.WithCancel(context.Background())
+	jobHandler := job_hdl.New(jobCtx, ccHandler)
+
+	wtchdg.RegisterStopFunc(func() error {
+		ccHandler.Stop()
+		jobCF()
+		if ccHandler.Active() > 0 {
+			util.Logger.Info("waiting for active jobs to cancel ...")
+			ctx, cf := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cf()
+			for ccHandler.Active() != 0 {
+				select {
+				case <-ctx.Done():
+					return fmt.Errorf("canceling jobs took too long")
+				default:
+					time.Sleep(50 * time.Millisecond)
+				}
+			}
+			util.Logger.Info("jobs canceled")
+		}
+		return nil
+	})
 
 	gin.SetMode(gin.ReleaseMode)
 	httpHandler := gin.New()
@@ -80,13 +112,14 @@ func main() {
 	}
 	httpHandler.Use(gin_mw.StaticHeaderHandler(staticHeader), requestid.New(requestid.WithCustomHeaderStrKey(model.HeaderRequestID)), gin_mw.LoggerHandler(util.Logger, nil, func(gc *gin.Context) string {
 		return requestid.Get(gc)
-	}), gin_mw.ErrorHandler(http_hdl.GetStatusCode, ", "), gin.Recovery())
+	}), gin_mw.ErrorHandler(util.GetStatusCode, ", "), gin.Recovery())
 	httpHandler.UseRawPath = true
+	cmApi := api.New(nil, jobHandler)
 
-	http_hdl.SetRoutes(httpHandler, mApi)
-	util.Logger.Debugf("routes: %s", srv_base.ToJsonStr(http_hdl.GetRoutes(httpHandler)))
+	http_hdl.SetRoutes(httpHandler, cmApi)
+	util.Logger.Debugf("routes: %s", sb_util.ToJsonStr(http_hdl.GetRoutes(httpHandler)))
 
-	listener, err := srv_base.NewUnixListener(config.Socket.Path, os.Getuid(), config.Socket.GroupID, config.Socket.FileMode)
+	listener, err := sb_util.NewUnixListener(config.Socket.Path, os.Getuid(), config.Socket.GroupID, config.Socket.FileMode)
 	if err != nil {
 		util.Logger.Error(err)
 		ec = 1
@@ -94,7 +127,7 @@ func main() {
 	}
 	server := &http.Server{Handler: httpHandler}
 	srvCtx, srvCF := context.WithCancel(context.Background())
-	watchdog.RegisterStopFunc(func() error {
+	wtchdg.RegisterStopFunc(func() error {
 		if srvCtx.Err() == nil {
 			ctxWt, cf := context.WithTimeout(context.Background(), time.Second*5)
 			defer cf()
@@ -105,7 +138,7 @@ func main() {
 		}
 		return nil
 	})
-	watchdog.RegisterHealthFunc(func() bool {
+	wtchdg.RegisterHealthFunc(func() bool {
 		if srvCtx.Err() == nil {
 			return true
 		}
@@ -113,7 +146,14 @@ func main() {
 		return false
 	})
 
-	watchdog.Start()
+	wtchdg.Start()
+
+	err = ccHandler.RunAsync(config.Jobs.MaxNumber, time.Duration(config.Jobs.JHInterval*1000))
+	if err != nil {
+		util.Logger.Error(err)
+		ec = 1
+		return
+	}
 
 	go func() {
 		defer srvCF()
@@ -125,5 +165,5 @@ func main() {
 		}
 	}()
 
-	ec = watchdog.Join()
+	ec = wtchdg.Join()
 }
