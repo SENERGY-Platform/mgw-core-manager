@@ -17,11 +17,19 @@
 package util
 
 import (
-	"github.com/SENERGY-Platform/go-service-base/srv-base"
+	sb_util "github.com/SENERGY-Platform/go-service-base/util"
 	"github.com/y-du/go-log-level/level"
 	"io/fs"
 	"os"
 )
+
+type JobsConfig struct {
+	BufferSize  int   `json:"buffer_size" env_var:"JOBS_BUFFER_SIZE"`
+	MaxNumber   int   `json:"max_number" env_var:"JOBS_MAX_NUMBER"`
+	CCHInterval int   `json:"cch_interval" env_var:"JOBS_CCH_INTERVAL"`
+	JHInterval  int   `json:"jh_interval" env_var:"JOBS_JH_INTERVAL"`
+	MaxAge      int64 `json:"max_age" env_var:"JOBS_MAX_AGE"`
+}
 
 type SocketConfig struct {
 	Path     string      `json:"path" env_var:"SOCKET_PATH"`
@@ -30,13 +38,14 @@ type SocketConfig struct {
 }
 
 type Config struct {
-	Logger srv_base.LoggerConfig `json:"logger" env_var:"LOGGER_CONFIG"`
-	Socket SocketConfig          `json:"socket" env_var:"SOCKET_CONFIG"`
+	Logger sb_util.LoggerConfig `json:"logger" env_var:"LOGGER_CONFIG"`
+	Socket SocketConfig         `json:"socket" env_var:"SOCKET_CONFIG"`
+	Jobs   JobsConfig           `json:"jobs" env_var:"JOBS_CONFIG"`
 }
 
 func NewConfig(path string) (*Config, error) {
 	cfg := Config{
-		Logger: srv_base.LoggerConfig{
+		Logger: sb_util.LoggerConfig{
 			Level:        level.Warning,
 			Utc:          true,
 			Path:         "./",
@@ -48,7 +57,14 @@ func NewConfig(path string) (*Config, error) {
 			GroupID:  os.Getgid(),
 			FileMode: 0660,
 		},
+		Jobs: JobsConfig{
+			BufferSize:  50,
+			MaxNumber:   10,
+			CCHInterval: 500000,
+			JHInterval:  500000,
+			MaxAge:      3600000000,
+		},
 	}
-	err := srv_base.LoadConfig(path, &cfg, nil, nil, nil)
+	err := sb_util.LoadConfig(path, &cfg, nil, nil, nil)
 	return &cfg, err
 }
