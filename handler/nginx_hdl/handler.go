@@ -31,22 +31,18 @@ import (
 )
 
 type Handler struct {
-	confPath     string
-	endPntPath   string
-	allowSubnets []string
-	denySubnets  []string
-	templates    map[int]string
-	endpoints    map[string]endpoint
-	m            sync.RWMutex
+	confPath   string
+	endPntPath string
+	templates  map[int]string
+	endpoints  map[string]endpoint
+	m          sync.RWMutex
 }
 
-func New(confPath, endPntPath string, allowSubnets, denySubnets []string, templates map[int]string) *Handler {
+func New(confPath, endPntPath string, templates map[int]string) *Handler {
 	return &Handler{
-		confPath:     confPath,
-		endPntPath:   endPntPath,
-		allowSubnets: allowSubnets,
-		denySubnets:  denySubnets,
-		templates:    templates,
+		confPath:   confPath,
+		endPntPath: endPntPath,
+		templates:  templates,
 	}
 }
 
@@ -136,7 +132,7 @@ func (h *Handler) RemoveAll(ctx context.Context, ref string) error {
 }
 
 func (h *Handler) update(ctx context.Context, endpoints map[string]endpoint) error {
-	directives, err := getDirectives(endpoints, h.allowSubnets, h.denySubnets)
+	directives, err := getDirectives(endpoints)
 	if err != nil {
 		return model.NewInternalError(err)
 	}
@@ -150,7 +146,7 @@ func (h *Handler) update(ctx context.Context, endpoints map[string]endpoint) err
 	return nil
 }
 
-func getDirectives(endpoints map[string]endpoint, allowSubnets, denySubnets []string) ([]gonginx.IDirective, error) {
+func getDirectives(endpoints map[string]endpoint) ([]gonginx.IDirective, error) {
 	var directives []gonginx.IDirective
 	for _, e := range endpoints {
 		cmt, err := e.GenComment()
@@ -160,12 +156,6 @@ func getDirectives(endpoints map[string]endpoint, allowSubnets, denySubnets []st
 		directives = append(directives, newDirective(setDirective, []string{e.GetSetValue()}, []string{cmt}, nil))
 		locDirectives := []gonginx.IDirective{
 			newDirective(proxyPassDirective, []string{e.GetProxyPassValue()}, nil, nil),
-		}
-		for _, subnet := range allowSubnets {
-			locDirectives = append(locDirectives, newDirective(allowDirective, []string{subnet}, nil, nil))
-		}
-		for _, subnet := range denySubnets {
-			locDirectives = append(locDirectives, newDirective(denyDirective, []string{subnet}, nil, nil))
 		}
 		directives = append(directives, newDirective(locationDirective, []string{e.GetLocationValue()}, nil, newBlock(locDirectives)))
 	}
