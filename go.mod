@@ -11,7 +11,7 @@ require (
 	github.com/SENERGY-Platform/mgw-core-manager/lib v0.0.0-00010101000000-000000000000
 	github.com/gin-contrib/requestid v0.0.6
 	github.com/gin-gonic/gin v1.9.1
-	github.com/tufanbarisyildirim/gonginx v0.0.0-20230627120331-964b6ae8380e
+	github.com/tufanbarisyildirim/gonginx v0.0.0-20231222202608-ba16e88a9436
 	github.com/y-du/go-log-level v0.2.3
 )
 
