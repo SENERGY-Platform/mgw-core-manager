@@ -72,20 +72,36 @@ func (h *Handler) Init() error {
 	return nil
 }
 
-func (h *Handler) List(ctx context.Context) ([]model.Endpoint, error) {
+func (h *Handler) List(ctx context.Context, filter model.EndpointFilter) (map[string]model.Endpoint, error) {
 	h.m.RLock()
 	defer h.m.RUnlock()
-	var endpoints []model.Endpoint
-	for _, e := range h.endpoints {
+	filtered := filterEndpoints(h.endpoints, filter)
+	endpoints := make(map[string]model.Endpoint)
+	for id, e := range filtered {
 		if ctx.Err() != nil {
 			return nil, model.NewInternalError(ctx.Err())
 		}
-		endpoints = append(endpoints, e.Endpoint)
+		endpoints[id] = e.Endpoint
 	}
 	return endpoints, nil
 }
 
-func (h *Handler) Add(ctx context.Context, endpoints []model.Endpoint) error {
+func (h *Handler) Add(ctx context.Context, ept model.Endpoint) error {
+	h.m.Lock()
+	defer h.m.Unlock()
+	endpointsCopy := make(map[string]endpoint)
+	for id, e := range h.endpoints {
+		endpointsCopy[id] = e
+	}
+	e := newEndpoint(ept, h.templates)
+	if ept2, ok := endpointsCopy[ept.ID]; ok {
+		return model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
+	}
+	endpointsCopy[ept.ID] = e
+	return h.update(ctx, endpointsCopy)
+}
+
+func (h *Handler) AddList(ctx context.Context, endpoints []model.Endpoint) error {
 	h.m.Lock()
 	defer h.m.Unlock()
 	endpointsCopy := make(map[string]endpoint)
@@ -116,19 +132,17 @@ func (h *Handler) Remove(ctx context.Context, id string) error {
 	return h.update(ctx, endpointsCopy)
 }
 
-func (h *Handler) RemoveAll(ctx context.Context, ref string) error {
+func (h *Handler) RemoveAll(ctx context.Context, filter model.EndpointFilter) error {
 	h.m.Lock()
 	defer h.m.Unlock()
-	endpointsCopy := make(map[string]endpoint)
+	filtered := filterEndpoints(h.endpoints, filter)
+	endpoints := make(map[string]endpoint)
 	for id, e := range h.endpoints {
-		if e.Ref != ref {
-			endpointsCopy[id] = e
+		if _, ok := filtered[id]; !ok {
+			endpoints[id] = e
 		}
 	}
-	if len(h.endpoints) == len(endpointsCopy) {
-		return model.NewNotFoundError(fmt.Errorf("no endpoints found for '%s'", ref))
-	}
-	return h.update(ctx, endpointsCopy)
+	return h.update(ctx, endpoints)
 }
 
 func (h *Handler) update(ctx context.Context, endpoints map[string]endpoint) error {
@@ -236,4 +250,30 @@ func writeConfig(directives []gonginx.IDirective, path string) error {
 		return err
 	}
 	return nil
+}
+
+func filterEndpoints(endpoints map[string]endpoint, filter model.EndpointFilter) map[string]endpoint {
+	filtered := make(map[string]endpoint)
+	var ids map[string]struct{}
+	if len(filter.IDs) > 0 {
+		ids = make(map[string]struct{})
+		for _, id := range filter.IDs {
+			ids[id] = struct{}{}
+		}
+	}
+	for id, e := range endpoints {
+		if len(ids) > 0 {
+			if _, ok := ids[id]; !ok {
+				continue
+			}
+		}
+		if filter.Type != nil && e.Type != *filter.Type {
+			continue
+		}
+		if filter.Ref != "" && e.Ref != filter.Ref {
+			continue
+		}
+		filtered[id] = e
+	}
+	return filtered
 }
