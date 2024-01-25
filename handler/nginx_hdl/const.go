@@ -21,8 +21,6 @@ import "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 const (
 	locationDirective  = "location"
 	proxyPassDirective = "proxy_pass"
-	allowDirective     = "allow"
-	denyDirective      = "deny"
 	setDirective       = "set"
 )
 
