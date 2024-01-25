@@ -27,3 +27,9 @@ type Endpoint struct {
 	IntPath string       `json:"int_path"`
 	ExtPath string       `json:"ext_path"`
 }
+
+type EndpointFilter struct {
+	IDs  []string
+	Type *EndpointType
+	Ref  string
+}
