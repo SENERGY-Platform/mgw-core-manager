@@ -70,6 +70,9 @@ func (h *Handler) Init() error {
 		return err
 	}
 	h.endpoints, err = getEndpoints(conf.GetDirectives(), h.templates)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
