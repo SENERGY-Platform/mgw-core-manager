@@ -22,8 +22,9 @@ import (
 )
 
 type GatewayEndpointHandler interface {
-	List(ctx context.Context) ([]model.Endpoint, error)
-	Add(ctx context.Context, endpoints []model.Endpoint) error
+	List(ctx context.Context, filter model.EndpointFilter) (map[string]model.Endpoint, error)
+	Add(ctx context.Context, endpoint model.Endpoint) error
+	AddList(ctx context.Context, endpoints []model.Endpoint) error
 	Remove(ctx context.Context, id string) error
-	RemoveAll(ctx context.Context, ref string) error
+	RemoveAll(ctx context.Context, filter model.EndpointFilter) error
 }
