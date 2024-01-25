@@ -65,7 +65,10 @@ func (h *Handler) Init() error {
 	if err != nil {
 		return err
 	}
-	conf := p.Parse()
+	conf, err := p.Parse()
+	if err != nil {
+		return err
+	}
 	h.endpoints, err = getEndpoints(conf.GetDirectives(), h.templates)
 	return nil
 }
