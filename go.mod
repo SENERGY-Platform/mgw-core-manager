@@ -6,6 +6,7 @@ require (
 	github.com/SENERGY-Platform/gin-middleware v0.4.2
 	github.com/SENERGY-Platform/go-cc-job-handler v0.1.1
 	github.com/SENERGY-Platform/go-service-base/job-hdl v0.0.6
+	github.com/SENERGY-Platform/go-service-base/job-hdl/lib v0.0.3
 	github.com/SENERGY-Platform/go-service-base/util v0.14.0
 	github.com/SENERGY-Platform/go-service-base/watchdog v0.4.1
 	github.com/SENERGY-Platform/mgw-core-manager/lib v0.0.0-00010101000000-000000000000
@@ -16,7 +17,6 @@ require (
 )
 
 require (
-	github.com/SENERGY-Platform/go-service-base/job-hdl/lib v0.0.3 // indirect
 	github.com/bytedance/sonic v1.10.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
