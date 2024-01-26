@@ -27,6 +27,7 @@ import (
 	"github.com/SENERGY-Platform/go-service-base/watchdog"
 	"github.com/SENERGY-Platform/mgw-core-manager/api"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/nginx_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"github.com/gin-contrib/requestid"
@@ -38,6 +39,15 @@ import (
 )
 
 var version string
+
+var endpointTemplates = map[int]string{
+	nginx_hdl.StandardLocationTmpl:    "~ ^/api/module-manager/deployments/{ref}/endpoints/{path}(.*)$",
+	nginx_hdl.StandardProxyPassTmpl:   "http://{var}{port}{path}$1$is_args$args",
+	nginx_hdl.DefaultGuiLocationTmpl:  "/",
+	nginx_hdl.DefaultGuiProxyPassTmpl: "http://{var}{port}{path}",
+	nginx_hdl.NamedLocationTmpl:       "~ ^/endpoints/{path}(.*)$",
+	nginx_hdl.NamedProxyPassTmpl:      "http://{var}{port}{path}$1$is_args$args",
+}
 
 func main() {
 	ec := 0
@@ -73,6 +83,8 @@ func main() {
 
 	watchdog.Logger = util.Logger
 	wtchdg := watchdog.New(syscall.SIGINT, syscall.SIGTERM)
+
+	gwEndpointHdl := nginx_hdl.New(config.EndpointsConfPath, endpointTemplates)
 
 	ccHandler := ccjh.New(config.Jobs.BufferSize)
 
@@ -114,7 +126,7 @@ func main() {
 		return requestid.Get(gc)
 	}), gin_mw.ErrorHandler(util.GetStatusCode, ", "), gin.Recovery())
 	httpHandler.UseRawPath = true
-	cmApi := api.New(nil, jobHandler)
+	cmApi := api.New(gwEndpointHdl, jobHandler)
 
 	http_hdl.SetRoutes(httpHandler, cmApi)
 	util.Logger.Debugf("routes: %s", sb_util.ToJsonStr(http_hdl.GetRoutes(httpHandler)))
