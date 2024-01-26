@@ -19,6 +19,7 @@ package nginx_hdl
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
@@ -84,6 +85,16 @@ func (h *Handler) List(ctx context.Context, filter lib_model.EndpointFilter) (ma
 		endpoints[id] = e.Endpoint
 	}
 	return endpoints, nil
+}
+
+func (h *Handler) Get(_ context.Context, id string) (lib_model.Endpoint, error) {
+	h.m.RLock()
+	defer h.m.RUnlock()
+	e, ok := h.endpoints[id]
+	if !ok {
+		return lib_model.Endpoint{}, lib_model.NewNotFoundError(errors.New("endpoint not found"))
+	}
+	return e.Endpoint, nil
 }
 
 func (h *Handler) Add(ctx context.Context, ept lib_model.Endpoint) error {
