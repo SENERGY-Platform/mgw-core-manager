@@ -18,21 +18,58 @@ package api
 
 import (
 	"context"
-	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+	"fmt"
+	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 )
 
-func (a *Api) ListEndpoints(ctx context.Context) ([]model.Endpoint, error) {
-	panic("not implemented")
+func (a *Api) GetEndpoints(ctx context.Context, filter lib_model.EndpointFilter) (map[string]lib_model.Endpoint, error) {
+	return a.gwEndpointHdl.List(ctx, filter)
 }
 
-func (a *Api) AddEndpoints(ctx context.Context, endpoints []model.Endpoint) error {
-	panic("not implemented")
+func (a *Api) GetEndpoint(ctx context.Context, id string) (lib_model.Endpoint, error) {
+	return a.gwEndpointHdl.Get(ctx, id)
 }
 
-func (a *Api) RemoveEndpoint(ctx context.Context, id string) error {
-	panic("not implemented")
+func (a *Api) AddEndpoint(ctx context.Context, endpoint lib_model.Endpoint) (string, error) {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("add endpoint '%+v'", endpoint), func(ctx context.Context, cf context.CancelFunc) error {
+		defer cf()
+		err := a.gwEndpointHdl.Add(ctx, endpoint)
+		if err == nil {
+			err = ctx.Err()
+		}
+		return err
+	})
 }
 
-func (a *Api) RemoveEndpoints(ctx context.Context, ref string) error {
-	panic("not implemented")
+func (a *Api) AddEndpoints(ctx context.Context, endpoints []lib_model.Endpoint) (string, error) {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("add endpoints '%+v'", endpoints), func(ctx context.Context, cf context.CancelFunc) error {
+		defer cf()
+		err := a.gwEndpointHdl.AddList(ctx, endpoints)
+		if err == nil {
+			err = ctx.Err()
+		}
+		return err
+	})
+}
+
+func (a *Api) RemoveEndpoint(ctx context.Context, id string) (string, error) {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoint '%s'", id), func(ctx context.Context, cf context.CancelFunc) error {
+		defer cf()
+		err := a.gwEndpointHdl.Remove(ctx, id)
+		if err == nil {
+			err = ctx.Err()
+		}
+		return err
+	})
+}
+
+func (a *Api) RemoveEndpoints(ctx context.Context, filter lib_model.EndpointFilter) (string, error) {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoints '%+v'", filter), func(ctx context.Context, cf context.CancelFunc) error {
+		defer cf()
+		err := a.gwEndpointHdl.RemoveAll(ctx, filter)
+		if err == nil {
+			err = ctx.Err()
+		}
+		return err
+	})
 }
