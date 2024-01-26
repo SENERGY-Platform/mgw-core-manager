@@ -38,9 +38,10 @@ type SocketConfig struct {
 }
 
 type Config struct {
-	Logger sb_util.LoggerConfig `json:"logger" env_var:"LOGGER_CONFIG"`
-	Socket SocketConfig         `json:"socket" env_var:"SOCKET_CONFIG"`
-	Jobs   JobsConfig           `json:"jobs" env_var:"JOBS_CONFIG"`
+	Logger            sb_util.LoggerConfig `json:"logger" env_var:"LOGGER_CONFIG"`
+	Socket            SocketConfig         `json:"socket" env_var:"SOCKET_CONFIG"`
+	Jobs              JobsConfig           `json:"jobs" env_var:"JOBS_CONFIG"`
+	EndpointsConfPath string               `json:"endpoints_conf_path" env_var:"ENDPOINTS_CONF_PATH"`
 }
 
 func NewConfig(path string) (*Config, error) {
