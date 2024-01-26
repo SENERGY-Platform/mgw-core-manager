@@ -32,18 +32,16 @@ import (
 )
 
 type Handler struct {
-	confPath   string
-	endPntPath string
-	templates  map[int]string
-	endpoints  map[string]endpoint
-	m          sync.RWMutex
+	confPath  string
+	templates map[int]string
+	endpoints map[string]endpoint
+	m         sync.RWMutex
 }
 
-func New(confPath, endPntPath string, templates map[int]string) *Handler {
+func New(confPath string, templates map[int]string) *Handler {
 	return &Handler{
-		confPath:   confPath,
-		endPntPath: endPntPath,
-		templates:  templates,
+		confPath:  confPath,
+		templates: templates,
 	}
 }
 
