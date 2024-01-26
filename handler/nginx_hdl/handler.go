@@ -20,7 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"github.com/tufanbarisyildirim/gonginx"
 	"github.com/tufanbarisyildirim/gonginx/parser"
@@ -72,21 +72,21 @@ func (h *Handler) Init() error {
 	return nil
 }
 
-func (h *Handler) List(ctx context.Context, filter model.EndpointFilter) (map[string]model.Endpoint, error) {
+func (h *Handler) List(ctx context.Context, filter lib_model.EndpointFilter) (map[string]lib_model.Endpoint, error) {
 	h.m.RLock()
 	defer h.m.RUnlock()
 	filtered := filterEndpoints(h.endpoints, filter)
-	endpoints := make(map[string]model.Endpoint)
+	endpoints := make(map[string]lib_model.Endpoint)
 	for id, e := range filtered {
 		if ctx.Err() != nil {
-			return nil, model.NewInternalError(ctx.Err())
+			return nil, lib_model.NewInternalError(ctx.Err())
 		}
 		endpoints[id] = e.Endpoint
 	}
 	return endpoints, nil
 }
 
-func (h *Handler) Add(ctx context.Context, ept model.Endpoint) error {
+func (h *Handler) Add(ctx context.Context, ept lib_model.Endpoint) error {
 	h.m.Lock()
 	defer h.m.Unlock()
 	endpointsCopy := make(map[string]endpoint)
@@ -95,13 +95,13 @@ func (h *Handler) Add(ctx context.Context, ept model.Endpoint) error {
 	}
 	e := newEndpoint(ept, h.templates)
 	if ept2, ok := endpointsCopy[ept.ID]; ok {
-		return model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
+		return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
 	}
 	endpointsCopy[ept.ID] = e
 	return h.update(ctx, endpointsCopy)
 }
 
-func (h *Handler) AddList(ctx context.Context, endpoints []model.Endpoint) error {
+func (h *Handler) AddList(ctx context.Context, endpoints []lib_model.Endpoint) error {
 	h.m.Lock()
 	defer h.m.Unlock()
 	endpointsCopy := make(map[string]endpoint)
@@ -111,7 +111,7 @@ func (h *Handler) AddList(ctx context.Context, endpoints []model.Endpoint) error
 	for _, e := range endpoints {
 		ept := newEndpoint(e, h.templates)
 		if ept2, ok := endpointsCopy[ept.ID]; ok {
-			return model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
+			return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
 		}
 		endpointsCopy[ept.ID] = ept
 	}
@@ -122,7 +122,7 @@ func (h *Handler) Remove(ctx context.Context, id string) error {
 	h.m.Lock()
 	defer h.m.Unlock()
 	if _, ok := h.endpoints[id]; !ok {
-		return model.NewNotFoundError(fmt.Errorf("endpoint '%s' not found", id))
+		return lib_model.NewNotFoundError(fmt.Errorf("endpoint '%s' not found", id))
 	}
 	endpointsCopy := make(map[string]endpoint)
 	for id2, e := range h.endpoints {
@@ -132,7 +132,7 @@ func (h *Handler) Remove(ctx context.Context, id string) error {
 	return h.update(ctx, endpointsCopy)
 }
 
-func (h *Handler) RemoveAll(ctx context.Context, filter model.EndpointFilter) error {
+func (h *Handler) RemoveAll(ctx context.Context, filter lib_model.EndpointFilter) error {
 	h.m.Lock()
 	defer h.m.Unlock()
 	filtered := filterEndpoints(h.endpoints, filter)
@@ -148,13 +148,13 @@ func (h *Handler) RemoveAll(ctx context.Context, filter model.EndpointFilter) er
 func (h *Handler) update(ctx context.Context, endpoints map[string]endpoint) error {
 	directives, err := getDirectives(endpoints)
 	if err != nil {
-		return model.NewInternalError(err)
+		return lib_model.NewInternalError(err)
 	}
 	if ctx.Err() != nil {
-		return model.NewInternalError(ctx.Err())
+		return lib_model.NewInternalError(ctx.Err())
 	}
 	if err = writeConfig(directives, h.confPath); err != nil {
-		return model.NewInternalError(err)
+		return lib_model.NewInternalError(err)
 	}
 	h.endpoints = endpoints
 	return nil
@@ -195,7 +195,7 @@ func getEndpoints(directives []gonginx.IDirective, templates map[int]string) (ma
 
 func getEndpoint(s string, templates map[int]string) (endpoint, error) {
 	s, _ = strings.CutPrefix(s, "#")
-	var e model.Endpoint
+	var e lib_model.Endpoint
 	err := json.Unmarshal([]byte(s), &e)
 	if err != nil {
 		return endpoint{}, err
@@ -252,7 +252,7 @@ func writeConfig(directives []gonginx.IDirective, path string) error {
 	return nil
 }
 
-func filterEndpoints(endpoints map[string]endpoint, filter model.EndpointFilter) map[string]endpoint {
+func filterEndpoints(endpoints map[string]endpoint, filter lib_model.EndpointFilter) map[string]endpoint {
 	filtered := make(map[string]endpoint)
 	var ids map[string]struct{}
 	if len(filter.IDs) > 0 {

@@ -19,20 +19,20 @@ package nginx_hdl
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"strconv"
 	"strings"
 )
 
 type endpoint struct {
-	model.Endpoint
+	lib_model.Endpoint
 	proxyPassVal string
 	locationVal  string
 	setVal       string
 }
 
-func newEndpoint(e model.Endpoint, templates map[int]string) endpoint {
+func newEndpoint(e lib_model.Endpoint, templates map[int]string) endpoint {
 	locVal := genLocationValue(e, templates)
 	e.ID = util.GenHash(locVal)
 	return endpoint{
@@ -63,7 +63,7 @@ func (e endpoint) GetSetValue() string {
 	return e.setVal
 }
 
-func genProxyPassValue(e model.Endpoint, templates map[int]string) string {
+func genProxyPassValue(e lib_model.Endpoint, templates map[int]string) string {
 	template := templates[endpointTypeMap[e.Type][proxyPassTmpl]]
 	template = strings.Replace(template, varPlaceholder, "$"+e.ID, -1)
 	var port string
@@ -74,12 +74,12 @@ func genProxyPassValue(e model.Endpoint, templates map[int]string) string {
 	return strings.Replace(template, pathPlaceholder, e.IntPath, -1)
 }
 
-func genLocationValue(e model.Endpoint, templates map[int]string) string {
+func genLocationValue(e lib_model.Endpoint, templates map[int]string) string {
 	template := templates[endpointTypeMap[e.Type][locationTmpl]]
 	template = strings.Replace(template, refPlaceholder, e.Ref, -1)
 	return strings.Replace(template, pathPlaceholder, e.ExtPath, -1)
 }
 
-func genSetValue(e model.Endpoint) string {
+func genSetValue(e lib_model.Endpoint) string {
 	return fmt.Sprintf("$%s %s", e.ID, e.Host)
 }
