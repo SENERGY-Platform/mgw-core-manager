@@ -24,9 +24,10 @@ import (
 
 type Api interface {
 	GetEndpoints(ctx context.Context, filter model.EndpointFilter) (map[string]model.Endpoint, error)
-	AddEndpoint(ctx context.Context, endpoint model.Endpoint) error
-	AddEndpoints(ctx context.Context, endpoints []model.Endpoint) error
-	RemoveEndpoint(ctx context.Context, id string) error
-	RemoveEndpoints(ctx context.Context, filter model.EndpointFilter) error
+	GetEndpoint(ctx context.Context, id string) (model.Endpoint, error)
+	AddEndpoint(ctx context.Context, endpoint model.Endpoint) (string, error)
+	AddEndpoints(ctx context.Context, endpoints []model.Endpoint) (string, error)
+	RemoveEndpoint(ctx context.Context, id string) (string, error)
+	RemoveEndpoints(ctx context.Context, filter model.EndpointFilter) (string, error)
 	job_hdl_lib.Api
 }
