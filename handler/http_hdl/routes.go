@@ -18,12 +18,17 @@ package http_hdl
 
 import (
 	"github.com/SENERGY-Platform/mgw-core-manager/lib"
+	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/gin-gonic/gin"
 	"sort"
 )
 
 func SetRoutes(e *gin.Engine, a lib.Api) {
-
+	e.GET(lib_model.GWConfEndpoint, getEndpointsH(a))
+	e.GET(lib_model.GWConfEndpoint+"/:"+endpointIdParam, getEndpointH(a))
+	e.POST(lib_model.GWConfEndpoint, postEndpointH(a))
+	e.DELETE(lib_model.GWConfEndpoint, deleteEndpointsH(a))
+	e.DELETE(lib_model.GWConfEndpoint+"/:"+endpointIdParam, deleteEndpointH(a))
 }
 
 func GetRoutes(e *gin.Engine) [][2]string {
