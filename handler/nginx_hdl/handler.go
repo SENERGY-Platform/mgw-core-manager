@@ -111,20 +111,23 @@ func (h *Handler) Add(ctx context.Context, ept lib_model.Endpoint) error {
 }
 
 func (h *Handler) AddList(ctx context.Context, endpoints []lib_model.Endpoint) error {
-	h.m.Lock()
-	defer h.m.Unlock()
-	endpointsCopy := make(map[string]endpoint)
-	for id, e := range h.endpoints {
-		endpointsCopy[id] = e
-	}
-	for _, e := range endpoints {
-		ept := newEndpoint(e, h.templates)
-		if ept2, ok := endpointsCopy[ept.ID]; ok {
-			return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
+	if len(endpoints) > 0 {
+		h.m.Lock()
+		defer h.m.Unlock()
+		endpointsCopy := make(map[string]endpoint)
+		for id, e := range h.endpoints {
+			endpointsCopy[id] = e
 		}
-		endpointsCopy[ept.ID] = ept
+		for _, e := range endpoints {
+			ept := newEndpoint(e, h.templates)
+			if ept2, ok := endpointsCopy[ept.ID]; ok {
+				return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
+			}
+			endpointsCopy[ept.ID] = ept
+		}
+		return h.update(ctx, endpointsCopy)
 	}
-	return h.update(ctx, endpointsCopy)
+	return nil
 }
 
 func (h *Handler) Remove(ctx context.Context, id string) error {
