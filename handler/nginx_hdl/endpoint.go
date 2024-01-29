@@ -65,7 +65,7 @@ func (e endpoint) GetSetValue() string {
 
 func genProxyPassValue(e lib_model.Endpoint, templates map[int]string) string {
 	template := templates[endpointTypeMap[e.Type][proxyPassTmpl]]
-	template = strings.Replace(template, varPlaceholder, "$"+e.ID, -1)
+	template = strings.Replace(template, varPlaceholder, "$v"+e.ID, -1)
 	var port string
 	if e.Port != nil && *e.Port != 80 {
 		port = ":" + strconv.FormatInt(int64(*e.Port), 10)
@@ -81,5 +81,5 @@ func genLocationValue(e lib_model.Endpoint, templates map[int]string) string {
 }
 
 func genSetValue(e lib_model.Endpoint) string {
-	return fmt.Sprintf("$%s %s", e.ID, e.Host)
+	return fmt.Sprintf("$v%s %s", e.ID, e.Host)
 }
