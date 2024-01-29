@@ -103,10 +103,10 @@ func (h *Handler) Add(ctx context.Context, ept lib_model.Endpoint) error {
 		endpointsCopy[id] = e
 	}
 	e := newEndpoint(ept, h.templates)
-	if ept2, ok := endpointsCopy[ept.ID]; ok {
+	if ept2, ok := endpointsCopy[e.ID]; ok {
 		return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
 	}
-	endpointsCopy[ept.ID] = e
+	endpointsCopy[e.ID] = e
 	return h.update(ctx, endpointsCopy)
 }
 
