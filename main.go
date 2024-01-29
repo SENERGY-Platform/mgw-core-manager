@@ -85,6 +85,11 @@ func main() {
 	wtchdg := watchdog.New(syscall.SIGINT, syscall.SIGTERM)
 
 	gwEndpointHdl := nginx_hdl.New(config.EndpointsConfPath, endpointTemplates)
+	if err = gwEndpointHdl.Init(); err != nil {
+		util.Logger.Error(err)
+		ec = 1
+		return
+	}
 
 	ccHandler := ccjh.New(config.Jobs.BufferSize)
 
