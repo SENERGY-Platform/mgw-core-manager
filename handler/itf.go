@@ -29,3 +29,15 @@ type GatewayEndpointHandler interface {
 	Remove(ctx context.Context, id string) error
 	RemoveAll(ctx context.Context, filter lib_model.EndpointFilter) error
 }
+
+type CoreServiceHandler interface {
+	List(ctx context.Context) (map[string]lib_model.CoreService, error)
+	Get(ctx context.Context, name string) (lib_model.CoreService, error)
+	Restart(ctx context.Context, name string) error
+}
+
+type ContainerHandler interface {
+	Info(ctx context.Context) (lib_model.CoreService, error)
+	Restart(ctx context.Context) error
+	ExecCmd(ctx context.Context, cmd []string, tty bool, envVars map[string]string, workDir string) error
+}
