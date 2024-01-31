@@ -9,14 +9,18 @@ require (
 	github.com/SENERGY-Platform/go-service-base/job-hdl/lib v0.0.3
 	github.com/SENERGY-Platform/go-service-base/util v0.14.0
 	github.com/SENERGY-Platform/go-service-base/watchdog v0.4.1
+	github.com/SENERGY-Platform/mgw-container-engine-wrapper/client v0.12.0
+	github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib v0.13.0
 	github.com/SENERGY-Platform/mgw-core-manager/lib v0.0.0-00010101000000-000000000000
 	github.com/gin-contrib/requestid v0.0.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/tufanbarisyildirim/gonginx v0.0.0-20231222202608-ba16e88a9436
 	github.com/y-du/go-log-level v0.2.3
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
+	github.com/SENERGY-Platform/go-base-http-client v0.0.1 // indirect
 	github.com/bytedance/sonic v1.10.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
@@ -43,7 +47,6 @@ require (
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 replace github.com/SENERGY-Platform/mgw-core-manager/lib => ./lib
