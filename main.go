@@ -25,13 +25,16 @@ import (
 	"github.com/SENERGY-Platform/go-service-base/job-hdl"
 	sb_util "github.com/SENERGY-Platform/go-service-base/util"
 	"github.com/SENERGY-Platform/go-service-base/watchdog"
+	cew_client "github.com/SENERGY-Platform/mgw-container-engine-wrapper/client"
 	"github.com/SENERGY-Platform/mgw-core-manager/api"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/nginx_hdl"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/service_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
+	"net"
 	"net/http"
 	"os"
 	"syscall"
@@ -84,7 +87,31 @@ func main() {
 	watchdog.Logger = util.Logger
 	wtchdg := watchdog.New(syscall.SIGINT, syscall.SIGTERM)
 
-	gwEndpointHdl := nginx_hdl.New(config.EndpointsConfPath, endpointTemplates)
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+				return net.Dial("unix", config.HttpClient.CewSocketPath)
+			},
+		},
+	}
+
+	cewClient := cew_client.New(httpClient, "http://unix")
+
+	coreServiceHdl := service_hdl.New(cewClient, config.CoreID, time.Duration(config.HttpClient.Timeout))
+	if err = coreServiceHdl.Init(config.ComposeFilePath); err != nil {
+		util.Logger.Error(err)
+		ec = 1
+		return
+	}
+
+	gwCtrHdl, err := coreServiceHdl.GetCtrHandler(config.CoreService.GatewaySrvName)
+	if err != nil {
+		util.Logger.Error(err)
+		ec = 1
+		return
+	}
+
+	gwEndpointHdl := nginx_hdl.New(gwCtrHdl, config.EndpointsConfPath, endpointTemplates)
 	if err = gwEndpointHdl.Init(); err != nil {
 		util.Logger.Error(err)
 		ec = 1
