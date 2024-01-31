@@ -31,6 +31,15 @@ type JobsConfig struct {
 	MaxAge      int64 `json:"max_age" env_var:"JOBS_MAX_AGE"`
 }
 
+type HttpClientConfig struct {
+	CewSocketPath string `json:"cew_socket_path" env_var:"CEW_SOCKET_PATH"`
+	Timeout       int64  `json:"timeout" env_var:"HTTP_TIMEOUT"`
+}
+
+type CoreServiceConfig struct {
+	GatewaySrvName string `json:"gateway_srv_name" env_var:"CORE_GATEWAY_SRV_NAME"`
+}
+
 type SocketConfig struct {
 	Path     string      `json:"path" env_var:"SOCKET_PATH"`
 	GroupID  int         `json:"group_id" env_var:"SOCKET_GROUP_ID"`
@@ -41,7 +50,11 @@ type Config struct {
 	Logger            sb_util.LoggerConfig `json:"logger" env_var:"LOGGER_CONFIG"`
 	Socket            SocketConfig         `json:"socket" env_var:"SOCKET_CONFIG"`
 	Jobs              JobsConfig           `json:"jobs" env_var:"JOBS_CONFIG"`
+	CoreService       CoreServiceConfig    `json:"core_service" env_var:"CORE_SERVICE_CONFIG"`
+	HttpClient        HttpClientConfig     `json:"http_client" env_var:"HTTP_CLIENT_CONFIG"`
 	EndpointsConfPath string               `json:"endpoints_conf_path" env_var:"ENDPOINTS_CONF_PATH"`
+	ComposeFilePath   string               `json:"compose_file_path" env_var:"COMPOSE_FILE_PATH"`
+	CoreID            string               `json:"core_id" env_var:"CORE_ID"`
 }
 
 func NewConfig(path string) (*Config, error) {
@@ -64,6 +77,10 @@ func NewConfig(path string) (*Config, error) {
 			CCHInterval: 500000,
 			JHInterval:  500000,
 			MaxAge:      3600000000,
+		},
+		HttpClient: HttpClientConfig{
+			CewSocketPath: "./ce_wrapper.sock",
+			Timeout:       10000000000,
 		},
 	}
 	err := sb_util.LoadConfig(path, &cfg, nil, nil, nil)
