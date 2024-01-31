@@ -41,11 +41,11 @@ import (
 var version string
 
 var endpointTemplates = map[int]string{
-	nginx_hdl.StandardLocationTmpl:    "~ ^/api/module-manager/deployments/{ref}/endpoints/{path}(.*)$",
+	nginx_hdl.StandardLocationTmpl:    "~ ^/endpoints/deployment/{ref}/{path}(.*)$",
 	nginx_hdl.StandardProxyPassTmpl:   "http://{var}{port}{path}$1$is_args$args",
 	nginx_hdl.DefaultGuiLocationTmpl:  "/",
 	nginx_hdl.DefaultGuiProxyPassTmpl: "http://{var}{port}{path}",
-	nginx_hdl.NamedLocationTmpl:       "~ ^/endpoints/{path}(.*)$",
+	nginx_hdl.NamedLocationTmpl:       "~ ^/endpoints/named/{path}(.*)$",
 	nginx_hdl.NamedProxyPassTmpl:      "http://{var}{port}{path}$1$is_args$args",
 }
 
