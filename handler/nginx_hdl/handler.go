@@ -171,6 +171,13 @@ func (h *Handler) update(ctx context.Context, endpoints map[string]endpoint) err
 	if err = writeConfig(directives, h.confPath); err != nil {
 		return lib_model.NewInternalError(err)
 	}
+	if err = h.ctrHdl.ExecCmd(ctx, []string{"nginx", "-s", "reload"}, true, nil, ""); err != nil {
+		e := copy(h.confPath+".bk", h.confPath)
+		if e != nil {
+			util.Logger.Error(e)
+		}
+		return lib_model.NewInternalError(err)
+	}
 	h.endpoints = endpoints
 	return nil
 }
