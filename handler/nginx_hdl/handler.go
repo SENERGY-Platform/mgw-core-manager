@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"github.com/tufanbarisyildirim/gonginx"
@@ -32,14 +33,16 @@ import (
 )
 
 type Handler struct {
+	ctrHdl    handler.ContainerHandler
 	confPath  string
 	templates map[int]string
 	endpoints map[string]endpoint
 	m         sync.RWMutex
 }
 
-func New(confPath string, templates map[int]string) *Handler {
+func New(containerHandler handler.ContainerHandler, confPath string, templates map[int]string) *Handler {
 	return &Handler{
+		ctrHdl:    containerHandler,
 		confPath:  confPath,
 		templates: templates,
 	}
