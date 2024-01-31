@@ -18,14 +18,14 @@ package handler
 
 import (
 	"context"
-	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 )
 
 type GatewayEndpointHandler interface {
-	List(ctx context.Context, filter model.EndpointFilter) (map[string]model.Endpoint, error)
-	Get(ctx context.Context, id string) (model.Endpoint, error)
-	Add(ctx context.Context, endpoint model.Endpoint) error
-	AddList(ctx context.Context, endpoints []model.Endpoint) error
+	List(ctx context.Context, filter lib_model.EndpointFilter) (map[string]lib_model.Endpoint, error)
+	Get(ctx context.Context, id string) (lib_model.Endpoint, error)
+	Add(ctx context.Context, endpoint lib_model.Endpoint) error
+	AddList(ctx context.Context, endpoints []lib_model.Endpoint) error
 	Remove(ctx context.Context, id string) error
-	RemoveAll(ctx context.Context, filter model.EndpointFilter) error
+	RemoveAll(ctx context.Context, filter lib_model.EndpointFilter) error
 }
