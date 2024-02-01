@@ -18,14 +18,18 @@ package model
 
 type EndpointType = int
 
+type EndpointBase struct {
+	Ref     string `json:"ref"`
+	Host    string `json:"host"`
+	Port    *int   `json:"port"`
+	IntPath string `json:"int_path"`
+	ExtPath string `json:"ext_path"`
+}
+
 type Endpoint struct {
-	ID      string       `json:"id"`
-	Type    EndpointType `json:"type"`
-	Ref     string       `json:"ref"`
-	Host    string       `json:"host"`
-	Port    *int         `json:"port"`
-	IntPath string       `json:"int_path"`
-	ExtPath string       `json:"ext_path"`
+	ID   string       `json:"id"`
+	Type EndpointType `json:"type"`
+	EndpointBase
 }
 
 type EndpointFilter struct {
