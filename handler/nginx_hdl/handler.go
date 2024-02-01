@@ -140,18 +140,16 @@ func (h *Handler) AddAlias(ctx context.Context, id, path string) error {
 	if !ok {
 		return lib_model.NewNotFoundError(errors.New("endpoint not found"))
 	}
-	eBase := lib_model.EndpointBase{
-		Ref:     e.Ref,
-		Host:    e.Host,
-		Port:    e.Port,
-		IntPath: e.IntPath,
-		ExtPath: path,
-	}
 	endpointsCopy := make(map[string]endpoint)
 	for eID, e2 := range h.endpoints {
 		endpointsCopy[eID] = e2
 	}
-	ept := newEndpoint(eBase, lib_model.AliasEndpoint, h.templates)
+	e.ExtPath = path
+	ept := newEndpoint(lib_model.Endpoint{
+		ParentID:     e.ID,
+		Type:         lib_model.AliasEndpoint,
+		EndpointBase: e.EndpointBase,
+	}, h.templates)
 	if ept2, ok := endpointsCopy[ept.ID]; ok {
 		return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.ID, ept2.ID, ept2.GetLocationValue()))
 	}
