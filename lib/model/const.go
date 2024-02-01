@@ -25,7 +25,7 @@ const (
 )
 
 const (
-	GWConfEndpoint = "endpoints"
+	EndpointsPath  = "endpoints"
 	JobsPath       = "jobs"
 	JobsCancelPath = "cancel"
 )

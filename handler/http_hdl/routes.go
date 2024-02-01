@@ -24,11 +24,11 @@ import (
 )
 
 func SetRoutes(e *gin.Engine, a lib.Api) {
-	e.GET(lib_model.GWConfEndpoint, getEndpointsH(a))
-	e.GET(lib_model.GWConfEndpoint+"/:"+endpointIdParam, getEndpointH(a))
-	e.POST(lib_model.GWConfEndpoint, postEndpointH(a))
-	e.DELETE(lib_model.GWConfEndpoint, deleteEndpointsH(a))
-	e.DELETE(lib_model.GWConfEndpoint+"/:"+endpointIdParam, deleteEndpointH(a))
+	e.GET(lib_model.EndpointsPath, getEndpointsH(a))
+	e.GET(lib_model.EndpointsPath+"/:"+endpointIdParam, getEndpointH(a))
+	e.POST(lib_model.EndpointsPath, postEndpointH(a))
+	e.DELETE(lib_model.EndpointsPath, deleteEndpointsH(a))
+	e.DELETE(lib_model.EndpointsPath+"/:"+endpointIdParam, deleteEndpointH(a))
 }
 
 func GetRoutes(e *gin.Engine) [][2]string {
