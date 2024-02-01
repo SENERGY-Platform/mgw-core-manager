@@ -153,7 +153,7 @@ func (h *Handler) AddAlias(ctx context.Context, id, path string) error {
 	}
 	ept := newEndpoint(eBase, lib_model.AliasEndpoint, h.templates)
 	if ept2, ok := endpointsCopy[ept.ID]; ok {
-		return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
+		return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.ID, ept2.ID, ept2.GetLocationValue()))
 	}
 	endpointsCopy[ept.ID] = ept
 	return h.update(ctx, endpointsCopy)
