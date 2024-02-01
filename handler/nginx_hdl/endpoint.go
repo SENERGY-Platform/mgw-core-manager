@@ -32,9 +32,13 @@ type endpoint struct {
 	setVal       string
 }
 
-func newEndpoint(e lib_model.Endpoint, templates map[int]string) endpoint {
-	locVal := genLocationValue(e, templates)
-	e.ID = util.GenHash(locVal)
+func newEndpoint(eBase lib_model.EndpointBase, eType lib_model.EndpointType, templates map[int]string) endpoint {
+	locVal := genLocationValue(eBase, eType, templates)
+	e := lib_model.Endpoint{
+		ID:           util.GenHash(locVal),
+		Type:         eType,
+		EndpointBase: eBase,
+	}
 	return endpoint{
 		Endpoint:     e,
 		proxyPassVal: genProxyPassValue(e, templates),
@@ -74,10 +78,10 @@ func genProxyPassValue(e lib_model.Endpoint, templates map[int]string) string {
 	return strings.Replace(template, pathPlaceholder, e.IntPath, -1)
 }
 
-func genLocationValue(e lib_model.Endpoint, templates map[int]string) string {
-	template := templates[endpointTypeMap[e.Type][locationTmpl]]
-	template = strings.Replace(template, refPlaceholder, e.Ref, -1)
-	return strings.Replace(template, pathPlaceholder, e.ExtPath, -1)
+func genLocationValue(eBase lib_model.EndpointBase, eType lib_model.EndpointType, templates map[int]string) string {
+	template := templates[endpointTypeMap[eType][locationTmpl]]
+	template = strings.Replace(template, refPlaceholder, eBase.Ref, -1)
+	return strings.Replace(template, pathPlaceholder, eBase.ExtPath, -1)
 }
 
 func genSetValue(e lib_model.Endpoint) string {

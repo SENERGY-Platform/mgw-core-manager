@@ -98,31 +98,31 @@ func (h *Handler) Get(_ context.Context, id string) (lib_model.Endpoint, error) 
 	return e.Endpoint, nil
 }
 
-func (h *Handler) Add(ctx context.Context, ept lib_model.Endpoint) error {
+func (h *Handler) Add(ctx context.Context, eBase lib_model.EndpointBase) error {
 	h.m.Lock()
 	defer h.m.Unlock()
 	endpointsCopy := make(map[string]endpoint)
 	for id, e := range h.endpoints {
 		endpointsCopy[id] = e
 	}
-	e := newEndpoint(ept, h.templates)
-	if ept2, ok := endpointsCopy[e.ID]; ok {
+	ept := newEndpoint(eBase, lib_model.StandardEndpoint, h.templates)
+	if ept2, ok := endpointsCopy[ept.ID]; ok {
 		return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
 	}
-	endpointsCopy[e.ID] = e
+	endpointsCopy[ept.ID] = ept
 	return h.update(ctx, endpointsCopy)
 }
 
-func (h *Handler) AddList(ctx context.Context, endpoints []lib_model.Endpoint) error {
-	if len(endpoints) > 0 {
+func (h *Handler) AddList(ctx context.Context, eBaseSl []lib_model.EndpointBase) error {
+	if len(eBaseSl) > 0 {
 		h.m.Lock()
 		defer h.m.Unlock()
 		endpointsCopy := make(map[string]endpoint)
 		for id, e := range h.endpoints {
 			endpointsCopy[id] = e
 		}
-		for _, e := range endpoints {
-			ept := newEndpoint(e, h.templates)
+		for _, eBase := range eBaseSl {
+			ept := newEndpoint(eBase, lib_model.StandardEndpoint, h.templates)
 			if ept2, ok := endpointsCopy[ept.ID]; ok {
 				return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
 			}
@@ -132,6 +132,36 @@ func (h *Handler) AddList(ctx context.Context, endpoints []lib_model.Endpoint) e
 	}
 	return nil
 }
+
+func (h *Handler) AddAlias(ctx context.Context, id, path string) error {
+	h.m.Lock()
+	defer h.m.Unlock()
+	e, ok := h.endpoints[id]
+	if !ok {
+		return lib_model.NewNotFoundError(errors.New("endpoint not found"))
+	}
+	eBase := lib_model.EndpointBase{
+		Ref:     e.Ref,
+		Host:    e.Host,
+		Port:    e.Port,
+		IntPath: e.IntPath,
+		ExtPath: path,
+	}
+	endpointsCopy := make(map[string]endpoint)
+	for eID, e2 := range h.endpoints {
+		endpointsCopy[eID] = e2
+	}
+	ept := newEndpoint(eBase, lib_model.AliasEndpoint, h.templates)
+	if ept2, ok := endpointsCopy[ept.ID]; ok {
+		return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
+	}
+	endpointsCopy[ept.ID] = ept
+	return h.update(ctx, endpointsCopy)
+}
+
+//func (h *Handler) SetDefaultGui(ctx context.Context, id string) error {
+//	panic("not implemented")
+//}
 
 func (h *Handler) Remove(ctx context.Context, id string) error {
 	h.m.Lock()
@@ -222,7 +252,12 @@ func getEndpoint(s string, templates map[int]string) (endpoint, error) {
 	if err != nil {
 		return endpoint{}, err
 	}
-	return newEndpoint(e, templates), nil
+	return endpoint{
+		Endpoint:     e,
+		proxyPassVal: genProxyPassValue(e, templates),
+		locationVal:  genLocationValue(e.EndpointBase, e.Type, templates),
+		setVal:       genSetValue(e),
+	}, nil
 }
 
 func newDirective(name string, parameters, comment []string, block gonginx.IBlock) *gonginx.Directive {
