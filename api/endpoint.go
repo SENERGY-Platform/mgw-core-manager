@@ -63,9 +63,16 @@ func (a *Api) AddEndpointAlias(ctx context.Context, id, path string) (string, er
 	})
 }
 
-//func (a *Api) SetGuiEndpoint(ctx context.Context, id string) (string, error) {
-//	panic("not implemented")
-//}
+func (a *Api) AddDefaultGuiEndpoint(ctx context.Context, id string) (string, error) {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("add endpoint '%s' as default gui", id), func(ctx context.Context, cf context.CancelFunc) error {
+		defer cf()
+		err := a.gwEndpointHdl.AddDefaultGui(ctx, id)
+		if err == nil {
+			err = ctx.Err()
+		}
+		return err
+	})
+}
 
 func (a *Api) RemoveEndpoint(ctx context.Context, id string) (string, error) {
 	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoint '%s'", id), func(ctx context.Context, cf context.CancelFunc) error {
@@ -78,10 +85,21 @@ func (a *Api) RemoveEndpoint(ctx context.Context, id string) (string, error) {
 	})
 }
 
-func (a *Api) RemoveEndpoints(ctx context.Context, filter lib_model.EndpointFilter) (string, error) {
-	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoints '%+v'", filter), func(ctx context.Context, cf context.CancelFunc) error {
+func (a *Api) RemoveEndpointsByRef(ctx context.Context, ref string) (string, error) {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoints by ref '%s'", ref), func(ctx context.Context, cf context.CancelFunc) error {
 		defer cf()
-		err := a.gwEndpointHdl.RemoveAll(ctx, filter)
+		err := a.gwEndpointHdl.RemoveByRef(ctx, ref)
+		if err == nil {
+			err = ctx.Err()
+		}
+		return err
+	})
+}
+
+func (a *Api) RemoveEndpointAlias(ctx context.Context, id string) (string, error) {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoint alias '%s'", id), func(ctx context.Context, cf context.CancelFunc) error {
+		defer cf()
+		err := a.gwEndpointHdl.RemoveAlias(ctx, id)
 		if err == nil {
 			err = ctx.Err()
 		}
