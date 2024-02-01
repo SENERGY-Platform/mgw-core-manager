@@ -134,32 +134,12 @@ func (h *Handler) AddList(ctx context.Context, eBaseSl []lib_model.EndpointBase)
 }
 
 func (h *Handler) AddAlias(ctx context.Context, id, path string) error {
-	h.m.Lock()
-	defer h.m.Unlock()
-	e, ok := h.endpoints[id]
-	if !ok {
-		return lib_model.NewNotFoundError(errors.New("endpoint not found"))
-	}
-	endpointsCopy := make(map[string]endpoint)
-	for eID, e2 := range h.endpoints {
-		endpointsCopy[eID] = e2
-	}
-	e.ExtPath = path
-	ept := newEndpoint(lib_model.Endpoint{
-		ParentID:     e.ID,
-		Type:         lib_model.AliasEndpoint,
-		EndpointBase: e.EndpointBase,
-	}, h.templates)
-	if ept2, ok := endpointsCopy[ept.ID]; ok {
-		return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.ID, ept2.ID, ept2.GetLocationValue()))
-	}
-	endpointsCopy[ept.ID] = ept
-	return h.update(ctx, endpointsCopy)
+	return h.addAlias(ctx, id, path, lib_model.AliasEndpoint)
 }
 
-//func (h *Handler) SetDefaultGui(ctx context.Context, id string) error {
-//	panic("not implemented")
-//}
+func (h *Handler) AddDefaultGui(ctx context.Context, id string) error {
+	return h.addAlias(ctx, id, "", lib_model.DefaultGuiEndpoint)
+}
 
 func (h *Handler) Remove(ctx context.Context, id string) error {
 	h.m.Lock()
@@ -172,20 +152,38 @@ func (h *Handler) Remove(ctx context.Context, id string) error {
 		endpointsCopy[id2] = e
 	}
 	delete(endpointsCopy, id)
+	aliases := h.getAliases(id)
+	for _, id := range aliases {
+		delete(endpointsCopy, id)
+	}
 	return h.update(ctx, endpointsCopy)
 }
 
-func (h *Handler) RemoveAll(ctx context.Context, filter lib_model.EndpointFilter) error {
+func (h *Handler) RemoveByRef(ctx context.Context, ref string) error {
 	h.m.Lock()
 	defer h.m.Unlock()
-	filtered := filterEndpoints(h.endpoints, filter)
-	endpoints := make(map[string]endpoint)
+	endpointsCopy := make(map[string]endpoint)
 	for id, e := range h.endpoints {
-		if _, ok := filtered[id]; !ok {
-			endpoints[id] = e
+		if e.Ref != ref {
+			endpointsCopy[id] = e
 		}
 	}
-	return h.update(ctx, endpoints)
+	return h.update(ctx, endpointsCopy)
+}
+
+func (h *Handler) RemoveAlias(ctx context.Context, id string) error {
+	h.m.Lock()
+	defer h.m.Unlock()
+	e, ok := h.endpoints[id]
+	if !ok || e.Type == lib_model.StandardEndpoint {
+		return lib_model.NewNotFoundError(fmt.Errorf("endpoint alias '%s' not found", id))
+	}
+	endpointsCopy := make(map[string]endpoint)
+	for id2, e2 := range h.endpoints {
+		endpointsCopy[id2] = e2
+	}
+	delete(endpointsCopy, id)
+	return h.update(ctx, endpointsCopy)
 }
 
 func (h *Handler) update(ctx context.Context, endpoints map[string]endpoint) error {
@@ -208,6 +206,40 @@ func (h *Handler) update(ctx context.Context, endpoints map[string]endpoint) err
 	}
 	h.endpoints = endpoints
 	return nil
+}
+
+func (h *Handler) addAlias(ctx context.Context, pID, path string, eType lib_model.EndpointType) error {
+	h.m.Lock()
+	defer h.m.Unlock()
+	e, ok := h.endpoints[pID]
+	if !ok {
+		return lib_model.NewNotFoundError(errors.New("endpoint not found"))
+	}
+	endpointsCopy := make(map[string]endpoint)
+	for eID, e2 := range h.endpoints {
+		endpointsCopy[eID] = e2
+	}
+	e.ExtPath = path
+	ept := newEndpoint(lib_model.Endpoint{
+		ParentID:     e.ID,
+		Type:         eType,
+		EndpointBase: e.EndpointBase,
+	}, h.templates)
+	if ept2, ok := endpointsCopy[ept.ID]; ok {
+		return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.ID, ept2.ID, ept2.GetLocationValue()))
+	}
+	endpointsCopy[ept.ID] = ept
+	return h.update(ctx, endpointsCopy)
+}
+
+func (h *Handler) getAliases(pID string) []string {
+	var aIDs []string
+	for id, e := range h.endpoints {
+		if e.ParentID == pID {
+			aIDs = append(aIDs, id)
+		}
+	}
+	return aIDs
 }
 
 func getDirectives(endpoints map[string]endpoint) ([]gonginx.IDirective, error) {
