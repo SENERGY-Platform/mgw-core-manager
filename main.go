@@ -48,8 +48,8 @@ var endpointTemplates = map[int]string{
 	nginx_hdl.StandardProxyPassTmpl:   "http://{var}{port}{path}$1$is_args$args",
 	nginx_hdl.DefaultGuiLocationTmpl:  "/",
 	nginx_hdl.DefaultGuiProxyPassTmpl: "http://{var}{port}{path}",
-	nginx_hdl.NamedLocationTmpl:       "~ ^/endpoints/named/{path}(.*)$",
-	nginx_hdl.NamedProxyPassTmpl:      "http://{var}{port}{path}$1$is_args$args",
+	nginx_hdl.AliasLocationTmpl:       "~ ^/endpoints/alias/{path}(.*)$",
+	nginx_hdl.AliasProxyPassTmpl:      "http://{var}{port}{path}$1$is_args$args",
 }
 
 func main() {
