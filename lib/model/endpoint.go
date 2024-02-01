@@ -42,6 +42,6 @@ type EndpointFilter struct {
 }
 
 type EndpointAliasReq struct {
-	ID   string `json:"id"`
-	Path string `json:"path"`
+	ParentID string `json:"parent_id"`
+	Path     string `json:"path"`
 }
