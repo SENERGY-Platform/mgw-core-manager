@@ -105,7 +105,7 @@ func (h *Handler) Add(ctx context.Context, eBase lib_model.EndpointBase) error {
 	for id, e := range h.endpoints {
 		endpointsCopy[id] = e
 	}
-	ept := newEndpoint(eBase, lib_model.StandardEndpoint, h.templates)
+	ept := newEndpoint(lib_model.Endpoint{Type: lib_model.StandardEndpoint, EndpointBase: eBase}, h.templates)
 	if ept2, ok := endpointsCopy[ept.ID]; ok {
 		return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.ID, ept2.ID, ept2.GetLocationValue()))
 	}
@@ -122,7 +122,7 @@ func (h *Handler) AddList(ctx context.Context, eBaseSl []lib_model.EndpointBase)
 			endpointsCopy[id] = e
 		}
 		for _, eBase := range eBaseSl {
-			ept := newEndpoint(eBase, lib_model.StandardEndpoint, h.templates)
+			ept := newEndpoint(lib_model.Endpoint{Type: lib_model.StandardEndpoint, EndpointBase: eBase}, h.templates)
 			if ept2, ok := endpointsCopy[ept.ID]; ok {
 				return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.ID, ept2.ID, ept2.GetLocationValue()))
 			}
