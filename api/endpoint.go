@@ -52,6 +52,21 @@ func (a *Api) AddEndpoints(ctx context.Context, endpoints []lib_model.EndpointBa
 	})
 }
 
+func (a *Api) AddEndpointAlias(ctx context.Context, id, path string) (string, error) {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("add alias for endpoint '%s'", id), func(ctx context.Context, cf context.CancelFunc) error {
+		defer cf()
+		err := a.gwEndpointHdl.AddAlias(ctx, id, path)
+		if err == nil {
+			err = ctx.Err()
+		}
+		return err
+	})
+}
+
+//func (a *Api) SetGuiEndpoint(ctx context.Context, id string) (string, error) {
+//	panic("not implemented")
+//}
+
 func (a *Api) RemoveEndpoint(ctx context.Context, id string) (string, error) {
 	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoint '%s'", id), func(ctx context.Context, cf context.CancelFunc) error {
 		defer cf()
