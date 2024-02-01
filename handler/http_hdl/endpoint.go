@@ -26,9 +26,10 @@ import (
 const endpointIdParam = "e"
 
 type endpointFilterQuery struct {
-	IDs  string `form:"name"`
-	Type *int   `form:"type"`
-	Ref  string `form:"ref"`
+	IDs    string `form:"name"`
+	Type   *int   `form:"type"`
+	Ref    string `form:"ref"`
+	Labels string `form:"labels"`
 }
 
 type postEndpointQuery struct {
@@ -43,9 +44,10 @@ func getEndpointsH(a lib.Api) gin.HandlerFunc {
 			return
 		}
 		filter := lib_model.EndpointFilter{
-			IDs:  parseStringSlice(query.IDs, ","),
-			Type: query.Type,
-			Ref:  query.Ref,
+			IDs:    parseStringSlice(query.IDs, ","),
+			Type:   query.Type,
+			Ref:    query.Ref,
+			Labels: genLabels(parseStringSlice(query.Labels, ",")),
 		}
 		endpoints, err := a.GetEndpoints(gc.Request.Context(), filter)
 		if err != nil {
