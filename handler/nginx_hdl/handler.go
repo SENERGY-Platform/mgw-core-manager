@@ -330,7 +330,25 @@ func filterEndpoints(endpoints map[string]endpoint, filter lib_model.EndpointFil
 		if filter.Ref != "" && e.Ref != filter.Ref {
 			continue
 		}
+		if len(filter.Labels) > 0 {
+			if !mapInMap(filter.Labels, e.Labels) {
+				continue
+			}
+		}
 		filtered[id] = e
 	}
 	return filtered
+}
+
+func mapInMap(a, b map[string]string) bool {
+	for key, v1 := range a {
+		v2, ok := b[key]
+		if !ok {
+			return false
+		}
+		if v1 != v2 {
+			return false
+		}
+	}
+	return true
 }
