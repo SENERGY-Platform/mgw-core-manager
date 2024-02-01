@@ -28,8 +28,9 @@ type EndpointBase struct {
 }
 
 type Endpoint struct {
-	ID   string       `json:"id"`
-	Type EndpointType `json:"type"`
+	ID       string       `json:"id"`
+	ParentID string       `json:"parent_id"`
+	Type     EndpointType `json:"type"`
 	EndpointBase
 }
 
