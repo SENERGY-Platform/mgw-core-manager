@@ -32,7 +32,7 @@ type endpointFilterQuery struct {
 }
 
 type postEndpointQuery struct {
-	List bool `form:"list"`
+	Action string `form:"action"`
 }
 
 func getEndpointsH(a lib.Api) gin.HandlerFunc {
@@ -76,24 +76,36 @@ func postEndpointH(a lib.Api) gin.HandlerFunc {
 		}
 		var jID string
 		var err error
-		if query.List {
-			var endpoints []lib_model.Endpoint
-			if err = gc.ShouldBindJSON(&endpoints); err != nil {
+		switch query.Action {
+		case "list":
+			var endpointBaseSl []lib_model.EndpointBase
+			if err = gc.ShouldBindJSON(&endpointBaseSl); err != nil {
 				_ = gc.Error(lib_model.NewInvalidInputError(err))
 				return
 			}
-			jID, err = a.AddEndpoints(gc.Request.Context(), endpoints)
+			jID, err = a.AddEndpoints(gc.Request.Context(), endpointBaseSl)
 			if err != nil {
 				_ = gc.Error(err)
 				return
 			}
-		} else {
-			var endpoint lib_model.Endpoint
-			if err = gc.ShouldBindJSON(&endpoint); err != nil {
+		case "alias":
+			var aliasReq lib_model.EndpointAliasReq
+			if err = gc.ShouldBindJSON(&aliasReq); err != nil {
 				_ = gc.Error(lib_model.NewInvalidInputError(err))
 				return
 			}
-			jID, err = a.AddEndpoint(gc.Request.Context(), endpoint)
+			jID, err = a.AddEndpointAlias(gc.Request.Context(), aliasReq.ID, aliasReq.Path)
+			if err != nil {
+				_ = gc.Error(err)
+				return
+			}
+		default:
+			var endpointBase lib_model.EndpointBase
+			if err = gc.ShouldBindJSON(&endpointBase); err != nil {
+				_ = gc.Error(lib_model.NewInvalidInputError(err))
+				return
+			}
+			jID, err = a.AddEndpoint(gc.Request.Context(), endpointBase)
 			if err != nil {
 				_ = gc.Error(err)
 				return
