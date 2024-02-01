@@ -32,6 +32,6 @@ const (
 
 const (
 	StandardEndpoint EndpointType = iota
-	DefaultGuiEndpoint
 	AliasEndpoint
+	DefaultGuiEndpoint
 )
