@@ -37,3 +37,8 @@ type EndpointFilter struct {
 	Type *EndpointType
 	Ref  string
 }
+
+type EndpointAliasReq struct {
+	ID   string `json:"id"`
+	Path string `json:"path"`
+}
