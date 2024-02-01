@@ -19,11 +19,12 @@ package model
 type EndpointType = int
 
 type EndpointBase struct {
-	Ref     string `json:"ref"`
-	Host    string `json:"host"`
-	Port    *int   `json:"port"`
-	IntPath string `json:"int_path"`
-	ExtPath string `json:"ext_path"`
+	Ref     string            `json:"ref"`
+	Host    string            `json:"host"`
+	Port    *int              `json:"port"`
+	IntPath string            `json:"int_path"`
+	ExtPath string            `json:"ext_path"`
+	Labels  map[string]string `json:"labels"`
 }
 
 type Endpoint struct {
@@ -33,9 +34,10 @@ type Endpoint struct {
 }
 
 type EndpointFilter struct {
-	IDs  []string
-	Type *EndpointType
-	Ref  string
+	IDs    []string
+	Type   *EndpointType
+	Ref    string
+	Labels map[string]string
 }
 
 type EndpointAliasReq struct {
