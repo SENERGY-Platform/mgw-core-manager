@@ -26,7 +26,7 @@ import (
 const endpointIdParam = "e"
 
 type endpointFilterQuery struct {
-	IDs    string `form:"name"`
+	IDs    string `form:"ids"`
 	Type   *int   `form:"type"`
 	Ref    string `form:"ref"`
 	Labels string `form:"labels"`
