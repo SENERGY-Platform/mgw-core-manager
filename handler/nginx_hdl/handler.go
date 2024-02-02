@@ -175,8 +175,11 @@ func (h *Handler) RemoveAlias(ctx context.Context, id string) error {
 	h.m.Lock()
 	defer h.m.Unlock()
 	e, ok := h.endpoints[id]
-	if !ok || e.Type == lib_model.StandardEndpoint {
-		return lib_model.NewNotFoundError(fmt.Errorf("endpoint alias '%s' not found", id))
+	if !ok {
+		return lib_model.NewNotFoundError(fmt.Errorf("endpoint '%s' not found", id))
+	}
+	if e.Type == lib_model.StandardEndpoint {
+		return lib_model.NewNotAllowedError(fmt.Errorf("remove endpoint '%s' not allowed", id))
 	}
 	endpointsCopy := make(map[string]endpoint)
 	for id2, e2 := range h.endpoints {
