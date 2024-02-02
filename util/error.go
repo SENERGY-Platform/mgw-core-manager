@@ -39,6 +39,10 @@ func GetStatusCode(err error) int {
 	if errors.As(err, &iie) {
 		return http.StatusBadRequest
 	}
+	var nae *model.NotAllowedError
+	if errors.As(err, &nae) {
+		return http.StatusForbidden
+	}
 	var ie *model.InternalError
 	if errors.As(err, &ie) {
 		return http.StatusInternalServerError

@@ -32,6 +32,10 @@ type InvalidInputError struct {
 	cError
 }
 
+type NotAllowedError struct {
+	cError
+}
+
 func (e *cError) Error() string {
 	return e.err.Error()
 }
@@ -50,4 +54,8 @@ func NewNotFoundError(err error) error {
 
 func NewInvalidInputError(err error) error {
 	return &InvalidInputError{cError{err: err}}
+}
+
+func NewNotAllowedError(err error) error {
+	return &NotAllowedError{cError{err: err}}
 }
