@@ -31,6 +31,5 @@ type Api interface {
 	AddDefaultGuiEndpoint(ctx context.Context, id string) (string, error)
 	RemoveEndpoint(ctx context.Context, id string, restrictStd bool) (string, error)
 	RemoveEndpointsByRef(ctx context.Context, ref string) (string, error)
-	RemoveEndpointAlias(ctx context.Context, id string) (string, error)
 	job_hdl_lib.Api
 }
