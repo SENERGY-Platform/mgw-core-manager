@@ -74,10 +74,10 @@ func (a *Api) AddDefaultGuiEndpoint(ctx context.Context, id string) (string, err
 	})
 }
 
-func (a *Api) RemoveEndpoint(ctx context.Context, id string) (string, error) {
+func (a *Api) RemoveEndpoint(ctx context.Context, id string, restrictStd bool) (string, error) {
 	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoint '%s'", id), func(ctx context.Context, cf context.CancelFunc) error {
 		defer cf()
-		err := a.gwEndpointHdl.Remove(ctx, id)
+		err := a.gwEndpointHdl.Remove(ctx, id, restrictStd)
 		if err == nil {
 			err = ctx.Err()
 		}
