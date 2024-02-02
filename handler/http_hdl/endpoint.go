@@ -36,6 +36,10 @@ type postEndpointQuery struct {
 	Action string `form:"action"`
 }
 
+type deleteEndpointBatchQuery struct {
+	Ref string `form:"ref"`
+}
+
 func getEndpointsH(a lib.Api) gin.HandlerFunc {
 	return func(gc *gin.Context) {
 		query := endpointFilterQuery{}
@@ -78,30 +82,27 @@ func postEndpointH(a lib.Api) gin.HandlerFunc {
 		}
 		var jID string
 		var err error
-		switch query.Action {
-		case "list":
-			var endpointBaseSl []lib_model.EndpointBase
-			if err = gc.ShouldBindJSON(&endpointBaseSl); err != nil {
-				_ = gc.Error(lib_model.NewInvalidInputError(err))
-				return
-			}
-			jID, err = a.AddEndpoints(gc.Request.Context(), endpointBaseSl)
-			if err != nil {
-				_ = gc.Error(err)
-				return
-			}
-		case "alias":
+		if query.Action != "" {
 			var aliasReq lib_model.EndpointAliasReq
 			if err = gc.ShouldBindJSON(&aliasReq); err != nil {
 				_ = gc.Error(lib_model.NewInvalidInputError(err))
 				return
 			}
-			jID, err = a.AddEndpointAlias(gc.Request.Context(), aliasReq.ID, aliasReq.Path)
-			if err != nil {
-				_ = gc.Error(err)
-				return
+			switch query.Action {
+			case "gui":
+				jID, err = a.AddDefaultGuiEndpoint(gc.Request.Context(), aliasReq.ParentID)
+				if err != nil {
+					_ = gc.Error(err)
+					return
+				}
+			case "alias":
+				jID, err = a.AddEndpointAlias(gc.Request.Context(), aliasReq.ParentID, aliasReq.Path)
+				if err != nil {
+					_ = gc.Error(err)
+					return
+				}
 			}
-		default:
+		} else {
 			var endpointBase lib_model.EndpointBase
 			if err = gc.ShouldBindJSON(&endpointBase); err != nil {
 				_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -128,19 +129,73 @@ func deleteEndpointH(a lib.Api) gin.HandlerFunc {
 	}
 }
 
-func deleteEndpointsH(a lib.Api) gin.HandlerFunc {
+func postEndpointBatchH(a lib.Api) gin.HandlerFunc {
 	return func(gc *gin.Context) {
-		query := endpointFilterQuery{}
+		var endpointBaseSl []lib_model.EndpointBase
+		if err := gc.ShouldBindJSON(&endpointBaseSl); err != nil {
+			_ = gc.Error(lib_model.NewInvalidInputError(err))
+			return
+		}
+		jID, err := a.AddEndpoints(gc.Request.Context(), endpointBaseSl)
+		if err != nil {
+			_ = gc.Error(err)
+			return
+		}
+		gc.String(http.StatusOK, jID)
+	}
+}
+
+func deleteEndpointBatchH(a lib.Api) gin.HandlerFunc {
+	return func(gc *gin.Context) {
+		query := deleteEndpointBatchQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
 			return
 		}
-		filter := lib_model.EndpointFilter{
-			IDs:  parseStringSlice(query.IDs, ","),
-			Type: query.Type,
-			Ref:  query.Ref,
+		jID, err := a.RemoveEndpointsByRef(gc.Request.Context(), query.Ref)
+		if err != nil {
+			_ = gc.Error(err)
+			return
 		}
-		jID, err := a.RemoveEndpoints(gc.Request.Context(), filter)
+		gc.String(http.StatusOK, jID)
+	}
+}
+
+func postEndpointRestrictedH(a lib.Api) gin.HandlerFunc {
+	return func(gc *gin.Context) {
+		query := postEndpointQuery{}
+		if err := gc.ShouldBindQuery(&query); err != nil {
+			_ = gc.Error(lib_model.NewInvalidInputError(err))
+			return
+		}
+		var jID string
+		var err error
+		var aliasReq lib_model.EndpointAliasReq
+		if err = gc.ShouldBindJSON(&aliasReq); err != nil {
+			_ = gc.Error(lib_model.NewInvalidInputError(err))
+			return
+		}
+		switch query.Action {
+		case "gui":
+			jID, err = a.AddDefaultGuiEndpoint(gc.Request.Context(), aliasReq.ParentID)
+			if err != nil {
+				_ = gc.Error(err)
+				return
+			}
+		case "alias":
+			jID, err = a.AddEndpointAlias(gc.Request.Context(), aliasReq.ParentID, aliasReq.Path)
+			if err != nil {
+				_ = gc.Error(err)
+				return
+			}
+		}
+		gc.String(http.StatusOK, jID)
+	}
+}
+
+func deleteEndpointRestrictedH(a lib.Api) gin.HandlerFunc {
+	return func(gc *gin.Context) {
+		jID, err := a.RemoveEndpointAlias(gc.Request.Context(), gc.Param(endpointIdParam))
 		if err != nil {
 			_ = gc.Error(err)
 			return

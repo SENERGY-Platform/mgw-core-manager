@@ -25,10 +25,15 @@ import (
 
 func SetRoutes(e *gin.Engine, a lib.Api) {
 	e.GET(lib_model.EndpointsPath, getEndpointsH(a))
-	e.GET(lib_model.EndpointsPath+"/:"+endpointIdParam, getEndpointH(a))
 	e.POST(lib_model.EndpointsPath, postEndpointH(a))
-	e.DELETE(lib_model.EndpointsPath, deleteEndpointsH(a))
+	e.GET(lib_model.EndpointsPath+"/:"+endpointIdParam, getEndpointH(a))
 	e.DELETE(lib_model.EndpointsPath+"/:"+endpointIdParam, deleteEndpointH(a))
+	e.POST(lib_model.EndpointsBatchPath, postEndpointBatchH(a))
+	e.DELETE(lib_model.EndpointsBatchPath, deleteEndpointBatchH(a))
+	e.GET(lib_model.RestrictedPath+"/"+lib_model.EndpointsPath, getEndpointsH(a))
+	e.POST(lib_model.RestrictedPath+"/"+lib_model.EndpointsPath, postEndpointRestrictedH(a))
+	e.GET(lib_model.RestrictedPath+"/"+lib_model.EndpointsPath+"/:"+endpointIdParam, getEndpointH(a))
+	e.DELETE(lib_model.RestrictedPath+"/"+lib_model.EndpointsPath+"/:"+endpointIdParam, deleteEndpointRestrictedH(a))
 }
 
 func GetRoutes(e *gin.Engine) [][2]string {
