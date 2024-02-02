@@ -24,6 +24,9 @@ import (
 )
 
 func SetRoutes(e *gin.Engine, a lib.Api) {
+	e.GET(lib_model.CoreServicesPath, getCoreServicesH(a))
+	e.GET(lib_model.CoreServicesPath+"/:"+coreSrvNameParam, getCoreServiceH(a))
+	e.PATCH(lib_model.CoreServicesPath+"/:"+coreSrvNameParam+"/"+lib_model.RestartPath, patchRestartCoreServiceH(a))
 	e.GET(lib_model.EndpointsPath, getEndpointsH(a))
 	e.POST(lib_model.EndpointsPath, postEndpointH(a))
 	e.GET(lib_model.EndpointsPath+"/:"+endpointIdParam, getEndpointH(a))
