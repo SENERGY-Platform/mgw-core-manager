@@ -158,7 +158,7 @@ func main() {
 		return requestid.Get(gc)
 	}), gin_mw.ErrorHandler(util.GetStatusCode, ", "), gin.Recovery())
 	httpHandler.UseRawPath = true
-	cmApi := api.New(gwEndpointHdl, jobHandler)
+	cmApi := api.New(coreServiceHdl, gwEndpointHdl, jobHandler)
 
 	http_hdl.SetRoutes(httpHandler, cmApi)
 	util.Logger.Debugf("routes: %s", sb_util.ToJsonStr(http_hdl.GetRoutes(httpHandler)))

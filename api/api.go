@@ -22,12 +22,14 @@ import (
 )
 
 type Api struct {
+	coreSrvHdl    handler.CoreServiceHandler
 	gwEndpointHdl handler.GatewayEndpointHandler
 	jobHandler    job_hdl.JobHandler
 }
 
-func New(gwEndpointHdl handler.GatewayEndpointHandler, jobHandler job_hdl.JobHandler) *Api {
+func New(coreServiceHandler handler.CoreServiceHandler, gwEndpointHdl handler.GatewayEndpointHandler, jobHandler job_hdl.JobHandler) *Api {
 	return &Api{
+		coreSrvHdl:    coreServiceHandler,
 		gwEndpointHdl: gwEndpointHdl,
 		jobHandler:    jobHandler,
 	}
