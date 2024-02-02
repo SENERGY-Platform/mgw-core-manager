@@ -30,7 +30,6 @@ type GatewayEndpointHandler interface {
 	AddDefaultGui(ctx context.Context, id string) error
 	Remove(ctx context.Context, id string, restrictStd bool) error
 	RemoveByRef(ctx context.Context, ref string) error
-	RemoveAlias(ctx context.Context, id string) error
 }
 
 type CoreServiceHandler interface {

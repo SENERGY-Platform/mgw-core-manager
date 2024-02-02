@@ -175,24 +175,6 @@ func (h *Handler) RemoveByRef(ctx context.Context, ref string) error {
 	return h.update(ctx, endpointsCopy)
 }
 
-func (h *Handler) RemoveAlias(ctx context.Context, id string) error {
-	h.m.Lock()
-	defer h.m.Unlock()
-	e, ok := h.endpoints[id]
-	if !ok {
-		return lib_model.NewNotFoundError(fmt.Errorf("endpoint '%s' not found", id))
-	}
-	if e.Type == lib_model.StandardEndpoint {
-		return lib_model.NewNotAllowedError(fmt.Errorf("remove endpoint '%s' not allowed", id))
-	}
-	endpointsCopy := make(map[string]endpoint)
-	for id2, e2 := range h.endpoints {
-		endpointsCopy[id2] = e2
-	}
-	delete(endpointsCopy, id)
-	return h.update(ctx, endpointsCopy)
-}
-
 func (h *Handler) update(ctx context.Context, endpoints map[string]endpoint) error {
 	directives, err := getDirectives(endpoints)
 	if err != nil {
