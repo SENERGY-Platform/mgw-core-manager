@@ -1,0 +1,32 @@
+name: Build, Test & Upload
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+      #      - name: Test
+      #        run: go test -v -race -covermode=atomic -coverprofile=coverage.out ./...
+      - name: Make Linux build dir
+        run: mkdir -p linux_build/amd64 linux_build/arm64 linux_build/arm
+      - name: Build Linux amd64
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o linux_build/amd64/bin -ldflags="-X 'main.version=${{ github.ref_name }}'" main.go
+      - name: Build Linux arm
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=arm go build -o linux_build/arm/bin -ldflags="-X 'main.version=${{ github.ref_name }}'" main.go
+      - name: Build Linux arm64
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o linux_build/arm64/bin -ldflags="-X 'main.version=${{ github.ref_name }}'" main.go
+      - name: Archive Linux
+        run: tar -czvf mgw_core_manager_${{ github.ref_name }}_linux.tar.gz LICENSE README.md -C linux_build amd64 arm arm64
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: mgw_core_manager_${{ github.ref_name }}_linux.tar.gz
