@@ -95,14 +95,3 @@ func (a *Api) RemoveEndpointsByRef(ctx context.Context, ref string) (string, err
 		return err
 	})
 }
-
-func (a *Api) RemoveEndpointAlias(ctx context.Context, id string) (string, error) {
-	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoint alias '%s'", id), func(ctx context.Context, cf context.CancelFunc) error {
-		defer cf()
-		err := a.gwEndpointHdl.RemoveAlias(ctx, id)
-		if err == nil {
-			err = ctx.Err()
-		}
-		return err
-	})
-}
