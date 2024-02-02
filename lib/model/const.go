@@ -25,9 +25,11 @@ const (
 )
 
 const (
-	EndpointsPath  = "endpoints"
-	JobsPath       = "jobs"
-	JobsCancelPath = "cancel"
+	RestrictedPath     = "restricted"
+	EndpointsPath      = "endpoints"
+	EndpointsBatchPath = "endpoints-batch"
+	JobsPath           = "jobs"
+	JobsCancelPath     = "cancel"
 )
 
 const (
