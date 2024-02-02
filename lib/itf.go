@@ -31,5 +31,8 @@ type Api interface {
 	AddDefaultGuiEndpoint(ctx context.Context, id string) (string, error)
 	RemoveEndpoint(ctx context.Context, id string, restrictStd bool) (string, error)
 	RemoveEndpointsByRef(ctx context.Context, ref string) (string, error)
+	GetCoreServices(ctx context.Context) (map[string]model.CoreService, error)
+	GetCoreService(ctx context.Context, name string) (model.CoreService, error)
+	RestartCoreService(ctx context.Context, name string) (string, error)
 	job_hdl_lib.Api
 }
