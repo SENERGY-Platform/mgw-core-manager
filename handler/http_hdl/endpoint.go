@@ -120,7 +120,7 @@ func postEndpointH(a lib.Api) gin.HandlerFunc {
 
 func deleteEndpointH(a lib.Api) gin.HandlerFunc {
 	return func(gc *gin.Context) {
-		jID, err := a.RemoveEndpoint(gc.Request.Context(), gc.Param(endpointIdParam))
+		jID, err := a.RemoveEndpoint(gc.Request.Context(), gc.Param(endpointIdParam), false)
 		if err != nil {
 			_ = gc.Error(err)
 			return
@@ -195,7 +195,7 @@ func postEndpointRestrictedH(a lib.Api) gin.HandlerFunc {
 
 func deleteEndpointRestrictedH(a lib.Api) gin.HandlerFunc {
 	return func(gc *gin.Context) {
-		jID, err := a.RemoveEndpointAlias(gc.Request.Context(), gc.Param(endpointIdParam))
+		jID, err := a.RemoveEndpoint(gc.Request.Context(), gc.Param(endpointIdParam), true)
 		if err != nil {
 			_ = gc.Error(err)
 			return
