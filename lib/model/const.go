@@ -26,6 +26,7 @@ const (
 
 const (
 	CoreServicesPath   = "core-services"
+	RestartPath        = "restart"
 	RestrictedPath     = "restricted"
 	EndpointsPath      = "endpoints"
 	EndpointsBatchPath = "endpoints-batch"
