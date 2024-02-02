@@ -34,6 +34,9 @@ func SetRoutes(e *gin.Engine, a lib.Api) {
 	e.POST(lib_model.RestrictedPath+"/"+lib_model.EndpointsPath, postEndpointRestrictedH(a))
 	e.GET(lib_model.RestrictedPath+"/"+lib_model.EndpointsPath+"/:"+endpointIdParam, getEndpointH(a))
 	e.DELETE(lib_model.RestrictedPath+"/"+lib_model.EndpointsPath+"/:"+endpointIdParam, deleteEndpointRestrictedH(a))
+	e.GET("/"+lib_model.JobsPath, getJobsH(a))
+	e.GET("/"+lib_model.JobsPath+"/:"+jobIdParam, getJobH(a))
+	e.PATCH("/"+lib_model.JobsPath+"/:"+jobIdParam+"/"+lib_model.JobsCancelPath, patchJobCancelH(a))
 }
 
 func GetRoutes(e *gin.Engine) [][2]string {
