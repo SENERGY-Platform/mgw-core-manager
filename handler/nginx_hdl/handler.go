@@ -141,15 +141,19 @@ func (h *Handler) AddDefaultGui(ctx context.Context, id string) error {
 	return h.addAlias(ctx, id, "", lib_model.DefaultGuiEndpoint)
 }
 
-func (h *Handler) Remove(ctx context.Context, id string) error {
+func (h *Handler) Remove(ctx context.Context, id string, restrictStd bool) error {
 	h.m.Lock()
 	defer h.m.Unlock()
-	if _, ok := h.endpoints[id]; !ok {
+	e, ok := h.endpoints[id]
+	if !ok {
 		return lib_model.NewNotFoundError(fmt.Errorf("endpoint '%s' not found", id))
 	}
+	if restrictStd && e.Type == lib_model.StandardEndpoint {
+		return lib_model.NewNotAllowedError(fmt.Errorf("remove endpoint '%s' not allowed", id))
+	}
 	endpointsCopy := make(map[string]endpoint)
-	for id2, e := range h.endpoints {
-		endpointsCopy[id2] = e
+	for id2, e2 := range h.endpoints {
+		endpointsCopy[id2] = e2
 	}
 	delete(endpointsCopy, id)
 	aliases := h.getAliases(id)
