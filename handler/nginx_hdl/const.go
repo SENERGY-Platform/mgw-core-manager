@@ -20,6 +20,7 @@ import lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 
 const (
 	locationDirective  = "location"
+	rewriteDirective   = "rewrite"
 	proxyPassDirective = "proxy_pass"
 	setDirective       = "set"
 )
@@ -33,21 +34,25 @@ const (
 
 const (
 	locationTmpl = iota
+	rewriteTmpl
 	proxyPassTmpl
 )
 
 const (
 	StandardLocationTmpl = iota
+	StandardRewriteTmpl
 	StandardProxyPassTmpl
 	DefaultGuiLocationTmpl
 	DefaultGuiProxyPassTmpl
 	AliasLocationTmpl
+	AliasRewriteTmpl
 	AliasProxyPassTmpl
 )
 
 var endpointTypeMap = map[int]map[int]int{
 	lib_model.StandardEndpoint: {
 		locationTmpl:  StandardLocationTmpl,
+		rewriteTmpl:   StandardRewriteTmpl,
 		proxyPassTmpl: StandardProxyPassTmpl,
 	},
 	lib_model.DefaultGuiEndpoint: {
@@ -56,6 +61,7 @@ var endpointTypeMap = map[int]map[int]int{
 	},
 	lib_model.AliasEndpoint: {
 		locationTmpl:  AliasLocationTmpl,
+		rewriteTmpl:   AliasRewriteTmpl,
 		proxyPassTmpl: AliasProxyPassTmpl,
 	},
 }
