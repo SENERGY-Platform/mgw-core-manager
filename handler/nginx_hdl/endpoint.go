@@ -92,8 +92,8 @@ func genSetValue(e lib_model.Endpoint) string {
 	return fmt.Sprintf("$v%s %s", e.ID, e.Host)
 }
 
-func genRewriteValue(eBase lib_model.EndpointBase, eType lib_model.EndpointType, templates map[int]string) string {
+func genRewriteValue(e lib_model.Endpoint, eType lib_model.EndpointType, templates map[int]string) string {
 	template := templates[endpointTypeMap[eType][rewriteTmpl]]
-	template = strings.Replace(template, refPlaceholder, eBase.Ref, -1)
-	return strings.Replace(template, pathPlaceholder, eBase.ExtPath, -1)
+	template = strings.Replace(template, refPlaceholder, e.Ref, -1)
+	return strings.Replace(template, pathPlaceholder, e.ExtPath, -1)
 }
