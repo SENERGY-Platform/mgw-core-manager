@@ -101,6 +101,12 @@ func (h *Handler) Get(_ context.Context, id string) (lib_model.Endpoint, error) 
 func (h *Handler) Add(ctx context.Context, eBase lib_model.EndpointBase) error {
 	h.m.Lock()
 	defer h.m.Unlock()
+	if err := checkIntPath(eBase.IntPath); err != nil {
+		return err
+	}
+	if err := checkExtPath(eBase.ExtPath); err != nil {
+		return err
+	}
 	endpointsCopy := make(map[string]endpoint)
 	for id, e := range h.endpoints {
 		endpointsCopy[id] = e
@@ -122,6 +128,12 @@ func (h *Handler) AddList(ctx context.Context, eBaseSl []lib_model.EndpointBase)
 			endpointsCopy[id] = e
 		}
 		for _, eBase := range eBaseSl {
+			if err := checkIntPath(eBase.IntPath); err != nil {
+				return err
+			}
+			if err := checkExtPath(eBase.ExtPath); err != nil {
+				return err
+			}
 			ept := newEndpoint(lib_model.Endpoint{Type: lib_model.StandardEndpoint, EndpointBase: eBase}, h.templates)
 			if ept2, ok := endpointsCopy[ept.ID]; ok {
 				return lib_model.NewInvalidInputError(fmt.Errorf("duplicate endpoint '%s' & '%s' -> '%s'", ept.Ref, ept2.Ref, ept2.GetLocationValue()))
@@ -200,6 +212,9 @@ func (h *Handler) update(ctx context.Context, endpoints map[string]endpoint) err
 func (h *Handler) addAlias(ctx context.Context, pID, path string, eType lib_model.EndpointType) error {
 	h.m.Lock()
 	defer h.m.Unlock()
+	if err := checkExtPath(path); err != nil {
+		return err
+	}
 	e, ok := h.endpoints[pID]
 	if !ok {
 		return lib_model.NewNotFoundError(errors.New("endpoint not found"))
@@ -367,4 +382,18 @@ func mapInMap(a, b map[string]string) bool {
 		}
 	}
 	return true
+}
+
+func checkIntPath(p string) error {
+	if !strings.HasPrefix(p, "/") {
+		return lib_model.NewInvalidInputError(fmt.Errorf("path '%s' not absolute", p))
+	}
+	return nil
+}
+
+func checkExtPath(p string) error {
+	if strings.HasPrefix(p, "/") {
+		return lib_model.NewInvalidInputError(fmt.Errorf("path '%s' not relative", p))
+	}
+	return nil
 }
