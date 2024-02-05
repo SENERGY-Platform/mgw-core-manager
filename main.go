@@ -44,11 +44,13 @@ import (
 var version string
 
 var endpointTemplates = map[int]string{
-	nginx_hdl.StandardLocationTmpl:    "~ ^/endpoints/deployment/{ref}/{path}(.*)$",
+	nginx_hdl.StandardLocationTmpl:    "/endpoints/deployment/{ref}/{path}",
+	nginx_hdl.StandardRewriteTmpl:     "/endpoints/deployment/{ref}/{path}(.*) /$1 break",
 	nginx_hdl.StandardProxyPassTmpl:   "http://{var}{port}{path}$1$is_args$args",
-	nginx_hdl.DefaultGuiLocationTmpl:  "/",
+	nginx_hdl.DefaultGuiLocationTmpl:  "= /",
 	nginx_hdl.DefaultGuiProxyPassTmpl: "http://{var}{port}{path}",
-	nginx_hdl.AliasLocationTmpl:       "~ ^/endpoints/alias/{path}(.*)$",
+	nginx_hdl.AliasLocationTmpl:       "/endpoints/alias/{path}",
+	nginx_hdl.AliasRewriteTmpl:        "/endpoints/alias/{path}(.*) /$1 break",
 	nginx_hdl.AliasProxyPassTmpl:      "http://{var}{port}{path}$1$is_args$args",
 }
 
