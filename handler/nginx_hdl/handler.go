@@ -277,6 +277,7 @@ func getEndpoint(s string, templates map[int]string) (endpoint, error) {
 		Endpoint:     e,
 		proxyPassVal: genProxyPassValue(e, templates),
 		locationVal:  genLocationValue(e.EndpointBase, e.Type, templates),
+		rewriteVal:   genRewriteValue(e.EndpointBase, e.Type, templates),
 		setVal:       genSetValue(e),
 	}, nil
 }
