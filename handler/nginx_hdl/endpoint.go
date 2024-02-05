@@ -28,6 +28,7 @@ import (
 type endpoint struct {
 	lib_model.Endpoint
 	proxyPassVal string
+	rewriteVal   string
 	locationVal  string
 	setVal       string
 }
@@ -38,6 +39,7 @@ func newEndpoint(e lib_model.Endpoint, templates map[int]string) endpoint {
 	return endpoint{
 		Endpoint:     e,
 		proxyPassVal: genProxyPassValue(e, templates),
+		rewriteVal:   genRewriteValue(e.EndpointBase, e.Type, templates),
 		locationVal:  locVal,
 		setVal:       genSetValue(e),
 	}
@@ -53,6 +55,10 @@ func (e endpoint) GenComment() (string, error) {
 
 func (e endpoint) GetLocationValue() string {
 	return e.locationVal
+}
+
+func (e endpoint) GetRewriteValue() string {
+	return e.rewriteVal
 }
 
 func (e endpoint) GetProxyPassValue() string {
@@ -82,4 +88,10 @@ func genLocationValue(eBase lib_model.EndpointBase, eType lib_model.EndpointType
 
 func genSetValue(e lib_model.Endpoint) string {
 	return fmt.Sprintf("$v%s %s", e.ID, e.Host)
+}
+
+func genRewriteValue(eBase lib_model.EndpointBase, eType lib_model.EndpointType, templates map[int]string) string {
+	template := templates[endpointTypeMap[eType][rewriteTmpl]]
+	template = strings.Replace(template, refPlaceholder, eBase.Ref, -1)
+	return strings.Replace(template, pathPlaceholder, eBase.ExtPath, -1)
 }
