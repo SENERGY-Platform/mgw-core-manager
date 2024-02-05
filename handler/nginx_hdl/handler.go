@@ -385,7 +385,7 @@ func mapInMap(a, b map[string]string) bool {
 }
 
 func checkIntPath(p string) error {
-	if !strings.HasPrefix(p, "/") {
+	if p != "" && !strings.HasPrefix(p, "/") {
 		return lib_model.NewInvalidInputError(fmt.Errorf("path '%s' not absolute", p))
 	}
 	return nil
