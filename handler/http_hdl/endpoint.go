@@ -182,7 +182,7 @@ func postEndpointRestrictedH(a lib.Api) gin.HandlerFunc {
 				_ = gc.Error(err)
 				return
 			}
-		case "alias":
+		default:
 			jID, err = a.AddEndpointAlias(gc.Request.Context(), aliasReq.ParentID, aliasReq.Path)
 			if err != nil {
 				_ = gc.Error(err)
