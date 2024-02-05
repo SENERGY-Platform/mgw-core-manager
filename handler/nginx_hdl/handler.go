@@ -273,13 +273,7 @@ func getEndpoint(s string, templates map[int]string) (endpoint, error) {
 	if err != nil {
 		return endpoint{}, err
 	}
-	return endpoint{
-		Endpoint:     e,
-		proxyPassVal: genProxyPassValue(e, templates),
-		locationVal:  genLocationValue(e.EndpointBase, e.Type, templates),
-		rewriteVal:   genRewriteValue(e.EndpointBase, e.Type, templates),
-		setVal:       genSetValue(e),
-	}, nil
+	return newEndpoint(e, templates), nil
 }
 
 func newDirective(name string, parameters, comment []string, block gonginx.IBlock) *gonginx.Directive {

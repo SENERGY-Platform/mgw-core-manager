@@ -35,11 +35,13 @@ type endpoint struct {
 
 func newEndpoint(e lib_model.Endpoint, templates map[int]string) endpoint {
 	locVal := genLocationValue(e.EndpointBase, e.Type, templates)
-	e.ID = util.GenHash(locVal)
+	if e.ID == "" {
+		e.ID = util.GenHash(locVal)
+	}
 	return endpoint{
 		Endpoint:     e,
 		proxyPassVal: genProxyPassValue(e, templates),
-		rewriteVal:   genRewriteValue(e.EndpointBase, e.Type, templates),
+		rewriteVal:   genRewriteValue(e, e.Type, templates),
 		locationVal:  locVal,
 		setVal:       genSetValue(e),
 	}
