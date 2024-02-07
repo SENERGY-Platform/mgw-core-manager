@@ -85,21 +85,10 @@ func (a *Api) RemoveEndpoint(ctx context.Context, id string, restrictStd bool) (
 	})
 }
 
-func (a *Api) RemoveEndpoints(ctx context.Context, ids []string, restrictStd bool) (string, error) {
-	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoints '%v'", ids), func(ctx context.Context, cf context.CancelFunc) error {
+func (a *Api) RemoveEndpoints(ctx context.Context, filter lib_model.EndpointFilter, restrictStd bool) (string, error) {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoints '%+v'", filter), func(ctx context.Context, cf context.CancelFunc) error {
 		defer cf()
-		err := a.gwEndpointHdl.RemoveAll(ctx, ids, restrictStd)
-		if err == nil {
-			err = ctx.Err()
-		}
-		return err
-	})
-}
-
-func (a *Api) RemoveEndpointsByRef(ctx context.Context, ref string) (string, error) {
-	return a.jobHandler.Create(ctx, fmt.Sprintf("remove endpoints by ref '%s'", ref), func(ctx context.Context, cf context.CancelFunc) error {
-		defer cf()
-		err := a.gwEndpointHdl.RemoveByRef(ctx, ref)
+		err := a.gwEndpointHdl.RemoveAll(ctx, filter, restrictStd)
 		if err == nil {
 			err = ctx.Err()
 		}
