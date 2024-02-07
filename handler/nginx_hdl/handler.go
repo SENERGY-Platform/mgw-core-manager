@@ -194,6 +194,10 @@ func (h *Handler) RemoveAll(ctx context.Context, filter lib_model.EndpointFilter
 			return lib_model.NewNotAllowedError(fmt.Errorf("remove endpoint '%s' not allowed", id))
 		}
 		delete(endpointsCopy, id)
+		aliases := h.getAliases(id)
+		for _, id2 := range aliases {
+			delete(endpointsCopy, id2)
+		}
 	}
 	return h.update(ctx, endpointsCopy)
 }
