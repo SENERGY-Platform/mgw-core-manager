@@ -29,6 +29,7 @@ type GatewayEndpointHandler interface {
 	AddAlias(ctx context.Context, id, path string) error
 	AddDefaultGui(ctx context.Context, id string) error
 	Remove(ctx context.Context, id string, restrictStd bool) error
+	RemoveAll(ctx context.Context, ids []string, restrictStd bool) error
 	RemoveByRef(ctx context.Context, ref string) error
 }
 
