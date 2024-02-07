@@ -37,7 +37,9 @@ type postEndpointQuery struct {
 }
 
 type deleteEndpointBatchQuery struct {
-	Ref string `form:"ref"`
+	IDs    string `form:"ids"`
+	Ref    string `form:"ref"`
+	Labels string `form:"labels"`
 }
 
 func getEndpointsH(a lib.Api) gin.HandlerFunc {
@@ -152,7 +154,11 @@ func deleteEndpointBatchH(a lib.Api) gin.HandlerFunc {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
 			return
 		}
-		jID, err := a.RemoveEndpointsByRef(gc.Request.Context(), query.Ref)
+		jID, err := a.RemoveEndpoints(gc.Request.Context(), lib_model.EndpointFilter{
+			IDs:    parseStringSlice(query.IDs, ","),
+			Ref:    query.Ref,
+			Labels: genLabels(parseStringSlice(query.Labels, ",")),
+		}, false)
 		if err != nil {
 			_ = gc.Error(err)
 			return
