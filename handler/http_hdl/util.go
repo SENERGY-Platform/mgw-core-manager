@@ -19,7 +19,7 @@ package http_hdl
 import "strings"
 
 func genLabels(sl []string) (l map[string]string) {
-	if sl != nil && len(sl) > 0 {
+	if len(sl) > 0 {
 		l = make(map[string]string)
 		for _, s := range sl {
 			p := strings.Split(s, "=")
