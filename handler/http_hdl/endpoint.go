@@ -209,3 +209,23 @@ func deleteEndpointRestrictedH(a lib.Api) gin.HandlerFunc {
 		gc.String(http.StatusOK, jID)
 	}
 }
+
+func deleteEndpointBatchRestrictedH(a lib.Api) gin.HandlerFunc {
+	return func(gc *gin.Context) {
+		query := deleteEndpointBatchQuery{}
+		if err := gc.ShouldBindQuery(&query); err != nil {
+			_ = gc.Error(lib_model.NewInvalidInputError(err))
+			return
+		}
+		jID, err := a.RemoveEndpoints(gc.Request.Context(), lib_model.EndpointFilter{
+			IDs:    parseStringSlice(query.IDs, ","),
+			Ref:    query.Ref,
+			Labels: genLabels(parseStringSlice(query.Labels, ",")),
+		}, true)
+		if err != nil {
+			_ = gc.Error(err)
+			return
+		}
+		gc.String(http.StatusOK, jID)
+	}
+}
