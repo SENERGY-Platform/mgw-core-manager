@@ -149,12 +149,12 @@ func (c *Client) RemoveEndpoint(ctx context.Context, id string, _ bool) (string,
 	return c.baseClient.ExecRequestString(req)
 }
 
-func (c *Client) RemoveEndpointsByRef(ctx context.Context, ref string) (string, error) {
+func (c *Client) RemoveEndpoints(ctx context.Context, filter model.EndpointFilter, _ bool) (string, error) {
 	u, err := url.JoinPath(c.baseUrl, model.EndpointsBatchPath)
 	if err != nil {
 		return "", err
 	}
-	u += "?ref=" + ref
+	u += genGetEndpointsQuery(filter)
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, u, nil)
 	if err != nil {
 		return "", err
