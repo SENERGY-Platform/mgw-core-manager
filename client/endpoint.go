@@ -174,7 +174,7 @@ func genGetEndpointsQuery(filter model.EndpointFilter) string {
 		q = append(q, "labels="+genLabels(filter.Labels, "=", ","))
 	}
 	if len(filter.IDs) > 0 {
-		q = append(q, "ids"+strings.Join(filter.IDs, ","))
+		q = append(q, "ids="+strings.Join(filter.IDs, ","))
 	}
 	if len(q) > 0 {
 		return "?" + strings.Join(q, "&")
