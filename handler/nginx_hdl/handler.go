@@ -175,6 +175,30 @@ func (h *Handler) Remove(ctx context.Context, id string, restrictStd bool) error
 	return h.update(ctx, endpointsCopy)
 }
 
+func (h *Handler) RemoveAll(ctx context.Context, ids []string, restrictStd bool) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	h.m.Lock()
+	defer h.m.Unlock()
+	if restrictStd {
+		filtered := filterEndpoints(h.endpoints, lib_model.EndpointFilter{IDs: ids})
+		for id, e := range filtered {
+			if e.Type == lib_model.StandardEndpoint {
+				return lib_model.NewNotAllowedError(fmt.Errorf("remove endpoint '%s' not allowed", id))
+			}
+		}
+	}
+	endpointsCopy := make(map[string]endpoint)
+	for id, e := range h.endpoints {
+		endpointsCopy[id] = e
+	}
+	for _, id := range ids {
+		delete(endpointsCopy, id)
+	}
+	return h.update(ctx, endpointsCopy)
+}
+
 func (h *Handler) RemoveByRef(ctx context.Context, ref string) error {
 	h.m.Lock()
 	defer h.m.Unlock()
