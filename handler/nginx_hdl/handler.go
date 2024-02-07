@@ -219,6 +219,9 @@ func (h *Handler) addAlias(ctx context.Context, pID, path string, eType lib_mode
 	if !ok {
 		return lib_model.NewNotFoundError(errors.New("endpoint not found"))
 	}
+	if e.Type != lib_model.StandardEndpoint {
+		return lib_model.NewInvalidInputError(errors.New("invalid parent type"))
+	}
 	endpointsCopy := make(map[string]endpoint)
 	for eID, e2 := range h.endpoints {
 		endpointsCopy[eID] = e2
