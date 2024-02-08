@@ -24,23 +24,59 @@ import (
 )
 
 func SetRoutes(e *gin.Engine, a lib.Api) {
-	e.GET(lib_model.CoreServicesPath, getCoreServicesH(a))
-	e.GET(lib_model.CoreServicesPath+"/:"+coreSrvNameParam, getCoreServiceH(a))
-	e.PATCH(lib_model.CoreServicesPath+"/:"+coreSrvNameParam+"/"+lib_model.RestartPath, patchRestartCoreServiceH(a))
-	e.GET(lib_model.EndpointsPath, getEndpointsH(a))
-	e.POST(lib_model.EndpointsPath, postEndpointH(a))
-	e.GET(lib_model.EndpointsPath+"/:"+endpointIdParam, getEndpointH(a))
-	e.DELETE(lib_model.EndpointsPath+"/:"+endpointIdParam, deleteEndpointH(a))
-	e.POST(lib_model.EndpointsBatchPath, postEndpointBatchH(a))
-	e.DELETE(lib_model.EndpointsBatchPath, deleteEndpointBatchH(a))
-	e.GET(lib_model.RestrictedPath+"/"+lib_model.EndpointsPath, getEndpointsH(a))
-	e.POST(lib_model.RestrictedPath+"/"+lib_model.EndpointsPath, postEndpointRestrictedH(a))
-	e.GET(lib_model.RestrictedPath+"/"+lib_model.EndpointsPath+"/:"+endpointIdParam, getEndpointH(a))
-	e.DELETE(lib_model.RestrictedPath+"/"+lib_model.EndpointsPath+"/:"+endpointIdParam, deleteEndpointRestrictedH(a))
-	e.DELETE(lib_model.RestrictedPath+"/"+lib_model.EndpointsBatchPath, deleteEndpointBatchRestrictedH(a))
-	e.GET(lib_model.JobsPath, getJobsH(a))
-	e.GET(lib_model.JobsPath+"/:"+jobIdParam, getJobH(a))
-	e.PATCH(lib_model.JobsPath+"/:"+jobIdParam+"/"+lib_model.JobsCancelPath, patchJobCancelH(a))
+	standardGrp := e.Group("")
+	restrictedGrp := e.Group(lib_model.RestrictedPath)
+	setCoreServiceRoutes(a, standardGrp.Group(lib_model.CoreServicesPath), restrictedGrp.Group(lib_model.CoreServicesPath))
+	setJobsRoutes(a, standardGrp.Group(lib_model.JobsPath), restrictedGrp.Group(lib_model.JobsPath))
+	standardEndpointsGrp := standardGrp.Group(lib_model.EndpointsPath)
+	restrictedEndpointsGrp := restrictedGrp.Group(lib_model.EndpointsPath)
+	setEndpointsSharedRoutes(a, standardEndpointsGrp, restrictedEndpointsGrp)
+	setEndpointsRoutes(a, standardEndpointsGrp)
+	setEndpointsRestrictedRoutes(a, restrictedEndpointsGrp)
+	setEndpointsBatchRoutes(a, standardGrp.Group(lib_model.EndpointsBatchPath))
+	setEndpointsBatchRestrictedRoutes(a, restrictedGrp.Group(lib_model.EndpointsBatchPath))
+}
+
+func setCoreServiceRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
+	for _, rg := range rGroups {
+		rg.GET("", getCoreServicesH(a))
+		rg.GET(":"+coreSrvNameParam, getCoreServiceH(a))
+		rg.PATCH(":"+coreSrvNameParam+"/"+lib_model.RestartPath, patchRestartCoreServiceH(a))
+	}
+}
+
+func setJobsRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
+	for _, rg := range rGroups {
+		rg.GET("", getJobsH(a))
+		rg.GET(":"+jobIdParam, getJobH(a))
+		rg.PATCH(":"+jobIdParam+"/"+lib_model.JobsCancelPath, patchJobCancelH(a))
+	}
+}
+
+func setEndpointsSharedRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
+	for _, rg := range rGroups {
+		rg.GET("", getEndpointsH(a))
+		rg.GET(":"+endpointIdParam, getEndpointH(a))
+	}
+}
+
+func setEndpointsRoutes(a lib.Api, rg *gin.RouterGroup) {
+	rg.POST("", postEndpointH(a))
+	rg.DELETE(":"+endpointIdParam, deleteEndpointH(a))
+}
+
+func setEndpointsRestrictedRoutes(a lib.Api, rg *gin.RouterGroup) {
+	rg.POST("", postEndpointRestrictedH(a))
+	rg.DELETE(":"+endpointIdParam, deleteEndpointRestrictedH(a))
+}
+
+func setEndpointsBatchRoutes(a lib.Api, rg *gin.RouterGroup) {
+	rg.POST("", postEndpointBatchH(a))
+	rg.DELETE("", deleteEndpointBatchH(a))
+}
+
+func setEndpointsBatchRestrictedRoutes(a lib.Api, rg *gin.RouterGroup) {
+	rg.DELETE("", deleteEndpointBatchRestrictedH(a))
 }
 
 func GetRoutes(e *gin.Engine) [][2]string {
