@@ -19,6 +19,7 @@ package lib
 import (
 	"context"
 	job_hdl_lib "github.com/SENERGY-Platform/go-service-base/job-hdl/lib"
+	srv_info_lib "github.com/SENERGY-Platform/go-service-base/srv-info-hdl/lib"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 )
 
@@ -35,4 +36,5 @@ type Api interface {
 	GetCoreService(ctx context.Context, name string) (model.CoreService, error)
 	RestartCoreService(ctx context.Context, name string) (string, error)
 	job_hdl_lib.Api
+	srv_info_lib.Api
 }
