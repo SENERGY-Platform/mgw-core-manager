@@ -26,6 +26,7 @@ import (
 func SetRoutes(e *gin.Engine, a lib.Api) {
 	standardGrp := e.Group("")
 	restrictedGrp := e.Group(lib_model.RestrictedPath)
+	setSrvInfoRoutes(a, standardGrp, restrictedGrp)
 	setCoreServiceRoutes(a, standardGrp.Group(lib_model.CoreServicesPath), restrictedGrp.Group(lib_model.CoreServicesPath))
 	setJobsRoutes(a, standardGrp.Group(lib_model.JobsPath), restrictedGrp.Group(lib_model.JobsPath))
 	standardEndpointsGrp := standardGrp.Group(lib_model.EndpointsPath)
@@ -77,6 +78,12 @@ func setEndpointsBatchRoutes(a lib.Api, rg *gin.RouterGroup) {
 
 func setEndpointsBatchRestrictedRoutes(a lib.Api, rg *gin.RouterGroup) {
 	rg.DELETE("", deleteEndpointBatchRestrictedH(a))
+}
+
+func setSrvInfoRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
+	for _, rg := range rGroups {
+		rg.GET(lib_model.SrvInfoPath, getSrvInfoH(a))
+	}
 }
 
 func GetRoutes(e *gin.Engine) [][2]string {
