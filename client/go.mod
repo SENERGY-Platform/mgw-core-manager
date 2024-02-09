@@ -1,6 +1,6 @@
 module github.com/SENERGY-Platform/mgw-core-manager/client
 
-go 1.21
+go 1.22
 
 require (
 	github.com/SENERGY-Platform/go-base-http-client v0.0.1
