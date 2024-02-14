@@ -164,8 +164,8 @@ func (c *Client) RemoveEndpoints(ctx context.Context, filter model.EndpointFilte
 
 func genGetEndpointsQuery(filter model.EndpointFilter) string {
 	var q []string
-	if filter.Type != nil {
-		q = append(q, "type="+strconv.FormatInt(int64(*filter.Type), 10))
+	if filter.Type > 0 {
+		q = append(q, "type="+strconv.FormatInt(int64(filter.Type), 10))
 	}
 	if filter.Ref != "" {
 		q = append(q, "ref="+filter.Ref)
