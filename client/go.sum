@@ -4,5 +4,5 @@ github.com/SENERGY-Platform/go-service-base/job-hdl/lib v0.0.4 h1:H/rwzaD6r+ApWC
 github.com/SENERGY-Platform/go-service-base/job-hdl/lib v0.0.4/go.mod h1:+j0dc3Ey4IR+DeC26gIA6MoBTjf4TBH1DXQpnJPjx04=
 github.com/SENERGY-Platform/go-service-base/srv-info-hdl/lib v0.0.2 h1:Bcdxt7i3DGGvlwS6U3NY9eGJjiPuv3ZpbMwebEUV+nE=
 github.com/SENERGY-Platform/go-service-base/srv-info-hdl/lib v0.0.2/go.mod h1:vcvyLaSoZsScGQ8K/OuJxlANTs5FPozsLvPzFUZgiVM=
-github.com/SENERGY-Platform/mgw-core-manager/lib v0.3.3 h1:7vGeyPJFLRkt1XYERV8+MzWlSoMcFPwoQFk+ryKKeyQ=
-github.com/SENERGY-Platform/mgw-core-manager/lib v0.3.3/go.mod h1:KL1QGmuB8sEpp5hCPbCeV09RAgzssTuP0N0yzZiRKwQ=
+github.com/SENERGY-Platform/mgw-core-manager/lib v0.4.0 h1:ksxUBiWtEQMCpjA7EVIX6axniWdG5dU5iSk5xwMr+V0=
+github.com/SENERGY-Platform/mgw-core-manager/lib v0.4.0/go.mod h1:KL1QGmuB8sEpp5hCPbCeV09RAgzssTuP0N0yzZiRKwQ=
