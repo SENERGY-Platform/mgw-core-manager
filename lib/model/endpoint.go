@@ -36,7 +36,7 @@ type Endpoint struct {
 
 type EndpointFilter struct {
 	IDs    []string
-	Type   *EndpointType
+	Type   EndpointType
 	Ref    string
 	Labels map[string]string
 }
