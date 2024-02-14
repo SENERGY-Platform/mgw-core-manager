@@ -373,7 +373,7 @@ func filterEndpoints(endpoints map[string]endpoint, filter lib_model.EndpointFil
 				continue
 			}
 		}
-		if filter.Type != 0 && e.Type != filter.Type {
+		if filter.Type > 0 && e.Type != filter.Type {
 			continue
 		}
 		if filter.Ref != "" && e.Ref != filter.Ref {
@@ -417,5 +417,5 @@ func checkExtPath(p string) error {
 }
 
 func filterEmpty(f lib_model.EndpointFilter) bool {
-	return !(len(f.IDs) > 0 || f.Type != 0 || f.Ref != "" || len(f.Labels) > 0)
+	return !(len(f.IDs) > 0 || f.Type > 0 || f.Ref != "" || len(f.Labels) > 0)
 }
