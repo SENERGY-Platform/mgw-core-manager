@@ -34,7 +34,7 @@ const (
 )
 
 const (
-	StandardEndpoint EndpointType = iota
+	StandardEndpoint EndpointType = iota + 1
 	AliasEndpoint
 	DefaultGuiEndpoint
 )
