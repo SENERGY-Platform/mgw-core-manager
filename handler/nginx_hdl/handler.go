@@ -100,7 +100,7 @@ func (h *Handler) Get(_ context.Context, id string) (lib_model.Endpoint, error) 
 	return e.Endpoint, nil
 }
 
-func (h *Handler) Add(ctx context.Context, eBase lib_model.EndpointBase) error {
+func (h *Handler) Set(ctx context.Context, eBase lib_model.EndpointBase) error {
 	h.m.Lock()
 	defer h.m.Unlock()
 	if err := checkIntPath(eBase.IntPath); err != nil {
@@ -121,7 +121,7 @@ func (h *Handler) Add(ctx context.Context, eBase lib_model.EndpointBase) error {
 	return h.update(ctx, endpointsCopy)
 }
 
-func (h *Handler) AddList(ctx context.Context, eBaseSl []lib_model.EndpointBase) error {
+func (h *Handler) SetList(ctx context.Context, eBaseSl []lib_model.EndpointBase) error {
 	if len(eBaseSl) > 0 {
 		h.m.Lock()
 		defer h.m.Unlock()

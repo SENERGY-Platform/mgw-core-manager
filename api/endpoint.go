@@ -33,7 +33,7 @@ func (a *Api) GetEndpoint(ctx context.Context, id string) (lib_model.Endpoint, e
 func (a *Api) AddEndpoint(ctx context.Context, endpoint lib_model.EndpointBase) (string, error) {
 	return a.jobHandler.Create(ctx, fmt.Sprintf("add endpoint '%+v'", endpoint), func(ctx context.Context, cf context.CancelFunc) error {
 		defer cf()
-		err := a.gwEndpointHdl.Add(ctx, endpoint)
+		err := a.gwEndpointHdl.Set(ctx, endpoint)
 		if err == nil {
 			err = ctx.Err()
 		}
@@ -44,7 +44,7 @@ func (a *Api) AddEndpoint(ctx context.Context, endpoint lib_model.EndpointBase) 
 func (a *Api) AddEndpoints(ctx context.Context, endpoints []lib_model.EndpointBase) (string, error) {
 	return a.jobHandler.Create(ctx, fmt.Sprintf("add endpoints '%+v'", endpoints), func(ctx context.Context, cf context.CancelFunc) error {
 		defer cf()
-		err := a.gwEndpointHdl.AddList(ctx, endpoints)
+		err := a.gwEndpointHdl.SetList(ctx, endpoints)
 		if err == nil {
 			err = ctx.Err()
 		}
