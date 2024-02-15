@@ -62,7 +62,7 @@ func (c *Client) GetEndpoint(ctx context.Context, id string) (model.Endpoint, er
 	return endpoint, nil
 }
 
-func (c *Client) AddEndpoint(ctx context.Context, endpoint model.EndpointBase) (string, error) {
+func (c *Client) SetEndpoint(ctx context.Context, endpoint model.EndpointBase) (string, error) {
 	u, err := url.JoinPath(c.baseUrl, model.EndpointsPath)
 	if err != nil {
 		return "", err
@@ -79,7 +79,7 @@ func (c *Client) AddEndpoint(ctx context.Context, endpoint model.EndpointBase) (
 	return c.baseClient.ExecRequestString(req)
 }
 
-func (c *Client) AddEndpoints(ctx context.Context, endpoints []model.EndpointBase) (string, error) {
+func (c *Client) SetEndpoints(ctx context.Context, endpoints []model.EndpointBase) (string, error) {
 	u, err := url.JoinPath(c.baseUrl, model.EndpointsBatchPath)
 	if err != nil {
 		return "", err
