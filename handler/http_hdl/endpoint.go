@@ -110,7 +110,7 @@ func postEndpointH(a lib.Api) gin.HandlerFunc {
 				_ = gc.Error(lib_model.NewInvalidInputError(err))
 				return
 			}
-			jID, err = a.AddEndpoint(gc.Request.Context(), endpointBase)
+			jID, err = a.SetEndpoint(gc.Request.Context(), endpointBase)
 			if err != nil {
 				_ = gc.Error(err)
 				return
@@ -138,7 +138,7 @@ func postEndpointBatchH(a lib.Api) gin.HandlerFunc {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
 			return
 		}
-		jID, err := a.AddEndpoints(gc.Request.Context(), endpointBaseSl)
+		jID, err := a.SetEndpoints(gc.Request.Context(), endpointBaseSl)
 		if err != nil {
 			_ = gc.Error(err)
 			return

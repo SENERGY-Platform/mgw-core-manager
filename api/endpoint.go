@@ -30,8 +30,8 @@ func (a *Api) GetEndpoint(ctx context.Context, id string) (lib_model.Endpoint, e
 	return a.gwEndpointHdl.Get(ctx, id)
 }
 
-func (a *Api) AddEndpoint(ctx context.Context, endpoint lib_model.EndpointBase) (string, error) {
-	return a.jobHandler.Create(ctx, fmt.Sprintf("add endpoint '%+v'", endpoint), func(ctx context.Context, cf context.CancelFunc) error {
+func (a *Api) SetEndpoint(ctx context.Context, endpoint lib_model.EndpointBase) (string, error) {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("set endpoint '%+v'", endpoint), func(ctx context.Context, cf context.CancelFunc) error {
 		defer cf()
 		err := a.gwEndpointHdl.Set(ctx, endpoint)
 		if err == nil {
@@ -41,8 +41,8 @@ func (a *Api) AddEndpoint(ctx context.Context, endpoint lib_model.EndpointBase) 
 	})
 }
 
-func (a *Api) AddEndpoints(ctx context.Context, endpoints []lib_model.EndpointBase) (string, error) {
-	return a.jobHandler.Create(ctx, fmt.Sprintf("add endpoints '%+v'", endpoints), func(ctx context.Context, cf context.CancelFunc) error {
+func (a *Api) SetEndpoints(ctx context.Context, endpoints []lib_model.EndpointBase) (string, error) {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("set endpoints '%+v'", endpoints), func(ctx context.Context, cf context.CancelFunc) error {
 		defer cf()
 		err := a.gwEndpointHdl.SetList(ctx, endpoints)
 		if err == nil {

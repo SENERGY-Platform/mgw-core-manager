@@ -26,8 +26,8 @@ import (
 type Api interface {
 	GetEndpoints(ctx context.Context, filter model.EndpointFilter) (map[string]model.Endpoint, error)
 	GetEndpoint(ctx context.Context, id string) (model.Endpoint, error)
-	AddEndpoint(ctx context.Context, endpoint model.EndpointBase) (string, error)
-	AddEndpoints(ctx context.Context, endpoints []model.EndpointBase) (string, error)
+	SetEndpoint(ctx context.Context, endpoint model.EndpointBase) (string, error)
+	SetEndpoints(ctx context.Context, endpoints []model.EndpointBase) (string, error)
 	AddEndpointAlias(ctx context.Context, id, path string) (string, error)
 	AddDefaultGuiEndpoint(ctx context.Context, id string) (string, error)
 	RemoveEndpoint(ctx context.Context, id string, restrictStd bool) (string, error)
