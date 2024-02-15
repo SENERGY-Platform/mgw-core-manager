@@ -83,6 +83,7 @@ func (h *Handler) List(ctx context.Context, filter lib_model.EndpointFilter) (ma
 		if ctx.Err() != nil {
 			return nil, lib_model.NewInternalError(ctx.Err())
 		}
+		e.Location = e.GetLocationValue()
 		endpoints[id] = e.Endpoint
 	}
 	return endpoints, nil
@@ -95,6 +96,7 @@ func (h *Handler) Get(_ context.Context, id string) (lib_model.Endpoint, error) 
 	if !ok {
 		return lib_model.Endpoint{}, lib_model.NewNotFoundError(errors.New("endpoint not found"))
 	}
+	e.Location = e.GetLocationValue()
 	return e.Endpoint, nil
 }
 

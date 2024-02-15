@@ -31,6 +31,7 @@ type Endpoint struct {
 	ID       string       `json:"id"`
 	ParentID string       `json:"parent_id"`
 	Type     EndpointType `json:"type"`
+	Location string       `json:"location,omitempty"`
 	EndpointBase
 }
 
