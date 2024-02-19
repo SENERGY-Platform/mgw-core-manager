@@ -287,7 +287,7 @@ func getDirectives(endpoints map[string]endpoint) ([]gonginx.IDirective, error) 
 func getEndpoints(directives []gonginx.IDirective, templates map[int]string) (map[string]endpoint, error) {
 	endpoints := make(map[string]endpoint)
 	for _, directive := range directives {
-		if directive.GetName() == setDirective {
+		if directive.GetName() == locationDirective {
 			comment := directive.GetComment()
 			if len(comment) > 0 {
 				e, err := getEndpoint(comment[0], templates)
