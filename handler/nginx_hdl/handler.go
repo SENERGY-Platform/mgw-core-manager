@@ -274,12 +274,12 @@ func getDirectives(endpoints map[string]endpoint) ([]gonginx.IDirective, error) 
 			return nil, err
 		}
 		var locDirectives []gonginx.IDirective
-		locDirectives = append(locDirectives, newDirective(setDirective, []string{e.GetSetValue()}, []string{cmt}, nil))
+		locDirectives = append(locDirectives, newDirective(setDirective, []string{e.GetSetValue()}, nil, nil))
 		if e.Type != lib_model.DefaultGuiEndpoint {
 			locDirectives = append(locDirectives, newDirective(rewriteDirective, []string{e.GetRewriteValue()}, nil, nil))
 		}
 		locDirectives = append(locDirectives, newDirective(proxyPassDirective, []string{e.GetProxyPassValue()}, nil, nil))
-		directives = append(directives, newDirective(locationDirective, []string{e.GetLocationValue()}, nil, newBlock(locDirectives)))
+		directives = append(directives, newDirective(locationDirective, []string{e.GetLocationValue()}, []string{cmt}, newBlock(locDirectives)))
 	}
 	return directives, nil
 }
