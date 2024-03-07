@@ -114,7 +114,7 @@ func (h *Handler) List(ctx context.Context) (map[string]lib_model.CoreService, e
 		}
 		ctr, ok := ctrMap[srv.ContainerName]
 		if !ok {
-			util.Logger.Errorf("service '%s' missing container", name)
+			util.Logger.Errorf("service '%s' missing container '%s'", name, srv.ContainerName)
 		} else {
 			cs.Container.ID = &ctr.ID
 			cs.Container.State = &ctr.State
