@@ -31,12 +31,12 @@ func (a *Api) GetCoreService(ctx context.Context, name string) (model.CoreServic
 }
 
 func (a *Api) RestartCoreService(ctx context.Context, name string) (string, error) {
-	return a.jobHandler.Create(ctx, fmt.Sprintf("restart core service '%s'", name), func(ctx context.Context, cf context.CancelFunc) error {
+	return a.jobHandler.Create(ctx, fmt.Sprintf("restart core service '%s'", name), func(ctx context.Context, cf context.CancelFunc) (any, error) {
 		defer cf()
 		err := a.coreSrvHdl.Restart(ctx, name)
 		if err == nil {
 			err = ctx.Err()
 		}
-		return err
+		return nil, err
 	})
 }
