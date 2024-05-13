@@ -9,7 +9,7 @@ require (
 	github.com/SENERGY-Platform/go-service-base/job-hdl/lib v0.0.4
 	github.com/SENERGY-Platform/go-service-base/srv-info-hdl v0.0.3
 	github.com/SENERGY-Platform/go-service-base/srv-info-hdl/lib v0.0.2
-	github.com/SENERGY-Platform/go-service-base/util v0.14.1
+	github.com/SENERGY-Platform/go-service-base/util v1.0.0
 	github.com/SENERGY-Platform/go-service-base/watchdog v0.4.2
 	github.com/SENERGY-Platform/mgw-container-engine-wrapper/client v0.13.2
 	github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib v0.14.2
@@ -17,7 +17,7 @@ require (
 	github.com/gin-contrib/requestid v0.0.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/tufanbarisyildirim/gonginx v0.0.0-20231222202608-ba16e88a9436
-	github.com/y-du/go-log-level v0.2.4
+	github.com/y-du/go-log-level v1.0.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
