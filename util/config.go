@@ -28,6 +28,7 @@ type JobsConfig struct {
 	MaxNumber   int   `json:"max_number" env_var:"JOBS_MAX_NUMBER"`
 	CCHInterval int   `json:"cch_interval" env_var:"JOBS_CCH_INTERVAL"`
 	JHInterval  int   `json:"jh_interval" env_var:"JOBS_JH_INTERVAL"`
+	PJHInterval int64 `json:"pjh_interval" env_var:"JOBS_PJH_INTERVAL"`
 	MaxAge      int64 `json:"max_age" env_var:"JOBS_MAX_AGE"`
 }
 
@@ -72,11 +73,12 @@ func NewConfig(path string) (*Config, error) {
 			FileMode: 0660,
 		},
 		Jobs: JobsConfig{
-			BufferSize:  50,
-			MaxNumber:   10,
+			BufferSize:  200,
+			MaxNumber:   20,
 			CCHInterval: 500000,
 			JHInterval:  500000,
-			MaxAge:      3600000000,
+			PJHInterval: 300000000000,
+			MaxAge:      172800000000000,
 		},
 		HttpClient: HttpClientConfig{
 			CewSocketPath: "./ce_wrapper.sock",
