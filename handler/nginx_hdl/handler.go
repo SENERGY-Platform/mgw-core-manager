@@ -18,6 +18,7 @@ package nginx_hdl
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -318,8 +319,18 @@ func getEndpoints(directives []gonginx.IDirective, templates map[int]string) (ma
 
 func getEndpoint(s string, templates map[int]string) (endpoint, error) {
 	s, _ = strings.CutPrefix(s, "#")
+	var b []byte
+	if strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}") {
+		b = []byte(s)
+	} else {
+		var err error
+		b, err = base64.StdEncoding.DecodeString(s)
+		if err != nil {
+			return endpoint{}, err
+		}
+	}
 	var e lib_model.Endpoint
-	err := json.Unmarshal([]byte(s), &e)
+	err := json.Unmarshal(b, &e)
 	if err != nil {
 		return endpoint{}, err
 	}

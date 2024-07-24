@@ -17,6 +17,7 @@
 package nginx_hdl
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
@@ -52,7 +53,7 @@ func (e endpoint) GenComment() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return "#" + string(b), err
+	return "#" + base64.StdEncoding.EncodeToString(b), err
 }
 
 func (e endpoint) GetLocationValue() string {
