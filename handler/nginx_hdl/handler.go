@@ -277,6 +277,21 @@ func getDirectives(endpoints map[string]endpoint) ([]gonginx.IDirective, error) 
 		locDirectives = append(locDirectives, newDirective(setDirective, []string{e.GetSetValue()}, nil, nil))
 		if e.Type != lib_model.DefaultGuiEndpoint {
 			locDirectives = append(locDirectives, newDirective(rewriteDirective, []string{e.GetRewriteValue()}, nil, nil))
+			if len(e.StringSub.Filters) > 0 {
+				for orgStr, newStr := range e.StringSub.Filters {
+					locDirectives = append(locDirectives, newDirective(subFilterDirective, []string{"'" + orgStr + "'", "'" + strings.Replace(newStr, locPlaceholder, e.GetLocationValue(), -1) + "'"}, nil, nil))
+				}
+				subFilterTypes := []string{"*"}
+				if len(e.StringSub.MimeTypes) > 0 {
+					subFilterTypes = e.StringSub.MimeTypes
+				}
+				locDirectives = append(locDirectives, newDirective(subFilterTypesDirective, subFilterTypes, nil, nil))
+				subFilterOnce := "off"
+				if e.StringSub.ReplaceOnce {
+					subFilterOnce = "on"
+				}
+				locDirectives = append(locDirectives, newDirective(subFilterOnceDirective, []string{subFilterOnce}, nil, nil))
+			}
 		}
 		locDirectives = append(locDirectives, newDirective(proxyPassDirective, []string{e.GetProxyPassValue()}, nil, nil))
 		directives = append(directives, newDirective(locationDirective, []string{e.GetLocationValue()}, []string{cmt}, newBlock(locDirectives)))

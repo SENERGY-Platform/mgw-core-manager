@@ -19,10 +19,13 @@ package nginx_hdl
 import lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 
 const (
-	locationDirective  = "location"
-	rewriteDirective   = "rewrite"
-	proxyPassDirective = "proxy_pass"
-	setDirective       = "set"
+	locationDirective       = "location"
+	rewriteDirective        = "rewrite"
+	proxyPassDirective      = "proxy_pass"
+	setDirective            = "set"
+	subFilterDirective      = "sub_filter"
+	subFilterOnceDirective  = "sub_filter_once"
+	subFilterTypesDirective = "sub_filter_types"
 )
 
 const (
@@ -30,6 +33,7 @@ const (
 	portPlaceholder = "{port}"
 	pathPlaceholder = "{path}"
 	refPlaceholder  = "{ref}"
+	locPlaceholder  = "{loc}"
 )
 
 const (

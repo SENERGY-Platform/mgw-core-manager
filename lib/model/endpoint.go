@@ -19,12 +19,19 @@ package model
 type EndpointType = int
 
 type EndpointBase struct {
-	Ref     string            `json:"ref"`
-	Host    string            `json:"host"`
-	Port    *int              `json:"port"`
-	IntPath string            `json:"int_path"`
-	ExtPath string            `json:"ext_path"`
-	Labels  map[string]string `json:"labels"`
+	Ref       string            `json:"ref"`
+	Host      string            `json:"host"`
+	Port      *int              `json:"port"`
+	IntPath   string            `json:"int_path"`
+	ExtPath   string            `json:"ext_path"`
+	StringSub StringSub         `json:"string_sub"`
+	Labels    map[string]string `json:"labels"`
+}
+
+type StringSub struct {
+	ReplaceOnce bool              `json:"replace_once"` // false -> replace repeatedly
+	MimeTypes   []string          `json:"mime_types"`   // empty -> all types
+	Filters     map[string]string `json:"filters"`      // orgStr:newStr
 }
 
 type Endpoint struct {
