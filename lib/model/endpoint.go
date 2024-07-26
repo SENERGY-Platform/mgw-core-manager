@@ -16,6 +16,8 @@
 
 package model
 
+import "time"
+
 type EndpointType = int
 
 type EndpointBase struct {
@@ -24,8 +26,15 @@ type EndpointBase struct {
 	Port      *int              `json:"port"`
 	IntPath   string            `json:"int_path"`
 	ExtPath   string            `json:"ext_path"`
+	ProxyConf ProxyConfig       `json:"proxy_conf"`
 	StringSub StringSub         `json:"string_sub"`
 	Labels    map[string]string `json:"labels"`
+}
+
+type ProxyConfig struct {
+	Headers     map[string]string `json:"headers"`
+	WebSocket   bool              `json:"websocket"`
+	ReadTimeout time.Duration     `json:"read_timeout"`
 }
 
 type StringSub struct {
