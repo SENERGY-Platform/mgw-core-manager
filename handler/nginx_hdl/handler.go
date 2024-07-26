@@ -278,26 +278,53 @@ func getDirectives(endpoints map[string]endpoint) ([]gonginx.IDirective, error) 
 		locDirectives = append(locDirectives, newDirective(setDirective, []string{e.GetSetValue()}, nil, nil))
 		if e.Type != lib_model.DefaultGuiEndpoint {
 			locDirectives = append(locDirectives, newDirective(rewriteDirective, []string{e.GetRewriteValue()}, nil, nil))
-			if len(e.StringSub.Filters) > 0 {
-				for orgStr, newStr := range e.StringSub.Filters {
-					locDirectives = append(locDirectives, newDirective(subFilterDirective, []string{"'" + orgStr + "'", "'" + strings.Replace(newStr, locPlaceholder, e.GetLocationValue(), -1) + "'"}, nil, nil))
-				}
-				subFilterTypes := []string{"*"}
-				if len(e.StringSub.MimeTypes) > 0 {
-					subFilterTypes = e.StringSub.MimeTypes
-				}
-				locDirectives = append(locDirectives, newDirective(subFilterTypesDirective, subFilterTypes, nil, nil))
-				subFilterOnce := "off"
-				if e.StringSub.ReplaceOnce {
-					subFilterOnce = "on"
-				}
-				locDirectives = append(locDirectives, newDirective(subFilterOnceDirective, []string{subFilterOnce}, nil, nil))
-			}
+			locDirectives = append(locDirectives, getProxyDirectives(e)...)
+			locDirectives = append(locDirectives, getSubFilterDirectives(e)...)
 		}
 		locDirectives = append(locDirectives, newDirective(proxyPassDirective, []string{e.GetProxyPassValue()}, nil, nil))
 		directives = append(directives, newDirective(locationDirective, []string{e.GetLocationValue()}, []string{cmt}, newBlock(locDirectives)))
 	}
 	return directives, nil
+}
+
+func getProxyDirectives(e endpoint) []gonginx.IDirective {
+	var directives []gonginx.IDirective
+	headers := make(map[string]string)
+	for key, val := range e.ProxyConf.Headers {
+		headers[key] = strings.Replace(val, locPlaceholder, e.GetLocationValue(), -1)
+	}
+	if e.ProxyConf.WebSocket {
+		directives = append(directives, newDirective(proxyHttpVerDirective, []string{"1.1"}, nil, nil))
+		headers["Upgrade"] = "$http_upgrade"
+		headers["Connection"] = "$connection_upgrade"
+	}
+	if e.ProxyConf.ReadTimeout > 0 {
+		directives = append(directives, newDirective(proxyReadTimeoutDirective, []string{e.ProxyConf.ReadTimeout.String()}, nil, nil))
+	}
+	for key, val := range headers {
+		directives = append(directives, newDirective(proxySetHeaderDirective, []string{key, val}, nil, nil))
+	}
+	return directives
+}
+
+func getSubFilterDirectives(e endpoint) []gonginx.IDirective {
+	var directives []gonginx.IDirective
+	if len(e.StringSub.Filters) > 0 {
+		for orgStr, newStr := range e.StringSub.Filters {
+			directives = append(directives, newDirective(subFilterDirective, []string{"'" + orgStr + "'", "'" + strings.Replace(newStr, locPlaceholder, e.GetLocationValue(), -1) + "'"}, nil, nil))
+		}
+		subFilterTypes := []string{"*"}
+		if len(e.StringSub.MimeTypes) > 0 {
+			subFilterTypes = e.StringSub.MimeTypes
+		}
+		directives = append(directives, newDirective(subFilterTypesDirective, subFilterTypes, nil, nil))
+		subFilterOnce := "off"
+		if e.StringSub.ReplaceOnce {
+			subFilterOnce = "on"
+		}
+		directives = append(directives, newDirective(subFilterOnceDirective, []string{subFilterOnce}, nil, nil))
+	}
+	return directives
 }
 
 func getEndpoints(directives []gonginx.IDirective, templates map[int]string) (map[string]endpoint, error) {
