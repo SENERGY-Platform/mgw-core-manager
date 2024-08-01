@@ -17,7 +17,7 @@
 package util
 
 import (
-	sb_util "github.com/SENERGY-Platform/go-service-base/util"
+	"github.com/SENERGY-Platform/go-service-base/config-hdl"
 	"github.com/y-du/go-log-level/level"
 	"io/fs"
 	"os"
@@ -47,20 +47,30 @@ type SocketConfig struct {
 	FileMode fs.FileMode `json:"file_mode" env_var:"SOCKET_FILE_MODE"`
 }
 
+type LoggerConfig struct {
+	Level        level.Level `json:"level" env_var:"LOGGER_LEVEL"`
+	Utc          bool        `json:"utc" env_var:"LOGGER_UTC"`
+	Path         string      `json:"path" env_var:"LOGGER_PATH"`
+	FileName     string      `json:"file_name" env_var:"LOGGER_FILE_NAME"`
+	Terminal     bool        `json:"terminal" env_var:"LOGGER_TERMINAL"`
+	Microseconds bool        `json:"microseconds" env_var:"LOGGER_MICROSECONDS"`
+	Prefix       string      `json:"prefix" env_var:"LOGGER_PREFIX"`
+}
+
 type Config struct {
-	Logger            sb_util.LoggerConfig `json:"logger" env_var:"LOGGER_CONFIG"`
-	Socket            SocketConfig         `json:"socket" env_var:"SOCKET_CONFIG"`
-	Jobs              JobsConfig           `json:"jobs" env_var:"JOBS_CONFIG"`
-	CoreService       CoreServiceConfig    `json:"core_service" env_var:"CORE_SERVICE_CONFIG"`
-	HttpClient        HttpClientConfig     `json:"http_client" env_var:"HTTP_CLIENT_CONFIG"`
-	EndpointsConfPath string               `json:"endpoints_conf_path" env_var:"ENDPOINTS_CONF_PATH"`
-	ComposeFilePath   string               `json:"compose_file_path" env_var:"COMPOSE_FILE_PATH"`
-	CoreID            string               `json:"core_id" env_var:"CORE_ID"`
+	Logger            LoggerConfig      `json:"logger" env_var:"LOGGER_CONFIG"`
+	Socket            SocketConfig      `json:"socket" env_var:"SOCKET_CONFIG"`
+	Jobs              JobsConfig        `json:"jobs" env_var:"JOBS_CONFIG"`
+	CoreService       CoreServiceConfig `json:"core_service" env_var:"CORE_SERVICE_CONFIG"`
+	HttpClient        HttpClientConfig  `json:"http_client" env_var:"HTTP_CLIENT_CONFIG"`
+	EndpointsConfPath string            `json:"endpoints_conf_path" env_var:"ENDPOINTS_CONF_PATH"`
+	ComposeFilePath   string            `json:"compose_file_path" env_var:"COMPOSE_FILE_PATH"`
+	CoreID            string            `json:"core_id" env_var:"CORE_ID"`
 }
 
 func NewConfig(path string) (*Config, error) {
 	cfg := Config{
-		Logger: sb_util.LoggerConfig{
+		Logger: LoggerConfig{
 			Level:        level.Warning,
 			Utc:          true,
 			Path:         "./",
@@ -85,6 +95,6 @@ func NewConfig(path string) (*Config, error) {
 			Timeout:       10000000000,
 		},
 	}
-	err := sb_util.LoadConfig(path, &cfg, nil, nil, nil)
+	err := config_hdl.Load(&cfg, nil, nil, nil, path)
 	return &cfg, err
 }

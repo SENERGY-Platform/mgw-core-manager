@@ -23,6 +23,7 @@ import (
 	"github.com/SENERGY-Platform/gin-middleware"
 	"github.com/SENERGY-Platform/go-cc-job-handler/ccjh"
 	"github.com/SENERGY-Platform/go-service-base/job-hdl"
+	sb_logger "github.com/SENERGY-Platform/go-service-base/logger"
 	"github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
 	sb_util "github.com/SENERGY-Platform/go-service-base/util"
 	"github.com/SENERGY-Platform/go-service-base/watchdog"
@@ -75,7 +76,7 @@ func main() {
 	logFile, err := util.InitLogger(config.Logger)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
-		var logFileError *sb_util.LogFileError
+		var logFileError *sb_logger.LogFileError
 		if errors.As(err, &logFileError) {
 			ec = 1
 			return
