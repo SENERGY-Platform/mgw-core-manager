@@ -24,6 +24,7 @@ import (
 	"io/fs"
 	"os"
 	"reflect"
+	"time"
 )
 
 type JobsConfig struct {
@@ -60,12 +61,21 @@ type LoggerConfig struct {
 	Prefix       string      `json:"prefix" env_var:"LOGGER_PREFIX"`
 }
 
+type KratosConfig struct {
+	Version      string `json:"version" env_var:"KRATOS_VERSION"`
+	ConfigPath   string `json:"config_path" env_var:"KRATOS_CONFIG_PATH"`
+	SecretLength int    `json:"secret_length" env_var:"KRATOS_SECRET_LENGTH"`
+	SecretMaxAge int64  `json:"secret_max_age" env_var:"KRATOS_SECRET_MAX_AGE"`
+	Interval     int64  `json:"interval" env_var:"KRATOS_INTERVAL"`
+}
+
 type Config struct {
 	Logger            LoggerConfig      `json:"logger" env_var:"LOGGER_CONFIG"`
 	Socket            SocketConfig      `json:"socket" env_var:"SOCKET_CONFIG"`
 	Jobs              JobsConfig        `json:"jobs" env_var:"JOBS_CONFIG"`
 	CoreService       CoreServiceConfig `json:"core_service" env_var:"CORE_SERVICE_CONFIG"`
 	HttpClient        HttpClientConfig  `json:"http_client" env_var:"HTTP_CLIENT_CONFIG"`
+	Kratos            KratosConfig      `json:"kratos" env_var:"KRATOS_CONFIG"`
 	EndpointsConfPath string            `json:"endpoints_conf_path" env_var:"ENDPOINTS_CONF_PATH"`
 	ComposeFilePath   string            `json:"compose_file_path" env_var:"COMPOSE_FILE_PATH"`
 	CoreID            string            `json:"core_id" env_var:"CORE_ID"`
@@ -96,6 +106,11 @@ func NewConfig(path string) (*Config, error) {
 		HttpClient: HttpClientConfig{
 			CewSocketPath: "./ce_wrapper.sock",
 			Timeout:       10000000000,
+		},
+		Kratos: KratosConfig{
+			SecretLength: 32,
+			SecretMaxAge: int64(time.Hour * 168),
+			Interval:     int64(time.Hour),
 		},
 	}
 	err := config_hdl.Load(&cfg, nil, map[reflect.Type]envldr.Parser{reflect.TypeOf(level.Off): sb_logger.LevelParser}, nil, path)
