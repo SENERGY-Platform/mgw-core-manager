@@ -30,6 +30,7 @@ import (
 	cew_client "github.com/SENERGY-Platform/mgw-container-engine-wrapper/client"
 	"github.com/SENERGY-Platform/mgw-core-manager/api"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/kratos_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/nginx_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/service_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
@@ -92,6 +93,19 @@ func main() {
 
 	watchdog.Logger = util.Logger
 	wtchdg := watchdog.New(syscall.SIGINT, syscall.SIGTERM)
+
+	kratosCtx, kratosCf := context.WithCancel(context.Background())
+	kratosHdl, err := kratos_hdl.New(kratosCtx, config.Kratos.Version, config.Kratos.ConfigPath, config.Kratos.SecretLength, time.Duration(config.Kratos.SecretMaxAge), time.Duration(config.Kratos.Interval))
+	if err != nil {
+		util.Logger.Error(err)
+		ec = 1
+		return
+	}
+	if err = kratosHdl.Init(); err != nil {
+		util.Logger.Error(err)
+		ec = 1
+		return
+	}
 
 	httpClient := &http.Client{
 		Transport: &http.Transport{
@@ -196,6 +210,15 @@ func main() {
 		util.Logger.Error("http server closed unexpectedly")
 		return false
 	})
+
+	wtchdg.RegisterHealthFunc(kratosHdl.Running)
+	wtchdg.RegisterStopFunc(func() error {
+		kratosCf()
+		kratosHdl.Wait()
+		return nil
+	})
+
+	kratosHdl.Start()
 
 	wtchdg.Start()
 

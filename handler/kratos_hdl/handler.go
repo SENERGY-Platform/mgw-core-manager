@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"os"
 	"path"
@@ -39,14 +40,12 @@ type Handler struct {
 	loopMu    sync.RWMutex
 	dChan     chan struct{}
 	ctx       context.Context
-	cf        context.CancelFunc
 }
 
 func New(ctx context.Context, kratosVer, configPath string, secretLen int, maxAge, interval time.Duration) (*Handler, error) {
 	if !path.IsAbs(configPath) {
 		return nil, errors.New(configPath + " is not an absolute path")
 	}
-	ctx2, cf := context.WithCancel(ctx)
 	return &Handler{
 		kratosVer: kratosVer,
 		path:      configPath,
@@ -54,8 +53,7 @@ func New(ctx context.Context, kratosVer, configPath string, secretLen int, maxAg
 		maxAge:    maxAge,
 		interval:  interval,
 		dChan:     make(chan struct{}),
-		ctx:       ctx2,
-		cf:        cf,
+		ctx:       ctx,
 	}, nil
 }
 
@@ -79,8 +77,7 @@ func (h *Handler) Running() bool {
 	return h.running
 }
 
-func (h *Handler) Stop() {
-	h.cf()
+func (h *Handler) Wait() {
 	<-h.dChan
 }
 
