@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"os"
 	"path"
@@ -104,6 +103,7 @@ func (h *Handler) refreshSecrets() error {
 		if len(oldConfig.Secrets.Cipher) > 0 {
 			newConfig.Secrets.Cipher = append(newConfig.Secrets.Cipher, oldConfig.Secrets.Cipher[0])
 		}
+		util.Logger.Debug(logPrefix, " rotating secrets and keys ...")
 		return writeConfig(h.path, newConfig)
 	}
 	return nil
