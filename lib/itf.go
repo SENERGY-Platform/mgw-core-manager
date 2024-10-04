@@ -35,6 +35,7 @@ type Api interface {
 	GetCoreServices(ctx context.Context) (map[string]model.CoreService, error)
 	GetCoreService(ctx context.Context, name string) (model.CoreService, error)
 	RestartCoreService(ctx context.Context, name string) (string, error)
+	PurgeImages(ctx context.Context, repository, excludeTag string) (string, error)
 	job_hdl_lib.Api
 	srv_info_lib.Api
 }
