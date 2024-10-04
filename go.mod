@@ -6,6 +6,7 @@ require (
 	github.com/SENERGY-Platform/gin-middleware v0.4.3
 	github.com/SENERGY-Platform/go-cc-job-handler v0.1.2
 	github.com/SENERGY-Platform/go-service-base/config-hdl v0.1.1
+	github.com/SENERGY-Platform/go-service-base/context-hdl v0.0.3
 	github.com/SENERGY-Platform/go-service-base/job-hdl v1.1.1
 	github.com/SENERGY-Platform/go-service-base/job-hdl/lib v0.1.0
 	github.com/SENERGY-Platform/go-service-base/logger v0.2.0
@@ -19,6 +20,7 @@ require (
 	github.com/gin-contrib/requestid v1.0.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/tufanbarisyildirim/gonginx v0.0.0-20231222202608-ba16e88a9436
+	github.com/y-du/go-env-loader v0.5.2
 	github.com/y-du/go-log-level v1.0.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -45,7 +47,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
-	github.com/y-du/go-env-loader v0.5.2 // indirect
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
