@@ -37,21 +37,18 @@ type ctrHandler struct {
 	mu            sync.Mutex
 }
 
-func (h *ctrHandler) Info(ctx context.Context) (lib_model.CoreService, error) {
-	cs := lib_model.CoreService{
-		Name:      h.srvName,
-		Container: lib_model.SrvContainer{Name: h.containerName},
-	}
+func (h *ctrHandler) Info(ctx context.Context) (lib_model.SrvContainer, error) {
+	sc := lib_model.SrvContainer{Name: h.containerName}
 	ctxWt, cf := context.WithTimeout(ctx, h.httpTimeout)
 	defer cf()
 	ctr, err := h.cewClient.GetContainer(ctxWt, h.containerName)
 	if err != nil {
-		util.Logger.Error(err)
+		return lib_model.SrvContainer{}, err
 	} else {
-		cs.Container.ID = &ctr.ID
-		cs.Container.State = &ctr.State
+		sc.ID = &ctr.ID
+		sc.State = &ctr.State
 	}
-	return cs, nil
+	return sc, nil
 }
 
 func (h *ctrHandler) Restart(ctx context.Context) error {

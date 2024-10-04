@@ -39,7 +39,7 @@ type CoreServiceHandler interface {
 }
 
 type ContainerHandler interface {
-	Info(ctx context.Context) (lib_model.CoreService, error)
+	Info(ctx context.Context) (lib_model.SrvContainer, error)
 	Restart(ctx context.Context) error
 	ExecCmd(ctx context.Context, cmd []string, tty bool, envVars map[string]string, workDir string) error
 }
