@@ -44,12 +44,14 @@ type Handler struct {
 type service struct {
 	Name          string
 	ContainerName string
+	Image         string
 	CtrHandler    handler.ContainerHandler
 }
 
 type composeFile struct {
 	Services map[string]struct {
 		ContainerName string `yaml:"container_name"`
+		Image         string `yaml:"image"`
 	} `yaml:"services"`
 }
 
@@ -75,8 +77,9 @@ func (h *Handler) Init(composePath string) error {
 	h.services = make(map[string]service)
 	for name, srv := range cFile.Services {
 		h.services[name] = service{
-			ContainerName: srv.ContainerName,
 			Name:          name,
+			ContainerName: srv.ContainerName,
+			Image:         srv.Image,
 			CtrHandler: &ctrHandler{
 				cewClient:     h.cewClient,
 				srvName:       name,
@@ -111,6 +114,7 @@ func (h *Handler) List(ctx context.Context) (map[string]lib_model.CoreService, e
 		cs := lib_model.CoreService{
 			Name:      name,
 			Container: lib_model.SrvContainer{Name: srv.ContainerName},
+			Image:     srv.Image,
 		}
 		ctr, ok := ctrMap[srv.ContainerName]
 		if !ok {
@@ -129,9 +133,19 @@ func (h *Handler) Get(ctx context.Context, name string) (lib_model.CoreService, 
 	if !ok {
 		return lib_model.CoreService{}, lib_model.NewNotFoundError(fmt.Errorf("service '%s' not found", name))
 	}
-	cs, err := srv.CtrHandler.Info(ctx)
+	cs := lib_model.CoreService{
+		Name:      srv.Name,
+		Container: lib_model.SrvContainer{Name: srv.ContainerName},
+		Image:     srv.Image,
+	}
+	ctxWt, cf := context.WithTimeout(ctx, h.httpTimeout)
+	defer cf()
+	ctr, err := h.cewClient.GetContainer(ctxWt, srv.ContainerName)
 	if err != nil {
-		return lib_model.CoreService{}, lib_model.NewInternalError(err)
+		util.Logger.Error(err)
+	} else {
+		cs.Container.ID = &ctr.ID
+		cs.Container.State = &ctr.State
 	}
 	return cs, nil
 }
