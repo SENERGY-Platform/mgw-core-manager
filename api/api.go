@@ -25,14 +25,16 @@ import (
 type Api struct {
 	coreSrvHdl    handler.CoreServiceHandler
 	gwEndpointHdl handler.GatewayEndpointHandler
+	cleanupHdl    handler.CleanupHandler
 	jobHandler    job_hdl.JobHandler
 	srvInfoHdl    srv_info_hdl.SrvInfoHandler
 }
 
-func New(coreServiceHandler handler.CoreServiceHandler, gwEndpointHdl handler.GatewayEndpointHandler, jobHandler job_hdl.JobHandler, srvInfoHandler srv_info_hdl.SrvInfoHandler) *Api {
+func New(coreServiceHandler handler.CoreServiceHandler, gwEndpointHdl handler.GatewayEndpointHandler, cleanupHdl handler.CleanupHandler, jobHandler job_hdl.JobHandler, srvInfoHandler srv_info_hdl.SrvInfoHandler) *Api {
 	return &Api{
 		coreSrvHdl:    coreServiceHandler,
 		gwEndpointHdl: gwEndpointHdl,
+		cleanupHdl:    cleanupHdl,
 		jobHandler:    jobHandler,
 		srvInfoHdl:    srvInfoHandler,
 	}

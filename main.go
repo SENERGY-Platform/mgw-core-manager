@@ -29,6 +29,7 @@ import (
 	"github.com/SENERGY-Platform/go-service-base/watchdog"
 	cew_client "github.com/SENERGY-Platform/mgw-container-engine-wrapper/client"
 	"github.com/SENERGY-Platform/mgw-core-manager/api"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/cleanup_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/kratos_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/nginx_hdl"
@@ -138,6 +139,8 @@ func main() {
 		return
 	}
 
+	cleanupHdl := cleanup_hdl.New(cewClient, time.Duration(config.HttpClient.Timeout))
+
 	ccHandler := ccjh.New(config.Jobs.BufferSize)
 
 	job_hdl.Logger = util.Logger
@@ -179,7 +182,7 @@ func main() {
 		return requestid.Get(gc)
 	}), gin_mw.ErrorHandler(util.GetStatusCode, ", "), gin.Recovery())
 	httpHandler.UseRawPath = true
-	cmApi := api.New(coreServiceHdl, gwEndpointHdl, jobHandler, srvInfoHdl)
+	cmApi := api.New(coreServiceHdl, gwEndpointHdl, cleanupHdl, jobHandler, srvInfoHdl)
 
 	http_hdl.SetRoutes(httpHandler, cmApi)
 	util.Logger.Debugf("routes: %s", sb_util.ToJsonStr(http_hdl.GetRoutes(httpHandler)))
