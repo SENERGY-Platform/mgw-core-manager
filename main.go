@@ -234,6 +234,10 @@ func main() {
 
 	purgeJobsHdl.Start(jobCtx)
 
+	if err = cmApi.PurgeCoreImages(); err != nil {
+		util.Logger.Error(err)
+	}
+
 	go func() {
 		defer srvCF()
 		util.Logger.Info("starting http server ...")
