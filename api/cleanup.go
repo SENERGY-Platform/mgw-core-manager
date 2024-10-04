@@ -18,12 +18,17 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"strings"
 )
 
 func (a *Api) PurgeImages(ctx context.Context, repository, excludeTag string) (string, error) {
+	if repository == "" {
+		return "", lib_model.NewInvalidInputError(errors.New("missing repository"))
+	}
 	return a.jobHandler.Create(ctx, fmt.Sprintf("purge images (repository=%s exclude_tag=%s)", repository, excludeTag), func(ctx context.Context, cf context.CancelFunc) (any, error) {
 		defer cf()
 		err := a.cleanupHdl.PurgeImages(ctx, repository, excludeTag)
@@ -57,8 +62,10 @@ func (a *Api) purgeCoreImages(ctx context.Context) error {
 			util.Logger.Errorf("purge core images: malformed image string '%s'", service.Image)
 			continue
 		}
-		if err = a.cleanupHdl.PurgeImages(ctx, parts[0], parts[1]); err != nil {
-			util.Logger.Error("purge core images:", err)
+		if parts[0] != "" {
+			if err = a.cleanupHdl.PurgeImages(ctx, parts[0], parts[1]); err != nil {
+				util.Logger.Error("purge core images:", err)
+			}
 		}
 	}
 	return nil
