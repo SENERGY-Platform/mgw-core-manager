@@ -43,3 +43,7 @@ type ContainerHandler interface {
 	Restart(ctx context.Context) error
 	ExecCmd(ctx context.Context, cmd []string, tty bool, envVars map[string]string, workDir string) error
 }
+
+type CleanupHandler interface {
+	PurgeImages(ctx context.Context, repository, excludeTag string) error
+}
