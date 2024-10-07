@@ -79,6 +79,7 @@ type Config struct {
 	EndpointsConfPath string            `json:"endpoints_conf_path" env_var:"ENDPOINTS_CONF_PATH"`
 	ComposeFilePath   string            `json:"compose_file_path" env_var:"COMPOSE_FILE_PATH"`
 	CoreID            string            `json:"core_id" env_var:"CORE_ID"`
+	ImgPurgeDelay     int64             `json:"img_purge_delay" env_var:"IMG_PURGE_DELAY"`
 }
 
 func NewConfig(path string) (*Config, error) {
@@ -112,6 +113,7 @@ func NewConfig(path string) (*Config, error) {
 			SecretMaxAge: int64(time.Hour * 168),
 			Interval:     int64(time.Hour),
 		},
+		ImgPurgeDelay: int64(time.Minute),
 	}
 	err := config_hdl.Load(&cfg, nil, map[reflect.Type]envldr.Parser{reflect.TypeOf(level.Off): sb_logger.LevelParser}, nil, path)
 	return &cfg, err

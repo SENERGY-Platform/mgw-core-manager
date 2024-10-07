@@ -23,6 +23,7 @@ import (
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"strings"
+	"time"
 )
 
 func (a *Api) PurgeImages(ctx context.Context, repository, excludeTag string) (string, error) {
@@ -39,7 +40,22 @@ func (a *Api) PurgeImages(ctx context.Context, repository, excludeTag string) (s
 	})
 }
 
-func (a *Api) PurgeCoreImages() error {
+func (a *Api) PurgeCoreImages(ctx context.Context, delay time.Duration) error {
+	timer := time.NewTimer(delay)
+	select {
+	case <-timer.C:
+		break
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+	defer func() {
+		if !timer.Stop() {
+			select {
+			case <-timer.C:
+			default:
+			}
+		}
+	}()
 	_, err := a.jobHandler.Create(context.Background(), fmt.Sprintf("purge core images"), func(ctx context.Context, cf context.CancelFunc) (any, error) {
 		defer cf()
 		err := a.purgeCoreImages(ctx)
