@@ -236,9 +236,11 @@ func main() {
 
 	pcCtx, pcCF := context.WithCancel(context.Background())
 	defer pcCF()
-	if err = cmApi.PurgeCoreImages(pcCtx, time.Duration(config.ImgPurgeDelay)); err != nil {
-		util.Logger.Error(err)
-	}
+	go func() {
+		if err = cmApi.PurgeCoreImages(pcCtx, time.Duration(config.ImgPurgeDelay)); err != nil {
+			util.Logger.Error(err)
+		}
+	}()
 
 	go func() {
 		defer srvCF()
