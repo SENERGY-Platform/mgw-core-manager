@@ -234,13 +234,9 @@ func main() {
 
 	purgeJobsHdl.Start(jobCtx)
 
-	pcCtx, pcCF := context.WithCancel(context.Background())
-	defer pcCF()
-	go func() {
-		if err = cmApi.PurgeCoreImages(pcCtx, time.Duration(config.ImgPurgeDelay)); err != nil {
-			util.Logger.Error(err)
-		}
-	}()
+	if err = cmApi.PurgeCoreImages(time.Duration(config.ImgPurgeDelay)); err != nil {
+		util.Logger.Error(err)
+	}
 
 	go func() {
 		defer srvCF()

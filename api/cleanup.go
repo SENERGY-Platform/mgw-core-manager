@@ -40,7 +40,19 @@ func (a *Api) PurgeImages(ctx context.Context, repository, excludeTag string) (s
 	})
 }
 
-func (a *Api) PurgeCoreImages(ctx context.Context, delay time.Duration) error {
+func (a *Api) PurgeCoreImages(delay time.Duration) error {
+	_, err := a.jobHandler.Create(context.Background(), fmt.Sprintf("purge old core images (delay=%d)", delay), func(ctx context.Context, cf context.CancelFunc) (any, error) {
+		defer cf()
+		err := a.purgeCoreImages(ctx, delay)
+		if err == nil {
+			err = ctx.Err()
+		}
+		return nil, err
+	})
+	return err
+}
+
+func (a *Api) purgeCoreImages(ctx context.Context, delay time.Duration) error {
 	timer := time.NewTimer(delay)
 	select {
 	case <-timer.C:
@@ -56,18 +68,6 @@ func (a *Api) PurgeCoreImages(ctx context.Context, delay time.Duration) error {
 			}
 		}
 	}()
-	_, err := a.jobHandler.Create(context.Background(), fmt.Sprintf("purge core images"), func(ctx context.Context, cf context.CancelFunc) (any, error) {
-		defer cf()
-		err := a.purgeCoreImages(ctx)
-		if err == nil {
-			err = ctx.Err()
-		}
-		return nil, err
-	})
-	return err
-}
-
-func (a *Api) purgeCoreImages(ctx context.Context) error {
 	services, err := a.coreSrvHdl.List(ctx)
 	if err != nil {
 		return err
