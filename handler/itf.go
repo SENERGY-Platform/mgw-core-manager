@@ -19,6 +19,7 @@ package handler
 import (
 	"context"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+	"io"
 )
 
 type GatewayEndpointHandler interface {
@@ -46,4 +47,9 @@ type ContainerHandler interface {
 
 type CleanupHandler interface {
 	PurgeImages(ctx context.Context, repository, excludeTag string) error
+}
+
+type LogHandler interface {
+	List(ctx context.Context) (map[string]lib_model.Log, error)
+	GetReader(ctx context.Context, id string, numOfLines int) (io.ReadCloser, error)
 }
