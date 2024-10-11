@@ -140,13 +140,13 @@ func main() {
 		return
 	}
 
-	logConfig, err := log_hdl.ReadConfig("")
+	logConfig, err := log_hdl.ReadConfig(config.LogHandler.Path)
 	if err != nil {
 		util.Logger.Error(err)
 		ec = 1
 		return
 	}
-	logHdl, err := log_hdl.New(logConfig, 32768)
+	logHdl, err := log_hdl.New(logConfig, config.LogHandler.BufferSize)
 	if err != nil {
 		util.Logger.Error(err)
 		ec = 1

@@ -69,6 +69,11 @@ type KratosConfig struct {
 	Interval     int64  `json:"interval" env_var:"KRATOS_INTERVAL"`
 }
 
+type LogHandlerConfig struct {
+	Path       string `json:"path" env_var:"LOG_HANDLER_PATH"`
+	BufferSize int    `json:"buffer_size" env_var:"LOG_HANDLER_BUFFER_SIZE"`
+}
+
 type Config struct {
 	Logger            LoggerConfig      `json:"logger" env_var:"LOGGER_CONFIG"`
 	Socket            SocketConfig      `json:"socket" env_var:"SOCKET_CONFIG"`
@@ -80,6 +85,7 @@ type Config struct {
 	ComposeFilePath   string            `json:"compose_file_path" env_var:"COMPOSE_FILE_PATH"`
 	CoreID            string            `json:"core_id" env_var:"CORE_ID"`
 	ImgPurgeDelay     int64             `json:"img_purge_delay" env_var:"IMG_PURGE_DELAY"`
+	LogHandler        LogHandlerConfig  `json:"log_handler" env_var:"LOG_HANDLER_CONFIG"`
 }
 
 func NewConfig(path string) (*Config, error) {
@@ -114,6 +120,9 @@ func NewConfig(path string) (*Config, error) {
 			Interval:     int64(time.Hour),
 		},
 		ImgPurgeDelay: int64(time.Minute),
+		LogHandler: LogHandlerConfig{
+			BufferSize: 32768,
+		},
 	}
 	err := config_hdl.Load(&cfg, nil, map[reflect.Type]envldr.Parser{reflect.TypeOf(level.Off): sb_logger.LevelParser}, nil, path)
 	return &cfg, err
