@@ -75,7 +75,7 @@ func getLogH(a lib.Api) gin.HandlerFunc {
 				_ = gc.Error(model.NewInternalError(rErr))
 				return
 			}
-			_, wErr := gc.Writer.Write(b)
+			_, wErr := gc.Writer.Write(b[:n])
 			if wErr != nil {
 				_ = gc.Error(model.NewInternalError(wErr))
 				return
