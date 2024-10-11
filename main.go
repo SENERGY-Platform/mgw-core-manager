@@ -32,6 +32,7 @@ import (
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/cleanup_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/kratos_hdl"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/log_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/nginx_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/service_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
@@ -139,6 +140,19 @@ func main() {
 		return
 	}
 
+	logConfig, err := log_hdl.ReadConfig("")
+	if err != nil {
+		util.Logger.Error(err)
+		ec = 1
+		return
+	}
+	logHdl, err := log_hdl.New(logConfig, 32768)
+	if err != nil {
+		util.Logger.Error(err)
+		ec = 1
+		return
+	}
+
 	cleanupHdl := cleanup_hdl.New(cewClient, time.Duration(config.HttpClient.Timeout))
 
 	ccHandler := ccjh.New(config.Jobs.BufferSize)
@@ -182,7 +196,7 @@ func main() {
 		return requestid.Get(gc)
 	}), gin_mw.ErrorHandler(util.GetStatusCode, ", "), gin.Recovery())
 	httpHandler.UseRawPath = true
-	cmApi := api.New(coreServiceHdl, gwEndpointHdl, cleanupHdl, jobHandler, srvInfoHdl)
+	cmApi := api.New(coreServiceHdl, gwEndpointHdl, cleanupHdl, logHdl, jobHandler, srvInfoHdl)
 
 	http_hdl.SetRoutes(httpHandler, cmApi)
 	util.Logger.Debugf("routes: %s", sb_util.ToJsonStr(http_hdl.GetRoutes(httpHandler)))
