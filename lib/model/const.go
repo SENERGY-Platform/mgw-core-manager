@@ -30,6 +30,7 @@ const (
 	EndpointsBatchPath = "endpoints-batch"
 	CleanupPath        = "cleanup"
 	ImagesPath         = "images"
+	LogsPath           = "logs"
 	JobsPath           = "jobs"
 	JobsCancelPath     = "cancel"
 	SrvInfoPath        = "info"
