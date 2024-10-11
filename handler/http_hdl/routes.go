@@ -37,6 +37,7 @@ func SetRoutes(e *gin.Engine, a lib.Api) {
 	setEndpointsBatchRoutes(a, standardGrp.Group(lib_model.EndpointsBatchPath))
 	setEndpointsBatchRestrictedRoutes(a, restrictedGrp.Group(lib_model.EndpointsBatchPath))
 	setCleanupRoutes(a, standardGrp.Group(lib_model.CleanupPath))
+	setLogRoutes(a, standardGrp.Group(lib_model.LogsPath), restrictedGrp.Group(lib_model.LogsPath))
 }
 
 func setCoreServiceRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
@@ -89,6 +90,13 @@ func setSrvInfoRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
 
 func setCleanupRoutes(a lib.Api, rg *gin.RouterGroup) {
 	rg.PATCH(lib_model.ImagesPath, patchPurgeImagesH(a))
+}
+
+func setLogRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
+	for _, rg := range rGroups {
+		rg.GET("", getLogsH(a))
+		rg.GET(":"+logIdParam, getLogH(a))
+	}
 }
 
 func GetRoutes(e *gin.Engine) [][2]string {
