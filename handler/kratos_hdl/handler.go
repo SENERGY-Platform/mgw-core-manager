@@ -63,6 +63,14 @@ func (h *Handler) Init() error {
 		}
 		return err
 	}
+	config, err := readConfig(h.path)
+	if err != nil {
+		return err
+	}
+	if config.Version != h.kratosVer {
+		config.Version = h.kratosVer
+		return writeConfig(h.path, config)
+	}
 	return nil
 }
 
