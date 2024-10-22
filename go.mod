@@ -17,7 +17,7 @@ require (
 	github.com/SENERGY-Platform/mgw-container-engine-wrapper/client v0.15.1
 	github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib v0.16.0
 	github.com/SENERGY-Platform/mgw-core-manager/lib v0.0.0-00010101000000-000000000000
-	github.com/gin-contrib/requestid v1.0.2
+	github.com/gin-contrib/requestid v1.0.3
 	github.com/gin-gonic/gin v1.10.0
 	github.com/tufanbarisyildirim/gonginx v0.0.0-20241013191809-e73b7dd454e8
 	github.com/y-du/go-env-loader v0.5.2
