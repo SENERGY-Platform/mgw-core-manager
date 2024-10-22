@@ -25,7 +25,8 @@ import (
 	"github.com/SENERGY-Platform/mgw-core-manager/handler"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
-	"github.com/tufanbarisyildirim/gonginx"
+	"github.com/tufanbarisyildirim/gonginx/config"
+	"github.com/tufanbarisyildirim/gonginx/dumper"
 	"github.com/tufanbarisyildirim/gonginx/parser"
 	"io"
 	"os"
@@ -267,14 +268,14 @@ func (h *Handler) getAliases(pID string) []string {
 	return aIDs
 }
 
-func getDirectives(endpoints map[string]endpoint) ([]gonginx.IDirective, error) {
-	var directives []gonginx.IDirective
+func getDirectives(endpoints map[string]endpoint) ([]config.IDirective, error) {
+	var directives []config.IDirective
 	for _, e := range endpoints {
 		cmt, err := e.GenComment()
 		if err != nil {
 			return nil, err
 		}
-		var locDirectives []gonginx.IDirective
+		var locDirectives []config.IDirective
 		locDirectives = append(locDirectives, newDirective(setDirective, []string{e.GetSetValue()}, nil, nil))
 		if e.Type != lib_model.DefaultGuiEndpoint {
 			locDirectives = append(locDirectives, newDirective(rewriteDirective, []string{e.GetRewriteValue()}, nil, nil))
@@ -287,8 +288,8 @@ func getDirectives(endpoints map[string]endpoint) ([]gonginx.IDirective, error) 
 	return directives, nil
 }
 
-func getProxyDirectives(e endpoint) []gonginx.IDirective {
-	var directives []gonginx.IDirective
+func getProxyDirectives(e endpoint) []config.IDirective {
+	var directives []config.IDirective
 	headers := make(map[string]string)
 	for key, val := range e.ProxyConf.Headers {
 		headers[key] = strings.Replace(val, locPlaceholder, e.GetLocationValue(), -1)
@@ -307,8 +308,8 @@ func getProxyDirectives(e endpoint) []gonginx.IDirective {
 	return directives
 }
 
-func getSubFilterDirectives(e endpoint) []gonginx.IDirective {
-	var directives []gonginx.IDirective
+func getSubFilterDirectives(e endpoint) []config.IDirective {
+	var directives []config.IDirective
 	if len(e.StringSub.Filters) > 0 {
 		for orgStr, newStr := range e.StringSub.Filters {
 			directives = append(directives, newDirective(subFilterDirective, []string{"'" + orgStr + "'", "'" + strings.Replace(newStr, locPlaceholder, e.GetLocationValue(), -1) + "'"}, nil, nil))
@@ -327,7 +328,7 @@ func getSubFilterDirectives(e endpoint) []gonginx.IDirective {
 	return directives
 }
 
-func getEndpoints(directives []gonginx.IDirective, templates map[int]string) (map[string]endpoint, error) {
+func getEndpoints(directives []config.IDirective, templates map[int]string) (map[string]endpoint, error) {
 	endpoints := make(map[string]endpoint)
 	for _, directive := range directives {
 		if directive.GetName() == locationDirective {
@@ -364,8 +365,8 @@ func getEndpoint(s string, templates map[int]string) (endpoint, error) {
 	return newEndpoint(e, templates), nil
 }
 
-func newDirective(name string, parameters, comment []string, block gonginx.IBlock) *gonginx.Directive {
-	return &gonginx.Directive{
+func newDirective(name string, parameters, comment []string, block config.IBlock) *config.Directive {
+	return &config.Directive{
 		Block:      block,
 		Name:       name,
 		Parameters: parameters,
@@ -373,8 +374,8 @@ func newDirective(name string, parameters, comment []string, block gonginx.IBloc
 	}
 }
 
-func newBlock(directives []gonginx.IDirective) *gonginx.Block {
-	return &gonginx.Block{
+func newBlock(directives []config.IDirective) *config.Block {
+	return &config.Block{
 		Directives: directives,
 	}
 }
@@ -394,15 +395,15 @@ func copy(src, dst string) error {
 	return err
 }
 
-func writeConfig(directives []gonginx.IDirective, path string) error {
+func writeConfig(directives []config.IDirective, path string) error {
 	err := copy(path, path+".bk")
 	if err != nil {
 		return err
 	}
-	err = gonginx.WriteConfig(&gonginx.Config{
+	err = dumper.WriteConfig(&config.Config{
 		Block:    newBlock(directives),
 		FilePath: path,
-	}, gonginx.IndentedStyle, false)
+	}, dumper.IndentedStyle, false)
 	if err != nil {
 		e := copy(path+".bk", path)
 		if e != nil {
