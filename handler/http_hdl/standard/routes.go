@@ -24,11 +24,11 @@ import (
 )
 
 var routes = util.Routes{
-	SetPostEndpointH,
-	SetDeleteEndpointH,
-	SetPostEndpointBatchH,
-	SetDeleteEndpointBatchH,
-	SetPatchPurgeImagesH,
+	PostEndpointH,
+	DeleteEndpointH,
+	PostEndpointBatchH,
+	DeleteEndpointBatchH,
+	PatchPurgeImagesH,
 }
 
 func SetRoutes(e *gin.Engine, a lib.Api) {

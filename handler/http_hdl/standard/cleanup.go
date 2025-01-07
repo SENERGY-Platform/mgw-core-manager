@@ -29,7 +29,7 @@ type purgeImagesQuery struct {
 	ExcludeTag string `form:"exclude_tag"`
 }
 
-func SetPatchPurgeImagesH(a lib.Api, rg *gin.RouterGroup) {
+func PatchPurgeImagesH(a lib.Api, rg *gin.RouterGroup) {
 	rg.PATCH(path.Join(lib_model.CleanupPath, lib_model.ImagesPath), func(gc *gin.Context) {
 		query := purgeImagesQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {

@@ -21,15 +21,15 @@ import (
 )
 
 var Routes = util.Routes{
-	SetGetEndpointsH,
-	SetGetEndpointH,
-	SetGetCoreServicesH,
-	SetGetCoreServiceH,
-	SetPatchRestartCoreServiceH,
-	SetGetJobsH,
-	SetGetJobH,
-	SetPatchJobCancelH,
-	SetGetLogsH,
-	SetGetLogH,
-	SetGetSrvInfo,
+	GetEndpointsH,
+	GetEndpointH,
+	GetCoreServicesH,
+	GetCoreServiceH,
+	PatchRestartCoreServiceH,
+	GetJobsH,
+	GetJobH,
+	PatchJobCancelH,
+	GetLogsH,
+	GetLogH,
+	GetSrvInfo,
 }

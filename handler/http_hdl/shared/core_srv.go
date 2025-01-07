@@ -24,7 +24,7 @@ import (
 	"path"
 )
 
-func SetGetCoreServicesH(a lib.Api, rg *gin.RouterGroup) {
+func GetCoreServicesH(a lib.Api, rg *gin.RouterGroup) {
 	rg.GET(lib_model.CoreServicesPath, func(gc *gin.Context) {
 		services, err := a.GetCoreServices(gc.Request.Context())
 		if err != nil {
@@ -35,7 +35,7 @@ func SetGetCoreServicesH(a lib.Api, rg *gin.RouterGroup) {
 	})
 }
 
-func SetGetCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
+func GetCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
 	rg.GET(path.Join(lib_model.CoreServicesPath, ":name"), func(gc *gin.Context) {
 		service, err := a.GetCoreService(gc.Request.Context(), gc.Param("name"))
 		if err != nil {
@@ -46,7 +46,7 @@ func SetGetCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
 	})
 }
 
-func SetPatchRestartCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
+func PatchRestartCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
 	rg.PATCH(path.Join(lib_model.CoreServicesPath, ":name", lib_model.RestartPath), func(gc *gin.Context) {
 		jID, err := a.RestartCoreService(gc.Request.Context(), gc.Param("name"))
 		if err != nil {

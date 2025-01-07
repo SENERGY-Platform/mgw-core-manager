@@ -33,7 +33,7 @@ type jobsQuery struct {
 	Until    string `form:"until"`
 }
 
-func SetGetJobsH(a lib.Api, rg *gin.RouterGroup) {
+func GetJobsH(a lib.Api, rg *gin.RouterGroup) {
 	rg.GET(lib_model.JobsPath, func(gc *gin.Context) {
 		query := jobsQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
@@ -65,7 +65,7 @@ func SetGetJobsH(a lib.Api, rg *gin.RouterGroup) {
 	})
 }
 
-func SetGetJobH(a lib.Api, rg *gin.RouterGroup) {
+func GetJobH(a lib.Api, rg *gin.RouterGroup) {
 	rg.GET(path.Join(lib_model.JobsPath, ":id"), func(gc *gin.Context) {
 		job, err := a.GetJob(gc.Request.Context(), gc.Param("id"))
 		if err != nil {
@@ -76,7 +76,7 @@ func SetGetJobH(a lib.Api, rg *gin.RouterGroup) {
 	})
 }
 
-func SetPatchJobCancelH(a lib.Api, rg *gin.RouterGroup) {
+func PatchJobCancelH(a lib.Api, rg *gin.RouterGroup) {
 	rg.PATCH(path.Join(lib_model.JobsPath, ":id", lib_model.JobsCancelPath), func(gc *gin.Context) {
 		err := a.CancelJob(gc.Request.Context(), gc.Param("id"))
 		if err != nil {

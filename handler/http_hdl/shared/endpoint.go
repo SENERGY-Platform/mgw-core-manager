@@ -32,17 +32,7 @@ type endpointFilterQuery struct {
 	Labels string `form:"labels"`
 }
 
-type postEndpointQuery struct {
-	Action string `form:"action"`
-}
-
-type deleteEndpointBatchQuery struct {
-	IDs    string `form:"ids"`
-	Ref    string `form:"ref"`
-	Labels string `form:"labels"`
-}
-
-func SetGetEndpointsH(a lib.Api, rg *gin.RouterGroup) {
+func GetEndpointsH(a lib.Api, rg *gin.RouterGroup) {
 	rg.GET(lib_model.EndpointsPath, func(gc *gin.Context) {
 		query := endpointFilterQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
@@ -64,7 +54,7 @@ func SetGetEndpointsH(a lib.Api, rg *gin.RouterGroup) {
 	})
 }
 
-func SetGetEndpointH(a lib.Api, rg *gin.RouterGroup) {
+func GetEndpointH(a lib.Api, rg *gin.RouterGroup) {
 	rg.GET(path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
 		endpoint, err := a.GetEndpoint(gc.Request.Context(), gc.Param("id"))
 		if err != nil {
