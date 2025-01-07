@@ -19,36 +19,36 @@ package http_hdl
 import (
 	"github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib"
+	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
+	"path"
 )
-
-const logIdParam = "l"
 
 type logQuery struct {
 	MaxLines int `form:"max_lines"`
 }
 
-func getLogsH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
+func setGetLogsH(a lib.Api, rg *gin.RouterGroup) {
+	rg.GET(lib_model.LogsPath, func(gc *gin.Context) {
 		logs, err := a.ListLogs(gc.Request.Context())
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.JSON(http.StatusOK, logs)
-	}
+	})
 }
 
-func getLogH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
+func setGetLogH(a lib.Api, rg *gin.RouterGroup) {
+	rg.GET(path.Join(lib_model.LogsPath, ":id"), func(gc *gin.Context) {
 		query := logQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(model.NewInvalidInputError(err))
 			return
 		}
-		rc, err := a.GetLog(gc.Request.Context(), gc.Param(logIdParam), query.MaxLines)
+		rc, err := a.GetLog(gc.Request.Context(), gc.Param("id"), query.MaxLines)
 		if err != nil {
 			_ = gc.Error(err)
 			return
@@ -82,5 +82,5 @@ func getLogH(a lib.Api) gin.HandlerFunc {
 			}
 			gc.Writer.Flush()
 		}
-	}
+	})
 }

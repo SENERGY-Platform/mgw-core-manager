@@ -23,89 +23,61 @@ import (
 	"sort"
 )
 
-func SetRoutes(e *gin.Engine, a lib.Api) {
-	standardGrp := e.Group("")
-	restrictedGrp := e.Group(lib_model.RestrictedPath)
-	setSrvInfoRoutes(a, standardGrp, restrictedGrp)
-	setCoreServiceRoutes(a, standardGrp.Group(lib_model.CoreServicesPath), restrictedGrp.Group(lib_model.CoreServicesPath))
-	setJobsRoutes(a, standardGrp.Group(lib_model.JobsPath), restrictedGrp.Group(lib_model.JobsPath))
-	standardEndpointsGrp := standardGrp.Group(lib_model.EndpointsPath)
-	restrictedEndpointsGrp := restrictedGrp.Group(lib_model.EndpointsPath)
-	setEndpointsSharedRoutes(a, standardEndpointsGrp, restrictedEndpointsGrp)
-	setEndpointsRoutes(a, standardEndpointsGrp)
-	setEndpointsRestrictedRoutes(a, restrictedEndpointsGrp)
-	setEndpointsBatchRoutes(a, standardGrp.Group(lib_model.EndpointsBatchPath))
-	setEndpointsBatchRestrictedRoutes(a, restrictedGrp.Group(lib_model.EndpointsBatchPath))
-	setCleanupRoutes(a, standardGrp.Group(lib_model.CleanupPath))
-	setLogRoutes(a, standardGrp.Group(lib_model.LogsPath), restrictedGrp.Group(lib_model.LogsPath))
-}
+type routes []func(a lib.Api, rg *gin.RouterGroup)
 
-func setCoreServiceRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
-	for _, rg := range rGroups {
-		rg.GET("", getCoreServicesH(a))
-		rg.GET(":"+coreSrvNameParam, getCoreServiceH(a))
-		rg.PATCH(":"+coreSrvNameParam+"/"+lib_model.RestartPath, patchRestartCoreServiceH(a))
+func (r routes) Set(a lib.Api, rg *gin.RouterGroup) {
+	for _, f := range r {
+		f(a, rg)
 	}
 }
 
-func setJobsRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
-	for _, rg := range rGroups {
-		rg.GET("", getJobsH(a))
-		rg.GET(":"+jobIdParam, getJobH(a))
-		rg.PATCH(":"+jobIdParam+"/"+lib_model.JobsCancelPath, patchJobCancelH(a))
-	}
+var shared = routes{
+	setGetEndpointsH,
+	setGetEndpointH,
+	setGetCoreServicesH,
+	setGetCoreServiceH,
+	setPatchRestartCoreServiceH,
+	setGetJobsH,
+	setGetJobH,
+	setPatchJobCancelH,
+	setGetLogsH,
+	setGetLogH,
+	setGetSrvInfo,
 }
 
-func setEndpointsSharedRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
-	for _, rg := range rGroups {
-		rg.GET("", getEndpointsH(a))
-		rg.GET(":"+endpointIdParam, getEndpointH(a))
-	}
+var standard = routes{
+	setPostEndpointH,
+	setDeleteEndpointH,
+	setPostEndpointBatchH,
+	setDeleteEndpointBatchH,
+	setPatchPurgeImagesH,
 }
 
-func setEndpointsRoutes(a lib.Api, rg *gin.RouterGroup) {
-	rg.POST("", postEndpointH(a))
-	rg.DELETE(":"+endpointIdParam, deleteEndpointH(a))
+var restricted = routes{
+	setPostEndpointRestrictedH,
+	setDeleteEndpointRestrictedH,
+	setDeleteEndpointBatchRestrictedH,
 }
 
-func setEndpointsRestrictedRoutes(a lib.Api, rg *gin.RouterGroup) {
-	rg.POST("", postEndpointRestrictedH(a))
-	rg.DELETE(":"+endpointIdParam, deleteEndpointRestrictedH(a))
+func setStdRoutes(e *gin.Engine, a lib.Api) {
+	rg := e.Group("")
+	shared.Set(a, rg)
+	standard.Set(a, rg)
 }
 
-func setEndpointsBatchRoutes(a lib.Api, rg *gin.RouterGroup) {
-	rg.POST("", postEndpointBatchH(a))
-	rg.DELETE("", deleteEndpointBatchH(a))
-}
-
-func setEndpointsBatchRestrictedRoutes(a lib.Api, rg *gin.RouterGroup) {
-	rg.DELETE("", deleteEndpointBatchRestrictedH(a))
-}
-
-func setSrvInfoRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
-	for _, rg := range rGroups {
-		rg.GET(lib_model.SrvInfoPath, getSrvInfoH(a))
-	}
-}
-
-func setCleanupRoutes(a lib.Api, rg *gin.RouterGroup) {
-	rg.PATCH(lib_model.ImagesPath, patchPurgeImagesH(a))
-}
-
-func setLogRoutes(a lib.Api, rGroups ...*gin.RouterGroup) {
-	for _, rg := range rGroups {
-		rg.GET("", getLogsH(a))
-		rg.GET(":"+logIdParam, getLogH(a))
-	}
+func setRstRoutes(e *gin.Engine, a lib.Api) {
+	rg := e.Group(lib_model.RestrictedPath)
+	shared.Set(a, rg)
+	restricted.Set(a, rg)
 }
 
 func GetRoutes(e *gin.Engine) [][2]string {
-	routes := e.Routes()
-	sort.Slice(routes, func(i, j int) bool {
-		return routes[i].Path < routes[j].Path
+	routesInfo := e.Routes()
+	sort.Slice(routesInfo, func(i, j int) bool {
+		return routesInfo[i].Path < routesInfo[j].Path
 	})
 	var rInfo [][2]string
-	for _, info := range routes {
+	for _, info := range routesInfo {
 		rInfo = append(rInfo, [2]string{info.Method, info.Path})
 	}
 	return rInfo

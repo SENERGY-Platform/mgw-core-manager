@@ -21,9 +21,8 @@ import (
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"path"
 )
-
-const endpointIdParam = "e"
 
 type endpointFilterQuery struct {
 	IDs    string `form:"ids"`
@@ -42,8 +41,8 @@ type deleteEndpointBatchQuery struct {
 	Labels string `form:"labels"`
 }
 
-func getEndpointsH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
+func setGetEndpointsH(a lib.Api, rg *gin.RouterGroup) {
+	rg.GET(lib_model.EndpointsPath, func(gc *gin.Context) {
 		query := endpointFilterQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -61,22 +60,22 @@ func getEndpointsH(a lib.Api) gin.HandlerFunc {
 			return
 		}
 		gc.JSON(http.StatusOK, endpoints)
-	}
+	})
 }
 
-func getEndpointH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
-		endpoint, err := a.GetEndpoint(gc.Request.Context(), gc.Param(endpointIdParam))
+func setGetEndpointH(a lib.Api, rg *gin.RouterGroup) {
+	rg.GET(path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
+		endpoint, err := a.GetEndpoint(gc.Request.Context(), gc.Param("id"))
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.JSON(http.StatusOK, endpoint)
-	}
+	})
 }
 
-func postEndpointH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
+func setPostEndpointH(a lib.Api, rg *gin.RouterGroup) {
+	rg.POST(lib_model.EndpointsPath, func(gc *gin.Context) {
 		query := postEndpointQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -117,22 +116,22 @@ func postEndpointH(a lib.Api) gin.HandlerFunc {
 			}
 		}
 		gc.String(http.StatusOK, jID)
-	}
+	})
 }
 
-func deleteEndpointH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
-		jID, err := a.RemoveEndpoint(gc.Request.Context(), gc.Param(endpointIdParam), false)
+func setDeleteEndpointH(a lib.Api, rg *gin.RouterGroup) {
+	rg.DELETE(path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
+		jID, err := a.RemoveEndpoint(gc.Request.Context(), gc.Param("id"), false)
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	}
+	})
 }
 
-func postEndpointBatchH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
+func setPostEndpointBatchH(a lib.Api, rg *gin.RouterGroup) {
+	rg.POST(lib_model.EndpointsBatchPath, func(gc *gin.Context) {
 		var endpointBaseSl []lib_model.EndpointBase
 		if err := gc.ShouldBindJSON(&endpointBaseSl); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -144,11 +143,11 @@ func postEndpointBatchH(a lib.Api) gin.HandlerFunc {
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	}
+	})
 }
 
-func deleteEndpointBatchH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
+func setDeleteEndpointBatchH(a lib.Api, rg *gin.RouterGroup) {
+	rg.DELETE(lib_model.EndpointsBatchPath, func(gc *gin.Context) {
 		query := deleteEndpointBatchQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -164,11 +163,11 @@ func deleteEndpointBatchH(a lib.Api) gin.HandlerFunc {
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	}
+	})
 }
 
-func postEndpointRestrictedH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
+func setPostEndpointRestrictedH(a lib.Api, rg *gin.RouterGroup) {
+	rg.POST(lib_model.EndpointsPath, func(gc *gin.Context) {
 		query := postEndpointQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -196,22 +195,22 @@ func postEndpointRestrictedH(a lib.Api) gin.HandlerFunc {
 			}
 		}
 		gc.String(http.StatusOK, jID)
-	}
+	})
 }
 
-func deleteEndpointRestrictedH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
-		jID, err := a.RemoveEndpoint(gc.Request.Context(), gc.Param(endpointIdParam), true)
+func setDeleteEndpointRestrictedH(a lib.Api, rg *gin.RouterGroup) {
+	rg.DELETE(path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
+		jID, err := a.RemoveEndpoint(gc.Request.Context(), gc.Param("id"), true)
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	}
+	})
 }
 
-func deleteEndpointBatchRestrictedH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
+func setDeleteEndpointBatchRestrictedH(a lib.Api, rg *gin.RouterGroup) {
+	rg.DELETE(lib_model.EndpointsBatchPath, func(gc *gin.Context) {
 		query := deleteEndpointBatchQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -227,5 +226,5 @@ func deleteEndpointBatchRestrictedH(a lib.Api) gin.HandlerFunc {
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	}
+	})
 }

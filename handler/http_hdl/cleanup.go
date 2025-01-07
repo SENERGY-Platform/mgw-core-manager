@@ -21,6 +21,7 @@ import (
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"path"
 )
 
 type purgeImagesQuery struct {
@@ -28,8 +29,8 @@ type purgeImagesQuery struct {
 	ExcludeTag string `form:"exclude_tag"`
 }
 
-func patchPurgeImagesH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
+func setPatchPurgeImagesH(a lib.Api, rg *gin.RouterGroup) {
+	rg.PATCH(path.Join(lib_model.CleanupPath, lib_model.ImagesPath), func(gc *gin.Context) {
 		query := purgeImagesQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -41,5 +42,5 @@ func patchPurgeImagesH(a lib.Api) gin.HandlerFunc {
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	}
+	})
 }

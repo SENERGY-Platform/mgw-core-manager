@@ -22,10 +22,9 @@ import (
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"path"
 	"time"
 )
-
-const jobIdParam = "j"
 
 type jobsQuery struct {
 	Status   string `form:"status"`
@@ -34,8 +33,8 @@ type jobsQuery struct {
 	Until    string `form:"until"`
 }
 
-func getJobsH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
+func setGetJobsH(a lib.Api, rg *gin.RouterGroup) {
+	rg.GET(lib_model.JobsPath, func(gc *gin.Context) {
 		query := jobsQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -63,27 +62,27 @@ func getJobsH(a lib.Api) gin.HandlerFunc {
 		}
 		jobs, _ := a.GetJobs(gc.Request.Context(), jobOptions)
 		gc.JSON(http.StatusOK, jobs)
-	}
+	})
 }
 
-func getJobH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
-		job, err := a.GetJob(gc.Request.Context(), gc.Param(jobIdParam))
+func setGetJobH(a lib.Api, rg *gin.RouterGroup) {
+	rg.GET(path.Join(lib_model.JobsPath, ":id"), func(gc *gin.Context) {
+		job, err := a.GetJob(gc.Request.Context(), gc.Param("id"))
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.JSON(http.StatusOK, job)
-	}
+	})
 }
 
-func patchJobCancelH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
-		err := a.CancelJob(gc.Request.Context(), gc.Param(jobIdParam))
+func setPatchJobCancelH(a lib.Api, rg *gin.RouterGroup) {
+	rg.PATCH(path.Join(lib_model.JobsPath, ":id", lib_model.JobsCancelPath), func(gc *gin.Context) {
+		err := a.CancelJob(gc.Request.Context(), gc.Param("id"))
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.Status(http.StatusOK)
-	}
+	})
 }

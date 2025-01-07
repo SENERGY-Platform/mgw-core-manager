@@ -18,41 +18,41 @@ package http_hdl
 
 import (
 	"github.com/SENERGY-Platform/mgw-core-manager/lib"
+	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"path"
 )
 
-const coreSrvNameParam = "n"
-
-func getCoreServicesH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
-		endpoint, err := a.GetCoreServices(gc.Request.Context())
+func setGetCoreServicesH(a lib.Api, rg *gin.RouterGroup) {
+	rg.GET(lib_model.CoreServicesPath, func(gc *gin.Context) {
+		services, err := a.GetCoreServices(gc.Request.Context())
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
-		gc.JSON(http.StatusOK, endpoint)
-	}
+		gc.JSON(http.StatusOK, services)
+	})
 }
 
-func getCoreServiceH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
-		endpoint, err := a.GetCoreService(gc.Request.Context(), gc.Param(coreSrvNameParam))
+func setGetCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
+	rg.GET(path.Join(lib_model.CoreServicesPath, ":name"), func(gc *gin.Context) {
+		service, err := a.GetCoreService(gc.Request.Context(), gc.Param("name"))
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
-		gc.JSON(http.StatusOK, endpoint)
-	}
+		gc.JSON(http.StatusOK, service)
+	})
 }
 
-func patchRestartCoreServiceH(a lib.Api) gin.HandlerFunc {
-	return func(gc *gin.Context) {
-		jID, err := a.RestartCoreService(gc.Request.Context(), gc.Param(coreSrvNameParam))
+func setPatchRestartCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
+	rg.PATCH(path.Join(lib_model.CoreServicesPath, ":name", lib_model.RestartPath), func(gc *gin.Context) {
+		jID, err := a.RestartCoreService(gc.Request.Context(), gc.Param("name"))
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	}
+	})
 }
