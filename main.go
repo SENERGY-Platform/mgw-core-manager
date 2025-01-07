@@ -189,7 +189,6 @@ func main() {
 		lib_model.HeaderApiVer:  srvInfoHdl.GetVersion(),
 		lib_model.HeaderSrvName: srvInfoHdl.GetName(),
 	})
-	util.Logger.Debugf("routes: %s", sb_util.ToJsonStr(http_hdl.GetRoutes(httpHandler)))
 
 	listener, err := sb_util.NewUnixListener(config.Socket.Path, os.Getuid(), config.Socket.GroupID, config.Socket.FileMode)
 	if err != nil {
