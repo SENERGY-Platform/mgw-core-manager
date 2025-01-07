@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 InfAI (CC SES)
+ * Copyright 2025 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package handler
+package manager
 
 import (
 	"context"
@@ -37,12 +37,6 @@ type CoreServiceHandler interface {
 	List(ctx context.Context) (map[string]lib_model.CoreService, error)
 	Get(ctx context.Context, name string) (lib_model.CoreService, error)
 	Restart(ctx context.Context, name string) error
-}
-
-type ContainerHandler interface {
-	Info(ctx context.Context) (lib_model.SrvContainer, error)
-	Restart(ctx context.Context) error
-	ExecCmd(ctx context.Context, cmd []string, tty bool, envVars map[string]string, workDir string) error
 }
 
 type CleanupHandler interface {

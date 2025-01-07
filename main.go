@@ -27,7 +27,6 @@ import (
 	sb_util "github.com/SENERGY-Platform/go-service-base/util"
 	"github.com/SENERGY-Platform/go-service-base/watchdog"
 	cew_client "github.com/SENERGY-Platform/mgw-container-engine-wrapper/client"
-	"github.com/SENERGY-Platform/mgw-core-manager/api"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/cleanup_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/kratos_hdl"
@@ -35,6 +34,7 @@ import (
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/nginx_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/service_hdl"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+	"github.com/SENERGY-Platform/mgw-core-manager/manager"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"net"
 	"net/http"
@@ -183,9 +183,9 @@ func main() {
 		return nil
 	})
 
-	cmApi := api.New(coreServiceHdl, gwEndpointHdl, cleanupHdl, logHdl, jobHandler, srvInfoHdl)
+	coreManager := manager.New(coreServiceHdl, gwEndpointHdl, cleanupHdl, logHdl, jobHandler, srvInfoHdl)
 
-	httpHandler := http_hdl.New(cmApi, map[string]string{
+	httpHandler := http_hdl.New(coreManager, map[string]string{
 		lib_model.HeaderApiVer:  srvInfoHdl.GetVersion(),
 		lib_model.HeaderSrvName: srvInfoHdl.GetName(),
 	})
@@ -238,7 +238,7 @@ func main() {
 
 	purgeJobsHdl.Start(jobCtx)
 
-	if err = cmApi.PurgeCoreImages(time.Duration(config.ImgPurgeDelay)); err != nil {
+	if err = coreManager.PurgeCoreImages(time.Duration(config.ImgPurgeDelay)); err != nil {
 		util.Logger.Error(err)
 	}
 

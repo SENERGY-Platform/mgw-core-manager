@@ -21,7 +21,6 @@ import (
 	"fmt"
 	cew_lib "github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib"
 	cew_model "github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib/model"
-	"github.com/SENERGY-Platform/mgw-core-manager/handler"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"gopkg.in/yaml.v3"
@@ -45,7 +44,7 @@ type service struct {
 	Name          string
 	ContainerName string
 	Image         string
-	CtrHandler    handler.ContainerHandler
+	CtrHandler    *CtrHandler
 }
 
 type composeFile struct {
@@ -80,7 +79,7 @@ func (h *Handler) Init(composePath string) error {
 			Name:          name,
 			ContainerName: srv.ContainerName,
 			Image:         srv.Image,
-			CtrHandler: &ctrHandler{
+			CtrHandler: &CtrHandler{
 				cewClient:     h.cewClient,
 				srvName:       name,
 				containerName: srv.ContainerName,
@@ -162,7 +161,7 @@ func (h *Handler) Restart(ctx context.Context, name string) error {
 	return nil
 }
 
-func (h *Handler) GetCtrHandler(name string) (handler.ContainerHandler, error) {
+func (h *Handler) GetCtrHandler(name string) (*CtrHandler, error) {
 	srv, ok := h.services[name]
 	if !ok {
 		return nil, fmt.Errorf("service '%s' not defined", name)

@@ -29,7 +29,7 @@ import (
 	"time"
 )
 
-type ctrHandler struct {
+type CtrHandler struct {
 	cewClient     cew_lib.Api
 	srvName       string
 	containerName string
@@ -37,7 +37,7 @@ type ctrHandler struct {
 	mu            sync.Mutex
 }
 
-func (h *ctrHandler) Info(ctx context.Context) (lib_model.SrvContainer, error) {
+func (h *CtrHandler) Info(ctx context.Context) (lib_model.SrvContainer, error) {
 	sc := lib_model.SrvContainer{Name: h.containerName}
 	ctxWt, cf := context.WithTimeout(ctx, h.httpTimeout)
 	defer cf()
@@ -51,7 +51,7 @@ func (h *ctrHandler) Info(ctx context.Context) (lib_model.SrvContainer, error) {
 	return sc, nil
 }
 
-func (h *ctrHandler) Restart(ctx context.Context) error {
+func (h *CtrHandler) Restart(ctx context.Context) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	ctxWt, cf := context.WithTimeout(ctx, h.httpTimeout)
@@ -63,7 +63,7 @@ func (h *ctrHandler) Restart(ctx context.Context) error {
 	return h.awaitJob(ctx, jID)
 }
 
-func (h *ctrHandler) ExecCmd(ctx context.Context, cmd []string, tty bool, envVars map[string]string, workDir string) error {
+func (h *CtrHandler) ExecCmd(ctx context.Context, cmd []string, tty bool, envVars map[string]string, workDir string) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	ctxWt, cf := context.WithTimeout(ctx, h.httpTimeout)
@@ -80,7 +80,7 @@ func (h *ctrHandler) ExecCmd(ctx context.Context, cmd []string, tty bool, envVar
 	return h.awaitJob(ctx, jID)
 }
 
-func (h *ctrHandler) awaitJob(ctx context.Context, jID string) error {
+func (h *CtrHandler) awaitJob(ctx context.Context, jID string) error {
 	job, err := job_hdl_lib.Await(ctx, h.cewClient, jID, time.Second, h.httpTimeout, util.Logger)
 	if err != nil {
 		return lib_model.NewInternalError(err)
