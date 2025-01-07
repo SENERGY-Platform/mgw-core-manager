@@ -57,8 +57,3 @@ type EndpointFilter struct {
 	Ref    string
 	Labels map[string]string
 }
-
-type EndpointAliasReq struct {
-	ParentID string `json:"parent_id"`
-	Path     string `json:"path"`
-}
