@@ -115,24 +115,8 @@ func (c *Client) AddEndpointAlias(ctx context.Context, id, path string) (string,
 	return c.baseClient.ExecRequestString(req)
 }
 
-func (c *Client) AddDefaultGuiEndpoint(ctx context.Context, id string) (string, error) {
-	u, err := url.JoinPath(c.baseUrl, model.EndpointsPath)
-	if err != nil {
-		return "", err
-	}
-	u += "?action=alias"
-	body, err := json.Marshal(model.EndpointAliasReq{
-		ParentID: id,
-	})
-	if err != nil {
-		return "", err
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewBuffer(body))
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	return c.baseClient.ExecRequestString(req)
+func (c *Client) AddDefaultGuiEndpoint(_ context.Context, _ string) (string, error) {
+	panic("not implemented")
 }
 
 func (c *Client) RemoveEndpoint(ctx context.Context, id string, _ bool) (string, error) {
