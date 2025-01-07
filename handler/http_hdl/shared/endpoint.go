@@ -32,8 +32,8 @@ type endpointFilterQuery struct {
 	Labels string `form:"labels"`
 }
 
-func GetEndpointsH(a lib.Api, rg *gin.RouterGroup) {
-	rg.GET(lib_model.EndpointsPath, func(gc *gin.Context) {
+func GetEndpointsH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodGet, lib_model.EndpointsPath, func(gc *gin.Context) {
 		query := endpointFilterQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -51,18 +51,18 @@ func GetEndpointsH(a lib.Api, rg *gin.RouterGroup) {
 			return
 		}
 		gc.JSON(http.StatusOK, endpoints)
-	})
+	}
 }
 
-func GetEndpointH(a lib.Api, rg *gin.RouterGroup) {
-	rg.GET(path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
+func GetEndpointH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodGet, path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
 		endpoint, err := a.GetEndpoint(gc.Request.Context(), gc.Param("id"))
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.JSON(http.StatusOK, endpoint)
-	})
+	}
 }
 
 // PostEndpointAliasH
@@ -77,8 +77,8 @@ func GetEndpointH(a lib.Api, rg *gin.RouterGroup) {
 // @Failure	404 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /endpoints/{id}/alias [post]
-func PostEndpointAliasH(a lib.Api, rg *gin.RouterGroup) {
-	rg.POST(path.Join(lib_model.EndpointsPath, ":id", lib_model.AliasPath), func(gc *gin.Context) {
+func PostEndpointAliasH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodPost, path.Join(lib_model.EndpointsPath, ":id", lib_model.AliasPath), func(gc *gin.Context) {
 		var jID string
 		var err error
 		var aliasReq lib_model.EndpointAliasReq
@@ -92,5 +92,5 @@ func PostEndpointAliasH(a lib.Api, rg *gin.RouterGroup) {
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	})
+	}
 }

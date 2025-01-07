@@ -30,19 +30,19 @@ type logQuery struct {
 	MaxLines int `form:"max_lines"`
 }
 
-func GetLogsH(a lib.Api, rg *gin.RouterGroup) {
-	rg.GET(lib_model.LogsPath, func(gc *gin.Context) {
+func GetLogsH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodGet, lib_model.LogsPath, func(gc *gin.Context) {
 		logs, err := a.ListLogs(gc.Request.Context())
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.JSON(http.StatusOK, logs)
-	})
+	}
 }
 
-func GetLogH(a lib.Api, rg *gin.RouterGroup) {
-	rg.GET(path.Join(lib_model.LogsPath, ":id"), func(gc *gin.Context) {
+func GetLogH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodGet, path.Join(lib_model.LogsPath, ":id"), func(gc *gin.Context) {
 		query := logQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(model.NewInvalidInputError(err))
@@ -82,5 +82,5 @@ func GetLogH(a lib.Api, rg *gin.RouterGroup) {
 			}
 			gc.Writer.Flush()
 		}
-	})
+	}
 }

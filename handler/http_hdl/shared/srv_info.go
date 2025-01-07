@@ -23,8 +23,8 @@ import (
 	"net/http"
 )
 
-func GetSrvInfo(a lib.Api, rg *gin.RouterGroup) {
-	rg.GET(lib_model.SrvInfoPath, func(gc *gin.Context) {
+func GetSrvInfo(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodGet, lib_model.SrvInfoPath, func(gc *gin.Context) {
 		gc.JSON(http.StatusOK, a.GetSrvInfo(gc.Request.Context()))
-	})
+	}
 }

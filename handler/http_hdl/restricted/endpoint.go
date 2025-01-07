@@ -35,19 +35,19 @@ type deleteEndpointBatchQuery struct {
 	Labels string `form:"labels"`
 }
 
-func DeleteEndpointH(a lib.Api, rg *gin.RouterGroup) {
-	rg.DELETE(path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
+func DeleteEndpointH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodDelete, path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
 		jID, err := a.RemoveEndpoint(gc.Request.Context(), gc.Param("id"), true)
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	})
+	}
 }
 
-func DeleteEndpointBatchH(a lib.Api, rg *gin.RouterGroup) {
-	rg.DELETE(lib_model.EndpointsBatchPath, func(gc *gin.Context) {
+func DeleteEndpointBatchH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodDelete, lib_model.EndpointsBatchPath, func(gc *gin.Context) {
 		query := deleteEndpointBatchQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -63,5 +63,5 @@ func DeleteEndpointBatchH(a lib.Api, rg *gin.RouterGroup) {
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	})
+	}
 }

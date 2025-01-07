@@ -33,8 +33,8 @@ type jobsQuery struct {
 	Until    string `form:"until"`
 }
 
-func GetJobsH(a lib.Api, rg *gin.RouterGroup) {
-	rg.GET(lib_model.JobsPath, func(gc *gin.Context) {
+func GetJobsH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodGet, lib_model.JobsPath, func(gc *gin.Context) {
 		query := jobsQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -62,27 +62,27 @@ func GetJobsH(a lib.Api, rg *gin.RouterGroup) {
 		}
 		jobs, _ := a.GetJobs(gc.Request.Context(), jobOptions)
 		gc.JSON(http.StatusOK, jobs)
-	})
+	}
 }
 
-func GetJobH(a lib.Api, rg *gin.RouterGroup) {
-	rg.GET(path.Join(lib_model.JobsPath, ":id"), func(gc *gin.Context) {
+func GetJobH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodGet, path.Join(lib_model.JobsPath, ":id"), func(gc *gin.Context) {
 		job, err := a.GetJob(gc.Request.Context(), gc.Param("id"))
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.JSON(http.StatusOK, job)
-	})
+	}
 }
 
-func PatchJobCancelH(a lib.Api, rg *gin.RouterGroup) {
-	rg.PATCH(path.Join(lib_model.JobsPath, ":id", lib_model.JobsCancelPath), func(gc *gin.Context) {
+func PatchJobCancelH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodPatch, path.Join(lib_model.JobsPath, ":id", lib_model.JobsCancelPath), func(gc *gin.Context) {
 		err := a.CancelJob(gc.Request.Context(), gc.Param("id"))
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.Status(http.StatusOK)
-	})
+	}
 }

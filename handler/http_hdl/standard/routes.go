@@ -23,7 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var routes = util.Routes{
+var routes = []util.Route{
 	PostEndpointH,
 	DeleteEndpointH,
 	PostEndpointBatchH,
@@ -40,6 +40,6 @@ var routes = util.Routes{
 // @BasePath /
 func SetRoutes(e *gin.Engine, a lib.Api) {
 	rg := e.Group("")
-	shared.Routes.Set(a, rg)
-	routes.Set(a, rg)
+	routes = append(routes, shared.Routes...)
+	util.SetRoutes(a, rg, routes)
 }

@@ -24,35 +24,35 @@ import (
 	"path"
 )
 
-func GetCoreServicesH(a lib.Api, rg *gin.RouterGroup) {
-	rg.GET(lib_model.CoreServicesPath, func(gc *gin.Context) {
+func GetCoreServicesH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodGet, lib_model.CoreServicesPath, func(gc *gin.Context) {
 		services, err := a.GetCoreServices(gc.Request.Context())
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.JSON(http.StatusOK, services)
-	})
+	}
 }
 
-func GetCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
-	rg.GET(path.Join(lib_model.CoreServicesPath, ":name"), func(gc *gin.Context) {
+func GetCoreServiceH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodGet, path.Join(lib_model.CoreServicesPath, ":name"), func(gc *gin.Context) {
 		service, err := a.GetCoreService(gc.Request.Context(), gc.Param("name"))
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.JSON(http.StatusOK, service)
-	})
+	}
 }
 
-func PatchRestartCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
-	rg.PATCH(path.Join(lib_model.CoreServicesPath, ":name", lib_model.RestartPath), func(gc *gin.Context) {
+func PatchRestartCoreServiceH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodPatch, path.Join(lib_model.CoreServicesPath, ":name", lib_model.RestartPath), func(gc *gin.Context) {
 		jID, err := a.RestartCoreService(gc.Request.Context(), gc.Param("name"))
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	})
+	}
 }

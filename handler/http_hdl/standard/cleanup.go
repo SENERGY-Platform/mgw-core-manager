@@ -40,8 +40,8 @@ type purgeImagesQuery struct {
 // @Failure	400 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /cleanup/images [patch]
-func PatchPurgeImagesH(a lib.Api, rg *gin.RouterGroup) {
-	rg.PATCH(path.Join(lib_model.CleanupPath, lib_model.ImagesPath), func(gc *gin.Context) {
+func PatchPurgeImagesH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodPatch, path.Join(lib_model.CleanupPath, lib_model.ImagesPath), func(gc *gin.Context) {
 		query := purgeImagesQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -53,5 +53,5 @@ func PatchPurgeImagesH(a lib.Api, rg *gin.RouterGroup) {
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	})
+	}
 }

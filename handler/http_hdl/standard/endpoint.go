@@ -42,8 +42,8 @@ type deleteEndpointBatchQuery struct {
 // @Failure	400 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /endpoints [post]
-func PostEndpointH(a lib.Api, rg *gin.RouterGroup) {
-	rg.POST(lib_model.EndpointsPath, func(gc *gin.Context) {
+func PostEndpointH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodPost, lib_model.EndpointsPath, func(gc *gin.Context) {
 		var jID string
 		var err error
 		var endpointBase lib_model.EndpointBase
@@ -57,22 +57,22 @@ func PostEndpointH(a lib.Api, rg *gin.RouterGroup) {
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	})
+	}
 }
 
-func DeleteEndpointH(a lib.Api, rg *gin.RouterGroup) {
-	rg.DELETE(path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
+func DeleteEndpointH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodDelete, path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
 		jID, err := a.RemoveEndpoint(gc.Request.Context(), gc.Param("id"), false)
 		if err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	})
+	}
 }
 
-func PostEndpointBatchH(a lib.Api, rg *gin.RouterGroup) {
-	rg.POST(lib_model.EndpointsBatchPath, func(gc *gin.Context) {
+func PostEndpointBatchH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodPost, lib_model.EndpointsBatchPath, func(gc *gin.Context) {
 		var endpointBaseSl []lib_model.EndpointBase
 		if err := gc.ShouldBindJSON(&endpointBaseSl); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -84,11 +84,11 @@ func PostEndpointBatchH(a lib.Api, rg *gin.RouterGroup) {
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	})
+	}
 }
 
-func DeleteEndpointBatchH(a lib.Api, rg *gin.RouterGroup) {
-	rg.DELETE(lib_model.EndpointsBatchPath, func(gc *gin.Context) {
+func DeleteEndpointBatchH(a lib.Api) (string, string, gin.HandlerFunc) {
+	return http.MethodDelete, lib_model.EndpointsBatchPath, func(gc *gin.Context) {
 		query := deleteEndpointBatchQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
@@ -104,5 +104,5 @@ func DeleteEndpointBatchH(a lib.Api, rg *gin.RouterGroup) {
 			return
 		}
 		gc.String(http.StatusOK, jID)
-	})
+	}
 }

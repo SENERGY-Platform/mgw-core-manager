@@ -24,8 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var routes = util.Routes{
-	DeleteEndpointH,
+var routes = []util.Route{
 	DeleteEndpointH,
 	DeleteEndpointBatchH,
 }
@@ -39,6 +38,6 @@ var routes = util.Routes{
 // @BasePath /restricted
 func SetRoutes(e *gin.Engine, a lib.Api) {
 	rg := e.Group(lib_model.RestrictedPath)
-	shared.Routes.Set(a, rg)
-	routes.Set(a, rg)
+	routes = append(routes, shared.Routes...)
+	util.SetRoutes(a, rg, routes)
 }

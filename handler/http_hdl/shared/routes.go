@@ -20,7 +20,7 @@ import (
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/util"
 )
 
-var Routes = util.Routes{
+var Routes = []util.Route{
 	GetEndpointsH,
 	GetEndpointH,
 	PostEndpointAliasH,

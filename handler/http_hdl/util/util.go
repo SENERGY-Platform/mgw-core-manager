@@ -18,15 +18,24 @@ package util
 
 import (
 	"github.com/SENERGY-Platform/mgw-core-manager/lib"
+	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"github.com/gin-gonic/gin"
+	"path"
 	"strings"
 )
 
-type Routes []func(a lib.Api, rg *gin.RouterGroup)
+type Route func(a lib.Api) (m, p string, hf gin.HandlerFunc)
 
-func (r Routes) Set(a lib.Api, rg *gin.RouterGroup) {
-	for _, f := range r {
-		f(a, rg)
+func SetRoutes(a lib.Api, rg *gin.RouterGroup, routes []Route) {
+	set := make(map[string]struct{})
+	for _, route := range routes {
+		m, p, hf := route(a)
+		if _, ok := set[m+p]; ok {
+			panic("duplicate route: " + m + " " + path.Join(rg.BasePath(), p))
+		}
+		set[m+p] = struct{}{}
+		rg.Handle(m, p, hf)
+		util.Logger.Debug("set route: " + m + " " + path.Join(rg.BasePath(), p))
 	}
 }
 
