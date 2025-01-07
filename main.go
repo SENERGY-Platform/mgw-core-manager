@@ -20,7 +20,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/SENERGY-Platform/gin-middleware"
 	"github.com/SENERGY-Platform/go-cc-job-handler/ccjh"
 	"github.com/SENERGY-Platform/go-service-base/job-hdl"
 	sb_logger "github.com/SENERGY-Platform/go-service-base/logger"
@@ -35,10 +34,8 @@ import (
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/log_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/nginx_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/service_hdl"
-	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
-	"github.com/gin-contrib/requestid"
-	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
 	"os"
@@ -159,9 +156,9 @@ func main() {
 
 	job_hdl.Logger = util.Logger
 	job_hdl.ErrCodeMapper = util.GetErrCode
-	job_hdl.NewNotFoundErr = model.NewNotFoundError
-	job_hdl.NewInvalidInputError = model.NewInvalidInputError
-	job_hdl.NewInternalErr = model.NewInternalError
+	job_hdl.NewNotFoundErr = lib_model.NewNotFoundError
+	job_hdl.NewInvalidInputError = lib_model.NewInvalidInputError
+	job_hdl.NewInternalErr = lib_model.NewInternalError
 	jobCtx, jobCF := context.WithCancel(context.Background())
 	jobHandler := job_hdl.New(jobCtx, ccHandler)
 	purgeJobsHdl := job_hdl.NewPurgeJobsHandler(jobHandler, time.Duration(config.Jobs.PJHInterval), time.Duration(config.Jobs.MaxAge))
@@ -186,19 +183,12 @@ func main() {
 		return nil
 	})
 
-	gin.SetMode(gin.ReleaseMode)
-	httpHandler := gin.New()
-	staticHeader := map[string]string{
-		model.HeaderApiVer:  srvInfoHdl.GetVersion(),
-		model.HeaderSrvName: srvInfoHdl.GetName(),
-	}
-	httpHandler.Use(gin_mw.StaticHeaderHandler(staticHeader), requestid.New(requestid.WithCustomHeaderStrKey(model.HeaderRequestID)), gin_mw.LoggerHandler(util.Logger, nil, func(gc *gin.Context) string {
-		return requestid.Get(gc)
-	}), gin_mw.ErrorHandler(util.GetStatusCode, ", "), gin.Recovery())
-	httpHandler.UseRawPath = true
 	cmApi := api.New(coreServiceHdl, gwEndpointHdl, cleanupHdl, logHdl, jobHandler, srvInfoHdl)
 
-	http_hdl.SetRoutes(httpHandler, cmApi)
+	httpHandler := http_hdl.New(cmApi, map[string]string{
+		lib_model.HeaderApiVer:  srvInfoHdl.GetVersion(),
+		lib_model.HeaderSrvName: srvInfoHdl.GetName(),
+	})
 	util.Logger.Debugf("routes: %s", sb_util.ToJsonStr(http_hdl.GetRoutes(httpHandler)))
 
 	listener, err := sb_util.NewUnixListener(config.Socket.Path, os.Getuid(), config.Socket.GroupID, config.Socket.FileMode)
