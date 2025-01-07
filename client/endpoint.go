@@ -97,14 +97,12 @@ func (c *Client) SetEndpoints(ctx context.Context, endpoints []model.EndpointBas
 }
 
 func (c *Client) AddEndpointAlias(ctx context.Context, id, path string) (string, error) {
-	u, err := url.JoinPath(c.baseUrl, model.EndpointsPath)
+	u, err := url.JoinPath(c.baseUrl, model.EndpointsPath, id, model.AliasPath)
 	if err != nil {
 		return "", err
 	}
-	u += "?action=alias"
 	body, err := json.Marshal(model.EndpointAliasReq{
-		ParentID: id,
-		Path:     path,
+		Path: path,
 	})
 	if err != nil {
 		return "", err
