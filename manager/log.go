@@ -22,10 +22,10 @@ import (
 	"io"
 )
 
-func (a *Api) ListLogs(ctx context.Context) (map[string]lib_model.Log, error) {
-	return a.logHandler.List(ctx)
+func (m *Manager) ListLogs(ctx context.Context) (map[string]lib_model.Log, error) {
+	return m.logHandler.List(ctx)
 }
 
-func (a *Api) GetLog(ctx context.Context, id string, numOfLines int) (io.ReadCloser, error) {
-	return a.logHandler.GetReader(ctx, id, numOfLines)
+func (m *Manager) GetLog(ctx context.Context, id string, numOfLines int) (io.ReadCloser, error) {
+	return m.logHandler.GetReader(ctx, id, numOfLines)
 }

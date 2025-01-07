@@ -22,18 +22,18 @@ import (
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 )
 
-func (a *Api) GetCoreServices(ctx context.Context) (map[string]model.CoreService, error) {
-	return a.coreSrvHdl.List(ctx)
+func (m *Manager) GetCoreServices(ctx context.Context) (map[string]model.CoreService, error) {
+	return m.coreSrvHdl.List(ctx)
 }
 
-func (a *Api) GetCoreService(ctx context.Context, name string) (model.CoreService, error) {
-	return a.coreSrvHdl.Get(ctx, name)
+func (m *Manager) GetCoreService(ctx context.Context, name string) (model.CoreService, error) {
+	return m.coreSrvHdl.Get(ctx, name)
 }
 
-func (a *Api) RestartCoreService(ctx context.Context, name string) (string, error) {
-	return a.jobHandler.Create(ctx, fmt.Sprintf("restart core service '%s'", name), func(ctx context.Context, cf context.CancelFunc) (any, error) {
+func (m *Manager) RestartCoreService(ctx context.Context, name string) (string, error) {
+	return m.jobHandler.Create(ctx, fmt.Sprintf("restart core service '%s'", name), func(ctx context.Context, cf context.CancelFunc) (any, error) {
 		defer cf()
-		err := a.coreSrvHdl.Restart(ctx, name)
+		err := m.coreSrvHdl.Restart(ctx, name)
 		if err == nil {
 			err = ctx.Err()
 		}

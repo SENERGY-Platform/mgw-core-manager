@@ -21,7 +21,7 @@ import (
 	"github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
 )
 
-type Api struct {
+type Manager struct {
 	coreSrvHdl    CoreServiceHandler
 	gwEndpointHdl GatewayEndpointHandler
 	cleanupHdl    CleanupHandler
@@ -30,8 +30,8 @@ type Api struct {
 	srvInfoHdl    srv_info_hdl.SrvInfoHandler
 }
 
-func New(coreServiceHandler CoreServiceHandler, gwEndpointHdl GatewayEndpointHandler, cleanupHdl CleanupHandler, logHandler LogHandler, jobHandler job_hdl.JobHandler, srvInfoHandler srv_info_hdl.SrvInfoHandler) *Api {
-	return &Api{
+func New(coreServiceHandler CoreServiceHandler, gwEndpointHdl GatewayEndpointHandler, cleanupHdl CleanupHandler, logHandler LogHandler, jobHandler job_hdl.JobHandler, srvInfoHandler srv_info_hdl.SrvInfoHandler) *Manager {
+	return &Manager{
 		coreSrvHdl:    coreServiceHandler,
 		gwEndpointHdl: gwEndpointHdl,
 		cleanupHdl:    cleanupHdl,

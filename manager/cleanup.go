@@ -26,13 +26,13 @@ import (
 	"time"
 )
 
-func (a *Api) PurgeImages(ctx context.Context, repository, excludeTag string) (string, error) {
+func (m *Manager) PurgeImages(ctx context.Context, repository, excludeTag string) (string, error) {
 	if repository == "" {
 		return "", lib_model.NewInvalidInputError(errors.New("missing repository"))
 	}
-	return a.jobHandler.Create(ctx, fmt.Sprintf("purge images (repository=%s exclude_tag=%s)", repository, excludeTag), func(ctx context.Context, cf context.CancelFunc) (any, error) {
+	return m.jobHandler.Create(ctx, fmt.Sprintf("purge images (repository=%s exclude_tag=%s)", repository, excludeTag), func(ctx context.Context, cf context.CancelFunc) (any, error) {
 		defer cf()
-		err := a.cleanupHdl.PurgeImages(ctx, repository, excludeTag)
+		err := m.cleanupHdl.PurgeImages(ctx, repository, excludeTag)
 		if err == nil {
 			err = ctx.Err()
 		}
@@ -40,10 +40,10 @@ func (a *Api) PurgeImages(ctx context.Context, repository, excludeTag string) (s
 	})
 }
 
-func (a *Api) PurgeCoreImages(delay time.Duration) error {
-	_, err := a.jobHandler.Create(context.Background(), fmt.Sprintf("purge old core images (delay=%d)", delay), func(ctx context.Context, cf context.CancelFunc) (any, error) {
+func (m *Manager) PurgeCoreImages(delay time.Duration) error {
+	_, err := m.jobHandler.Create(context.Background(), fmt.Sprintf("purge old core images (delay=%d)", delay), func(ctx context.Context, cf context.CancelFunc) (any, error) {
 		defer cf()
-		err := a.purgeCoreImages(ctx, delay)
+		err := m.purgeCoreImages(ctx, delay)
 		if err == nil {
 			err = ctx.Err()
 		}
@@ -52,7 +52,7 @@ func (a *Api) PurgeCoreImages(delay time.Duration) error {
 	return err
 }
 
-func (a *Api) purgeCoreImages(ctx context.Context, delay time.Duration) error {
+func (m *Manager) purgeCoreImages(ctx context.Context, delay time.Duration) error {
 	timer := time.NewTimer(delay)
 	select {
 	case <-timer.C:
@@ -68,7 +68,7 @@ func (a *Api) purgeCoreImages(ctx context.Context, delay time.Duration) error {
 			}
 		}
 	}()
-	services, err := a.coreSrvHdl.List(ctx)
+	services, err := m.coreSrvHdl.List(ctx)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func (a *Api) purgeCoreImages(ctx context.Context, delay time.Duration) error {
 			continue
 		}
 		if parts[0] != "" {
-			if err = a.cleanupHdl.PurgeImages(ctx, parts[0], parts[1]); err != nil {
+			if err = m.cleanupHdl.PurgeImages(ctx, parts[0], parts[1]); err != nil {
 				util.Logger.Error("purge core images:", err)
 			}
 		}
