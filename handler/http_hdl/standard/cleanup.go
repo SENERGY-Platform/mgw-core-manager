@@ -29,6 +29,17 @@ type purgeImagesQuery struct {
 	ExcludeTag string `form:"exclude_tag"`
 }
 
+// PatchPurgeImagesH
+// @Summary Purge images
+// @Description	Purge unused images of a repository.
+// @Tags Docker
+// @Produce	plain
+// @Param repository query string true "docker repository name"
+// @Param exclude_tag query string false "image tag name to exclude"
+// @Success	200 {string} string "job ID"
+// @Failure	400 {string} string "error message"
+// @Failure	500 {string} string "error message"
+// @Router /cleanup/images [patch]
 func PatchPurgeImagesH(a lib.Api, rg *gin.RouterGroup) {
 	rg.PATCH(path.Join(lib_model.CleanupPath, lib_model.ImagesPath), func(gc *gin.Context) {
 		query := purgeImagesQuery{}
