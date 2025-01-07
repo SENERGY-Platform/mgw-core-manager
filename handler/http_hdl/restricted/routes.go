@@ -31,6 +31,13 @@ var routes = util.Routes{
 	DeleteEndpointBatchH,
 }
 
+// SetRoutes
+// @title Core Manager Public API
+// @version 0.8.0
+// @description Provides access to public management options for the multi-gateway core.
+// @license.name Apache-2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @BasePath /restricted
 func SetRoutes(e *gin.Engine, a lib.Api) {
 	rg := e.Group(lib_model.RestrictedPath)
 	shared.Routes.Set(a, rg)

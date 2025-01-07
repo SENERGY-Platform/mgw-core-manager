@@ -31,6 +31,13 @@ var routes = util.Routes{
 	PatchPurgeImagesH,
 }
 
+// SetRoutes
+// @title Core Manager Internal API
+// @version 0.8.0
+// @description Provides access to internal management options for the multi-gateway core.
+// @license.name Apache-2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @BasePath /
 func SetRoutes(e *gin.Engine, a lib.Api) {
 	rg := e.Group("")
 	shared.Routes.Set(a, rg)
