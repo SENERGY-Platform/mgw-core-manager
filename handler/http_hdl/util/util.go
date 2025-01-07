@@ -30,10 +30,11 @@ func SetRoutes(a lib.Api, rg *gin.RouterGroup, routes []Route) {
 	set := make(map[string]struct{})
 	for _, route := range routes {
 		m, p, hf := route(a)
-		if _, ok := set[m+p]; ok {
+		key := m + rg.BasePath() + p
+		if _, ok := set[key]; ok {
 			panic("duplicate route: " + m + " " + path.Join(rg.BasePath(), p))
 		}
-		set[m+p] = struct{}{}
+		set[key] = struct{}{}
 		rg.Handle(m, p, hf)
 		util.Logger.Debug("set route: " + m + " " + path.Join(rg.BasePath(), p))
 	}
