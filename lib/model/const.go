@@ -28,6 +28,7 @@ const (
 	RestrictedPath     = "restricted"
 	EndpointsPath      = "endpoints"
 	EndpointsBatchPath = "endpoints-batch"
+	AliasPath          = "alias"
 	CleanupPath        = "cleanup"
 	ImagesPath         = "images"
 	LogsPath           = "logs"
