@@ -57,3 +57,7 @@ type EndpointFilter struct {
 	Ref    string
 	Labels map[string]string
 }
+
+type EndpointAliasReq struct {
+	Path string `json:"path"`
+}
