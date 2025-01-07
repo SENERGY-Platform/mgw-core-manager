@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 InfAI (CC SES)
+ * Copyright 2025 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package http_hdl
+package standard
 
 import (
 	"github.com/SENERGY-Platform/mgw-core-manager/lib"
@@ -29,7 +29,7 @@ type purgeImagesQuery struct {
 	ExcludeTag string `form:"exclude_tag"`
 }
 
-func setPatchPurgeImagesH(a lib.Api, rg *gin.RouterGroup) {
+func SetPatchPurgeImagesH(a lib.Api, rg *gin.RouterGroup) {
 	rg.PATCH(path.Join(lib_model.CleanupPath, lib_model.ImagesPath), func(gc *gin.Context) {
 		query := purgeImagesQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {

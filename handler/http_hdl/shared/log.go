@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 InfAI (CC SES)
+ * Copyright 2025 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package http_hdl
+package shared
 
 import (
 	"github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib/model"
@@ -30,7 +30,7 @@ type logQuery struct {
 	MaxLines int `form:"max_lines"`
 }
 
-func setGetLogsH(a lib.Api, rg *gin.RouterGroup) {
+func SetGetLogsH(a lib.Api, rg *gin.RouterGroup) {
 	rg.GET(lib_model.LogsPath, func(gc *gin.Context) {
 		logs, err := a.ListLogs(gc.Request.Context())
 		if err != nil {
@@ -41,7 +41,7 @@ func setGetLogsH(a lib.Api, rg *gin.RouterGroup) {
 	})
 }
 
-func setGetLogH(a lib.Api, rg *gin.RouterGroup) {
+func SetGetLogH(a lib.Api, rg *gin.RouterGroup) {
 	rg.GET(path.Join(lib_model.LogsPath, ":id"), func(gc *gin.Context) {
 		query := logQuery{}
 		if err := gc.ShouldBindQuery(&query); err != nil {

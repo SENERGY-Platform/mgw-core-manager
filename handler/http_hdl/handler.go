@@ -18,6 +18,8 @@ package http_hdl
 
 import (
 	gin_mw "github.com/SENERGY-Platform/gin-middleware"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/restricted"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/standard"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
@@ -32,7 +34,7 @@ func New(a lib.Api, staticHeader map[string]string) *gin.Engine {
 		return requestid.Get(gc)
 	}), gin_mw.ErrorHandler(util.GetStatusCode, ", "), gin.Recovery())
 	httpHandler.UseRawPath = true
-	setStdRoutes(httpHandler, a)
-	setRstRoutes(httpHandler, a)
+	standard.SetRoutes(httpHandler, a)
+	restricted.SetRoutes(httpHandler, a)
 	return httpHandler
 }

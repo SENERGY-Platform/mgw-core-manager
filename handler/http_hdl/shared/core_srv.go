@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 InfAI (CC SES)
+ * Copyright 2025 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package http_hdl
+package shared
 
 import (
 	"github.com/SENERGY-Platform/mgw-core-manager/lib"
@@ -24,7 +24,7 @@ import (
 	"path"
 )
 
-func setGetCoreServicesH(a lib.Api, rg *gin.RouterGroup) {
+func SetGetCoreServicesH(a lib.Api, rg *gin.RouterGroup) {
 	rg.GET(lib_model.CoreServicesPath, func(gc *gin.Context) {
 		services, err := a.GetCoreServices(gc.Request.Context())
 		if err != nil {
@@ -35,7 +35,7 @@ func setGetCoreServicesH(a lib.Api, rg *gin.RouterGroup) {
 	})
 }
 
-func setGetCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
+func SetGetCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
 	rg.GET(path.Join(lib_model.CoreServicesPath, ":name"), func(gc *gin.Context) {
 		service, err := a.GetCoreService(gc.Request.Context(), gc.Param("name"))
 		if err != nil {
@@ -46,7 +46,7 @@ func setGetCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
 	})
 }
 
-func setPatchRestartCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
+func SetPatchRestartCoreServiceH(a lib.Api, rg *gin.RouterGroup) {
 	rg.PATCH(path.Join(lib_model.CoreServicesPath, ":name", lib_model.RestartPath), func(gc *gin.Context) {
 		jID, err := a.RestartCoreService(gc.Request.Context(), gc.Param("name"))
 		if err != nil {

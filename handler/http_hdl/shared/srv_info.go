@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 InfAI (CC SES)
+ * Copyright 2025 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package http_hdl
+package shared
 
 import (
 	"github.com/SENERGY-Platform/mgw-core-manager/lib"
@@ -23,7 +23,7 @@ import (
 	"net/http"
 )
 
-func setGetSrvInfo(a lib.Api, rg *gin.RouterGroup) {
+func SetGetSrvInfo(a lib.Api, rg *gin.RouterGroup) {
 	rg.GET(lib_model.SrvInfoPath, func(gc *gin.Context) {
 		gc.JSON(http.StatusOK, a.GetSrvInfo(gc.Request.Context()))
 	})
