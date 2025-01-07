@@ -35,38 +35,6 @@ type deleteEndpointBatchQuery struct {
 	Labels string `form:"labels"`
 }
 
-func PostEndpointH(a lib.Api, rg *gin.RouterGroup) {
-	rg.POST(lib_model.EndpointsPath, func(gc *gin.Context) {
-		query := postEndpointQuery{}
-		if err := gc.ShouldBindQuery(&query); err != nil {
-			_ = gc.Error(lib_model.NewInvalidInputError(err))
-			return
-		}
-		var jID string
-		var err error
-		var aliasReq lib_model.EndpointAliasReq
-		if err = gc.ShouldBindJSON(&aliasReq); err != nil {
-			_ = gc.Error(lib_model.NewInvalidInputError(err))
-			return
-		}
-		switch query.Action {
-		case "gui":
-			jID, err = a.AddDefaultGuiEndpoint(gc.Request.Context(), aliasReq.ParentID)
-			if err != nil {
-				_ = gc.Error(err)
-				return
-			}
-		default:
-			jID, err = a.AddEndpointAlias(gc.Request.Context(), aliasReq.ParentID, aliasReq.Path)
-			if err != nil {
-				_ = gc.Error(err)
-				return
-			}
-		}
-		gc.String(http.StatusOK, jID)
-	})
-}
-
 func DeleteEndpointH(a lib.Api, rg *gin.RouterGroup) {
 	rg.DELETE(path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
 		jID, err := a.RemoveEndpoint(gc.Request.Context(), gc.Param("id"), true)

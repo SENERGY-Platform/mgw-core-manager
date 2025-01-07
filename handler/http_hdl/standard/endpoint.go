@@ -25,56 +25,36 @@ import (
 	"path"
 )
 
-type postEndpointQuery struct {
-	Action string `form:"action"`
-}
-
 type deleteEndpointBatchQuery struct {
 	IDs    string `form:"ids"`
 	Ref    string `form:"ref"`
 	Labels string `form:"labels"`
 }
 
+// PostEndpointH
+// @Summary Create HTTP endpoint
+// @Description	Create an HTTP endpoint accessible via the core reverse proxy.
+// @Tags Endpoints
+// @Accept json
+// @Produce	plain
+// @Param endpoint body lib_model.EndpointBase true "endpoint information"
+// @Success	200 {string} string "job ID"
+// @Failure	400 {string} string "error message"
+// @Failure	500 {string} string "error message"
+// @Router /endpoints [post]
 func PostEndpointH(a lib.Api, rg *gin.RouterGroup) {
 	rg.POST(lib_model.EndpointsPath, func(gc *gin.Context) {
-		query := postEndpointQuery{}
-		if err := gc.ShouldBindQuery(&query); err != nil {
+		var jID string
+		var err error
+		var endpointBase lib_model.EndpointBase
+		if err = gc.ShouldBindJSON(&endpointBase); err != nil {
 			_ = gc.Error(lib_model.NewInvalidInputError(err))
 			return
 		}
-		var jID string
-		var err error
-		if query.Action != "" {
-			var aliasReq lib_model.EndpointAliasReq
-			if err = gc.ShouldBindJSON(&aliasReq); err != nil {
-				_ = gc.Error(lib_model.NewInvalidInputError(err))
-				return
-			}
-			switch query.Action {
-			case "gui":
-				jID, err = a.AddDefaultGuiEndpoint(gc.Request.Context(), aliasReq.ParentID)
-				if err != nil {
-					_ = gc.Error(err)
-					return
-				}
-			case "alias":
-				jID, err = a.AddEndpointAlias(gc.Request.Context(), aliasReq.ParentID, aliasReq.Path)
-				if err != nil {
-					_ = gc.Error(err)
-					return
-				}
-			}
-		} else {
-			var endpointBase lib_model.EndpointBase
-			if err = gc.ShouldBindJSON(&endpointBase); err != nil {
-				_ = gc.Error(lib_model.NewInvalidInputError(err))
-				return
-			}
-			jID, err = a.SetEndpoint(gc.Request.Context(), endpointBase)
-			if err != nil {
-				_ = gc.Error(err)
-				return
-			}
+		jID, err = a.SetEndpoint(gc.Request.Context(), endpointBase)
+		if err != nil {
+			_ = gc.Error(err)
+			return
 		}
 		gc.String(http.StatusOK, jID)
 	})

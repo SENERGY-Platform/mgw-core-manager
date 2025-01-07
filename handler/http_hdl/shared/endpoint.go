@@ -64,3 +64,33 @@ func GetEndpointH(a lib.Api, rg *gin.RouterGroup) {
 		gc.JSON(http.StatusOK, endpoint)
 	})
 }
+
+// PostEndpointAliasH
+// @Summary Create HTTP endpoint alias
+// @Description	Create an endpoint alias.
+// @Tags Endpoints
+// @Accept json
+// @Produce	plain
+// @Param alias body lib_model.EndpointAliasReq false "endpoint alias information"
+// @Success	200 {string} string "job ID"
+// @Failure	400 {string} string "error message"
+// @Failure	404 {string} string "error message"
+// @Failure	500 {string} string "error message"
+// @Router /endpoints/{id}/alias [post]
+func PostEndpointAliasH(a lib.Api, rg *gin.RouterGroup) {
+	rg.POST(path.Join(lib_model.EndpointsPath, ":id", lib_model.AliasPath), func(gc *gin.Context) {
+		var jID string
+		var err error
+		var aliasReq lib_model.EndpointAliasReq
+		if err = gc.ShouldBindJSON(&aliasReq); err != nil {
+			_ = gc.Error(lib_model.NewInvalidInputError(err))
+			return
+		}
+		jID, err = a.AddEndpointAlias(gc.Request.Context(), gc.Param("id"), aliasReq.Path)
+		if err != nil {
+			_ = gc.Error(err)
+			return
+		}
+		gc.String(http.StatusOK, jID)
+	})
+}

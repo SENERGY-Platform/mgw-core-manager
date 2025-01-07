@@ -23,6 +23,7 @@ import (
 var Routes = util.Routes{
 	GetEndpointsH,
 	GetEndpointH,
+	PostEndpointAliasH,
 	GetCoreServicesH,
 	GetCoreServiceH,
 	PatchRestartCoreServiceH,

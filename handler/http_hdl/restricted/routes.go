@@ -26,7 +26,6 @@ import (
 
 var routes = util.Routes{
 	DeleteEndpointH,
-	PostEndpointH,
 	DeleteEndpointH,
 	DeleteEndpointBatchH,
 }
