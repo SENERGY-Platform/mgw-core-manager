@@ -24,6 +24,14 @@ import (
 	"path"
 )
 
+// GetCoreServicesH
+// @Summary List services
+// @Description	List core services including image and container information.
+// @Tags Core Services
+// @Produce	json
+// @Success	200 {object} map[string]lib_model.CoreService "services"
+// @Failure	500 {string} string "error message"
+// @Router /core-services [get]
 func GetCoreServicesH(a lib.Api) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, lib_model.CoreServicesPath, func(gc *gin.Context) {
 		services, err := a.GetCoreServices(gc.Request.Context())
@@ -35,6 +43,15 @@ func GetCoreServicesH(a lib.Api) (string, string, gin.HandlerFunc) {
 	}
 }
 
+// GetCoreServiceH
+// @Summary Get service
+// @Description	Get core service including image and container information.
+// @Tags Core Services
+// @Produce	json
+// @Param name path string true "service name"
+// @Success	200 {object} lib_model.CoreService "service"
+// @Failure	500 {string} string "error message"
+// @Router /core-services/{name} [get]
 func GetCoreServiceH(a lib.Api) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, path.Join(lib_model.CoreServicesPath, ":name"), func(gc *gin.Context) {
 		service, err := a.GetCoreService(gc.Request.Context(), gc.Param("name"))
@@ -46,6 +63,15 @@ func GetCoreServiceH(a lib.Api) (string, string, gin.HandlerFunc) {
 	}
 }
 
+// PatchRestartCoreServiceH
+// @Summary Restart service
+// @Description	Restart core service container.
+// @Tags Core Services
+// @Produce	plain
+// @Param name path string true "service name"
+// @Success	200 {string} string "job ID"
+// @Failure	500 {string} string "error message"
+// @Router /core-services/{name}/restart [patch]
 func PatchRestartCoreServiceH(a lib.Api) (string, string, gin.HandlerFunc) {
 	return http.MethodPatch, path.Join(lib_model.CoreServicesPath, ":name", lib_model.RestartPath), func(gc *gin.Context) {
 		jID, err := a.RestartCoreService(gc.Request.Context(), gc.Param("name"))

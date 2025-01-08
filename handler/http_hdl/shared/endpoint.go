@@ -32,6 +32,18 @@ type endpointFilterQuery struct {
 	Labels string `form:"labels"`
 }
 
+// GetEndpointsH
+// @Summary List endpoints
+// @Description	List HTTP endpoints.
+// @Tags HTTP Endpoints
+// @Produce	json
+// @Param ids query string false "comma seperated list of endpoint ids (e.g.: id1,id2,...)"
+// @Param ref query string false "reference value (e.g.: a foreign id)"
+// @Param labels query string false "comma seperated list of labels (e.g.: key1=val1,key2=val2,...)"
+// @Success	200 {object} map[string]lib_model.Endpoint "endpoints"
+// @Failure	400 {string} string "error message"
+// @Failure	500 {string} string "error message"
+// @Router /endpoints [get]
 func GetEndpointsH(a lib.Api) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, lib_model.EndpointsPath, func(gc *gin.Context) {
 		query := endpointFilterQuery{}
@@ -54,6 +66,16 @@ func GetEndpointsH(a lib.Api) (string, string, gin.HandlerFunc) {
 	}
 }
 
+// GetEndpointH
+// @Summary Get endpoint
+// @Description	Get HTTP endpoint.
+// @Tags HTTP Endpoints
+// @Produce	json
+// @Param id path string true "endpoint id"
+// @Success	200 {object} map[string]lib_model.Endpoint "endpoints"
+// @Failure	404 {string} string "error message"
+// @Failure	500 {string} string "error message"
+// @Router /endpoints [get]
 func GetEndpointH(a lib.Api) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
 		endpoint, err := a.GetEndpoint(gc.Request.Context(), gc.Param("id"))
@@ -66,11 +88,12 @@ func GetEndpointH(a lib.Api) (string, string, gin.HandlerFunc) {
 }
 
 // PostEndpointAliasH
-// @Summary Create HTTP endpoint alias
+// @Summary Create endpoint alias
 // @Description	Create an endpoint alias.
-// @Tags Endpoints
+// @Tags HTTP Endpoints
 // @Accept json
 // @Produce	plain
+// @Param id path string true "endpoint id"
 // @Param alias body lib_model.EndpointAliasReq false "endpoint alias information"
 // @Success	200 {string} string "job ID"
 // @Failure	400 {string} string "error message"

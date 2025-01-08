@@ -35,6 +35,15 @@ type deleteEndpointBatchQuery struct {
 	Labels string `form:"labels"`
 }
 
+// DeleteEndpointH
+// @Summary Delete endpoint
+// @Description	Remove an HTTP endpoint.
+// @Tags HTTP Endpoints
+// @Produce	plain
+// @Param id path string true "endpoint id"
+// @Success	200 {string} string "job ID"
+// @Failure	500 {string} string "error message"
+// @Router /endpoints/{id} [delete]
 func DeleteEndpointH(a lib.Api) (string, string, gin.HandlerFunc) {
 	return http.MethodDelete, path.Join(lib_model.EndpointsPath, ":id"), func(gc *gin.Context) {
 		jID, err := a.RemoveEndpoint(gc.Request.Context(), gc.Param("id"), true)
@@ -46,6 +55,18 @@ func DeleteEndpointH(a lib.Api) (string, string, gin.HandlerFunc) {
 	}
 }
 
+// DeleteEndpointBatchH
+// @Summary Delete endpoints
+// @Description	Remove multiple HTTP endpoints.
+// @Tags HTTP Endpoints
+// @Produce	plain
+// @Param ids query string false "comma seperated list of endpoint ids (e.g.: id1,id2,...)"
+// @Param ref query string false "reference value (e.g.: a foreign id)"
+// @Param labels query string false "comma seperated list of labels (e.g.: key1=val1,key2=val2,...)"
+// @Success	200 {string} string "job ID"
+// @Failure	400 {string} string "error message"
+// @Failure	500 {string} string "error message"
+// @Router /endpoints-batch} [delete]
 func DeleteEndpointBatchH(a lib.Api) (string, string, gin.HandlerFunc) {
 	return http.MethodDelete, lib_model.EndpointsBatchPath, func(gc *gin.Context) {
 		query := deleteEndpointBatchQuery{}
