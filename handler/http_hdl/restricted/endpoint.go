@@ -25,10 +25,6 @@ import (
 	"path"
 )
 
-type postEndpointQuery struct {
-	Action string `form:"action"`
-}
-
 type deleteEndpointBatchQuery struct {
 	IDs    string `form:"ids"`
 	Ref    string `form:"ref"`
