@@ -17,8 +17,8 @@
 package restricted
 
 import (
-	_ "github.com/SENERGY-Platform/mgw-core-manager/docs"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/shared"
+	_ "github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/swagger_docs"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/util"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
