@@ -17,10 +17,13 @@
 package standard
 
 import (
+	_ "github.com/SENERGY-Platform/mgw-core-manager/docs"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/shared"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/util"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var routes = []util.Route{
@@ -42,4 +45,5 @@ func SetRoutes(e *gin.Engine, a lib.Api) {
 	rg := e.Group("")
 	routes = append(routes, shared.Routes...)
 	util.SetRoutes(a, rg, routes)
+	rg.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("standard")))
 }
