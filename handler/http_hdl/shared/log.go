@@ -30,6 +30,14 @@ type logQuery struct {
 	MaxLines int `form:"max_lines"`
 }
 
+// GetLogsH
+// @Summary List logs
+// @Description	List logs of core services not running as containers.
+// @Tags Logs
+// @Produce	json
+// @Success	200 {object} map[string]lib_model.Log "logs"
+// @Failure	500 {string} string "error message"
+// @Router /logs [get]
 func GetLogsH(a lib.Api) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, lib_model.LogsPath, func(gc *gin.Context) {
 		logs, err := a.ListLogs(gc.Request.Context())
@@ -41,6 +49,18 @@ func GetLogsH(a lib.Api) (string, string, gin.HandlerFunc) {
 	}
 }
 
+// GetLogH
+// @Summary Get Log
+// @Description	Get log of a core services.
+// @Tags Logs
+// @Produce	plain
+// @Param id path string true "log id"
+// @Param max_lines query string false "maximum number of lines to return"
+// @Success	200 {string} string "log entries"
+// @Failure	400 {string} string "error message"
+// @Failure	404 {string} string "error message"
+// @Failure	500 {string} string "error message"
+// @Router /logs/{id} [get]
 func GetLogH(a lib.Api) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, path.Join(lib_model.LogsPath, ":id"), func(gc *gin.Context) {
 		query := logQuery{}
