@@ -1,0 +1,631 @@
+basePath: /
+definitions:
+  lib.Job:
+    properties:
+      canceled:
+        type: string
+      completed:
+        type: string
+      created:
+        type: string
+      description:
+        type: string
+      error:
+        $ref: '#/definitions/lib.JobErr'
+      id:
+        type: string
+      result: {}
+      started:
+        type: string
+    type: object
+  lib.JobErr:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  lib.MemStats:
+    properties:
+      alloc:
+        type: integer
+      alloc_total:
+        type: integer
+      gc_cycles:
+        type: integer
+      sys_total:
+        type: integer
+    type: object
+  lib.SrvInfo:
+    properties:
+      mem_stats:
+        $ref: '#/definitions/lib.MemStats'
+      name:
+        type: string
+      up_time:
+        $ref: '#/definitions/time.Duration'
+      version:
+        type: string
+    type: object
+  model.CoreService:
+    properties:
+      container:
+        $ref: '#/definitions/model.SrvContainer'
+      image:
+        type: string
+      name:
+        type: string
+    type: object
+  model.Endpoint:
+    properties:
+      ext_path:
+        type: string
+      host:
+        type: string
+      id:
+        type: string
+      int_path:
+        type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      location:
+        type: string
+      parent_id:
+        type: string
+      port:
+        type: integer
+      proxy_conf:
+        $ref: '#/definitions/model.ProxyConfig'
+      ref:
+        type: string
+      string_sub:
+        $ref: '#/definitions/model.StringSub'
+      type:
+        $ref: '#/definitions/model.EndpointType'
+    type: object
+  model.EndpointAliasReq:
+    properties:
+      path:
+        type: string
+    type: object
+  model.EndpointBase:
+    properties:
+      ext_path:
+        type: string
+      host:
+        type: string
+      int_path:
+        type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      port:
+        type: integer
+      proxy_conf:
+        $ref: '#/definitions/model.ProxyConfig'
+      ref:
+        type: string
+      string_sub:
+        $ref: '#/definitions/model.StringSub'
+    type: object
+  model.EndpointType:
+    enum:
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - StandardEndpoint
+    - AliasEndpoint
+    - DefaultGuiEndpoint
+  model.Log:
+    properties:
+      id:
+        type: string
+      service_name:
+        type: string
+    type: object
+  model.ProxyConfig:
+    properties:
+      headers:
+        additionalProperties:
+          type: string
+        type: object
+      read_timeout:
+        $ref: '#/definitions/time.Duration'
+      websocket:
+        type: boolean
+    type: object
+  model.SrvContainer:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      state:
+        type: string
+    type: object
+  model.StringSub:
+    properties:
+      filters:
+        additionalProperties:
+          type: string
+        description: orgStr:newStr
+        type: object
+      mime_types:
+        description: empty -> all types
+        items:
+          type: string
+        type: array
+      replace_once:
+        description: false -> replace repeatedly
+        type: boolean
+    type: object
+  time.Duration:
+    enum:
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    type: integer
+    x-enum-varnames:
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+info:
+  contact: {}
+  description: Provides access to internal management options for the multi-gateway
+    core.
+  license:
+    name: Apache-2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Core Manager Internal API
+  version: 0.8.2
+paths:
+  /cleanup/images:
+    patch:
+      description: Purge unused images of a repository.
+      parameters:
+      - description: docker repository name
+        in: query
+        name: repository
+        required: true
+        type: string
+      - description: image tag name to exclude
+        in: query
+        name: exclude_tag
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: job ID
+          schema:
+            type: string
+        "400":
+          description: error message
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Purge images
+      tags:
+      - Docker
+  /core-services:
+    get:
+      description: List core services including image and container information.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: services
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/model.CoreService'
+            type: object
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: List services
+      tags:
+      - Core Services
+  /core-services/{name}:
+    get:
+      description: Get core service including image and container information.
+      parameters:
+      - description: service name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: service
+          schema:
+            $ref: '#/definitions/model.CoreService'
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Get service
+      tags:
+      - Core Services
+  /core-services/{name}/restart:
+    patch:
+      description: Restart core service container.
+      parameters:
+      - description: service name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: job ID
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Restart service
+      tags:
+      - Core Services
+  /endpoints:
+    get:
+      description: Get HTTP endpoint.
+      parameters:
+      - description: endpoint id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: endpoints
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/model.Endpoint'
+            type: object
+        "404":
+          description: error message
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Get endpoint
+      tags:
+      - HTTP Endpoints
+    post:
+      consumes:
+      - application/json
+      description: Create an HTTP endpoint accessible via the core reverse proxy.
+      parameters:
+      - description: endpoint information
+        in: body
+        name: endpoint
+        required: true
+        schema:
+          $ref: '#/definitions/model.EndpointBase'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: job ID
+          schema:
+            type: string
+        "400":
+          description: error message
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Create endpoint
+      tags:
+      - HTTP Endpoints
+  /endpoints-batch:
+    delete:
+      description: Remove multiple HTTP endpoints.
+      parameters:
+      - description: 'comma seperated list of endpoint ids (e.g.: id1,id2,...)'
+        in: query
+        name: ids
+        type: string
+      - description: 'reference value (e.g.: a foreign id)'
+        in: query
+        name: ref
+        type: string
+      - description: 'comma seperated list of labels (e.g.: key1=val1,key2=val2,...)'
+        in: query
+        name: labels
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: job ID
+          schema:
+            type: string
+        "400":
+          description: error message
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Delete endpoints
+      tags:
+      - HTTP Endpoints
+    post:
+      consumes:
+      - application/json
+      description: Create multiple HTTP endpoints accessible via the core reverse
+        proxy.
+      parameters:
+      - description: list of endpoint information items
+        in: body
+        name: endpoints
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/model.EndpointBase'
+          type: array
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: job ID
+          schema:
+            type: string
+        "400":
+          description: error message
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Create endpoints
+      tags:
+      - HTTP Endpoints
+  /endpoints/{id}:
+    delete:
+      description: Remove an HTTP endpoint.
+      parameters:
+      - description: endpoint id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: job ID
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Delete endpoint
+      tags:
+      - HTTP Endpoints
+  /endpoints/{id}/alias:
+    post:
+      consumes:
+      - application/json
+      description: Create an endpoint alias.
+      parameters:
+      - description: endpoint id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: endpoint alias information
+        in: body
+        name: alias
+        schema:
+          $ref: '#/definitions/model.EndpointAliasReq'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: job ID
+          schema:
+            type: string
+        "400":
+          description: error message
+          schema:
+            type: string
+        "404":
+          description: error message
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Create endpoint alias
+      tags:
+      - HTTP Endpoints
+  /info:
+    get:
+      description: Get basic service and runtime information.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: info
+          schema:
+            $ref: '#/definitions/lib.SrvInfo'
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Get service info
+      tags:
+      - Info
+  /jobs:
+    get:
+      description: List all jobs.
+      parameters:
+      - description: status to filter by (pending,running,canceled,completed,error,ok)
+        in: query
+        name: status
+        type: string
+      - description: sort in descending order
+        in: query
+        name: sort_desc
+        type: boolean
+      - description: list jobs since timestamp
+        in: query
+        name: since
+        type: string
+      - description: list jobs until timestamp
+        in: query
+        name: until
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: jobs
+          schema:
+            items:
+              $ref: '#/definitions/lib.Job'
+            type: array
+        "400":
+          description: error message
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: List jobs
+      tags:
+      - Jobs
+  /jobs/{id}:
+    get:
+      description: Get a job.
+      parameters:
+      - description: job id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: job
+          schema:
+            $ref: '#/definitions/lib.Job'
+        "404":
+          description: error message
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Get job
+      tags:
+      - Jobs
+  /jobs/{id}/cancel:
+    patch:
+      description: Cancels a job.
+      parameters:
+      - description: job id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: error message
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Cancel job
+      tags:
+      - Jobs
+  /logs:
+    get:
+      description: List logs of core services not running as containers.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: logs
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/model.Log'
+            type: object
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: List logs
+      tags:
+      - Logs
+  /logs/{id}:
+    get:
+      description: Get log of a core services.
+      parameters:
+      - description: log id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: maximum number of lines to return
+        in: query
+        name: max_lines
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: log entries
+          schema:
+            type: string
+        "400":
+          description: error message
+          schema:
+            type: string
+        "404":
+          description: error message
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Get Log
+      tags:
+      - Logs
+swagger: "2.0"
