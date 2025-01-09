@@ -33,9 +33,9 @@ var routes = []util.Route{
 }
 
 // SetRoutes
-// @title Core Manager Public API
+// @title Core Manager API
 // @version 0.8.2
-// @description Provides access to public management options for the multi-gateway core.
+// @description Provides access to management functions for the multi-gateway core.
 // @license.name Apache-2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @BasePath /restricted

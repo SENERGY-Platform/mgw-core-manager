@@ -37,7 +37,7 @@ var routes = []util.Route{
 // SetRoutes
 // @title Core Manager Internal API
 // @version 0.8.2
-// @description Provides access to internal management options for the multi-gateway core.
+// @description Provides access to internal management functions for the multi-gateway core.
 // @license.name Apache-2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @BasePath /
