@@ -1,7 +1,7 @@
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
-github.com/SENERGY-Platform/gin-middleware v0.4.4 h1:W7eM53CHt8rLBFYiY9MjvrWqPJGgizJIjxuU8lHRA8A=
-github.com/SENERGY-Platform/gin-middleware v0.4.4/go.mod h1:yN3QxrcPOy/NpoBWLw8uTpmD3hCwvzdCpgOeSOhT1cI=
+github.com/SENERGY-Platform/gin-middleware v0.5.1 h1:E3LxSnqwP1gLxwtz2FFwUMHzzovB42J/yBFt01og0nE=
+github.com/SENERGY-Platform/gin-middleware v0.5.1/go.mod h1:r91mZCds/Q2Hfxq5613VrwXdDF2dcL/UlAB28sWLve8=
 github.com/SENERGY-Platform/go-base-http-client v0.0.2 h1:sF4QDRkNjhnKQh6d8ujfxQRpeWzSTiBeYIK/aNWWOls=
 github.com/SENERGY-Platform/go-base-http-client v0.0.2/go.mod h1:NfKW/relIVTkMXhz4OqZlzJXYPQUYEKxwqou8D0B/Kw=
 github.com/SENERGY-Platform/go-cc-job-handler v0.1.2 h1:Ly7lwoyVC3YUAZ38OOfrvGfE8gtJqnJnhw7OzWR+/0M=
