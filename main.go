@@ -185,10 +185,15 @@ func main() {
 
 	coreManager := manager.New(coreServiceHdl, gwEndpointHdl, cleanupHdl, logHdl, jobHandler, srvInfoHdl)
 
-	httpHandler := http_hdl.New(coreManager, map[string]string{
+	httpHandler, err := http_hdl.New(coreManager, map[string]string{
 		lib_model.HeaderApiVer:  srvInfoHdl.GetVersion(),
 		lib_model.HeaderSrvName: srvInfoHdl.GetName(),
 	})
+	if err != nil {
+		util.Logger.Error(err)
+		ec = 1
+		return
+	}
 
 	listener, err := sb_util.NewUnixListener(config.Socket.Path, os.Getuid(), config.Socket.GroupID, config.Socket.FileMode)
 	if err != nil {

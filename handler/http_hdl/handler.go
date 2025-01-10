@@ -27,14 +27,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func New(a lib.Api, staticHeader map[string]string) *gin.Engine {
+func New(a lib.Api, staticHeader map[string]string) (*gin.Engine, error) {
 	gin.SetMode(gin.ReleaseMode)
 	httpHandler := gin.New()
 	httpHandler.Use(gin_mw.StaticHeaderHandler(staticHeader), requestid.New(requestid.WithCustomHeaderStrKey(lib_model.HeaderRequestID)), gin_mw.LoggerHandler(util.Logger, nil, func(gc *gin.Context) string {
 		return requestid.Get(gc)
 	}), gin_mw.ErrorHandler(util.GetStatusCode, ", "), gin.Recovery())
 	httpHandler.UseRawPath = true
-	standard.SetRoutes(httpHandler, a)
-	restricted.SetRoutes(httpHandler, a)
-	return httpHandler
+	err := standard.SetRoutes(httpHandler, a)
+	if err != nil {
+		return nil, err
+	}
+	err = restricted.SetRoutes(httpHandler, a)
+	if err != nil {
+		return nil, err
+	}
+	return httpHandler, nil
 }

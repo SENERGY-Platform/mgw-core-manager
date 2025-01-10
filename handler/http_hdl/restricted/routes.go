@@ -17,17 +17,18 @@
 package restricted
 
 import (
+	gin_mw "github.com/SENERGY-Platform/gin-middleware"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/shared"
 	_ "github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/swagger_docs"
-	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/util"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-var routes = []util.Route{
+var routes = gin_mw.Routes[lib.Api]{
 	DeleteEndpointH,
 	DeleteEndpointBatchH,
 }
@@ -39,9 +40,13 @@ var routes = []util.Route{
 // @license.name Apache-2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @BasePath /restricted
-func SetRoutes(e *gin.Engine, a lib.Api) {
+func SetRoutes(e *gin.Engine, a lib.Api) error {
 	rg := e.Group(lib_model.RestrictedPath)
 	routes = append(routes, shared.Routes...)
-	util.SetRoutes(a, rg, routes)
+	err := routes.Set(a, rg, util.Logger)
+	if err != nil {
+		return err
+	}
 	rg.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler(), ginSwagger.InstanceName("restricted")))
+	return nil
 }

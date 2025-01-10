@@ -17,28 +17,8 @@
 package util
 
 import (
-	"github.com/SENERGY-Platform/mgw-core-manager/lib"
-	"github.com/SENERGY-Platform/mgw-core-manager/util"
-	"github.com/gin-gonic/gin"
-	"path"
 	"strings"
 )
-
-type Route func(a lib.Api) (m, p string, hf gin.HandlerFunc)
-
-func SetRoutes(a lib.Api, rg *gin.RouterGroup, routes []Route) {
-	set := make(map[string]struct{})
-	for _, route := range routes {
-		m, p, hf := route(a)
-		key := m + rg.BasePath() + p
-		if _, ok := set[key]; ok {
-			panic("duplicate route: " + m + " " + path.Join(rg.BasePath(), p))
-		}
-		set[key] = struct{}{}
-		rg.Handle(m, p, hf)
-		util.Logger.Debug("set route: " + m + " " + path.Join(rg.BasePath(), p))
-	}
-}
 
 func GenLabels(sl []string) (l map[string]string) {
 	if len(sl) > 0 {

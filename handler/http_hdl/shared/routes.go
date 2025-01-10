@@ -17,10 +17,11 @@
 package shared
 
 import (
-	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl/util"
+	gin_mw "github.com/SENERGY-Platform/gin-middleware"
+	"github.com/SENERGY-Platform/mgw-core-manager/lib"
 )
 
-var Routes = []util.Route{
+var Routes = gin_mw.Routes[lib.Api]{
 	GetEndpointsH,
 	GetEndpointH,
 	PostEndpointAliasH,
