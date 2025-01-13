@@ -34,9 +34,9 @@ var routes = gin_mw.Routes[lib.Api]{
 }
 
 // SetRoutes
-// @title Core Manager API
+// @title Core Manager restricted API
 // @version 0.8.2
-// @description Provides access to management functions for the multi-gateway core.
+// @description Provides access to selected management functions for the multi-gateway core.
 // @license.name Apache-2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @BasePath /restricted
