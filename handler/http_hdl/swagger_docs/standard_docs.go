@@ -943,16 +943,24 @@ const docTemplatestandard = `{
         "time.Duration": {
             "type": "integer",
             "enum": [
+                -9223372036854775808,
+                9223372036854775807,
                 1,
                 1000,
                 1000000,
-                1000000000
+                1000000000,
+                60000000000,
+                3600000000000
             ],
             "x-enum-varnames": [
+                "minDuration",
+                "maxDuration",
                 "Nanosecond",
                 "Microsecond",
                 "Millisecond",
-                "Second"
+                "Second",
+                "Minute",
+                "Hour"
             ]
         }
     }
@@ -964,8 +972,8 @@ var SwaggerInfostandard = &swag.Spec{
 	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "Core Manager Internal API",
-	Description:      "Provides access to internal management options for the multi-gateway core.",
+	Title:            "Core Manager API",
+	Description:      "Provides access to management functions for the multi-gateway core.",
 	InfoInstanceName: "standard",
 	SwaggerTemplate:  docTemplatestandard,
 	LeftDelim:        "{{",

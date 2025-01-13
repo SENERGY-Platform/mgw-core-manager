@@ -157,12 +157,12 @@ definitions:
     - Second
 info:
   contact: {}
-  description: Provides access to public management options for the multi-gateway
+  description: Provides access to selected management functions for the multi-gateway
     core.
   license:
     name: Apache-2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  title: Core Manager Public API
+  title: Core Manager restricted API
   version: 0.8.2
 paths:
   /core-services:

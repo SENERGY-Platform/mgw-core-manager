@@ -166,24 +166,31 @@ definitions:
     type: object
   time.Duration:
     enum:
+    - -9223372036854775808
+    - 9223372036854775807
     - 1
     - 1000
     - 1000000
     - 1000000000
+    - 60000000000
+    - 3600000000000
     type: integer
     x-enum-varnames:
+    - minDuration
+    - maxDuration
     - Nanosecond
     - Microsecond
     - Millisecond
     - Second
+    - Minute
+    - Hour
 info:
   contact: {}
-  description: Provides access to internal management options for the multi-gateway
-    core.
+  description: Provides access to management functions for the multi-gateway core.
   license:
     name: Apache-2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  title: Core Manager Internal API
+  title: Core Manager API
   version: 0.8.2
 paths:
   /cleanup/images:

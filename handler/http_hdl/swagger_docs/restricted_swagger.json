@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Provides access to public management options for the multi-gateway core.",
-        "title": "Core Manager Public API",
+        "description": "Provides access to selected management functions for the multi-gateway core.",
+        "title": "Core Manager restricted API",
         "contact": {},
         "license": {
             "name": "Apache-2.0",
