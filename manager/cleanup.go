@@ -22,7 +22,6 @@ import (
 	"fmt"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
-	"strings"
 	"time"
 )
 
@@ -73,15 +72,8 @@ func (m *Manager) purgeCoreImages(ctx context.Context, delay time.Duration) erro
 		return err
 	}
 	for _, service := range services {
-		parts := strings.Split(service.Image, ":")
-		if len(parts) != 2 {
-			util.Logger.Errorf("purge core images: malformed image string '%s'", service.Image)
-			continue
-		}
-		if parts[0] != "" {
-			if err = m.cleanupHdl.PurgeImages(ctx, parts[0], parts[1]); err != nil {
-				util.Logger.Error("purge core images:", err)
-			}
+		if err = m.cleanupHdl.PurgeImages(ctx, service.Image.Repository, service.Image.Tag); err != nil {
+			util.Logger.Error("purge core images:", err)
 		}
 	}
 	return nil

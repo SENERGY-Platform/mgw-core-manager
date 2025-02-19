@@ -554,6 +554,17 @@ const docTemplaterestricted = `{
         }
     },
     "definitions": {
+        "github_com_SENERGY-Platform_mgw-core-manager_lib_model.Image": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                }
+            }
+        },
         "lib.Job": {
             "type": "object",
             "properties": {
@@ -633,7 +644,7 @@ const docTemplaterestricted = `{
                     "$ref": "#/definitions/model.SrvContainer"
                 },
                 "image": {
-                    "type": "string"
+                    "$ref": "#/definitions/github_com_SENERGY-Platform_mgw-core-manager_lib_model.Image"
                 },
                 "name": {
                     "type": "string"
@@ -773,16 +784,40 @@ const docTemplaterestricted = `{
         "time.Duration": {
             "type": "integer",
             "enum": [
+                -9223372036854775808,
+                9223372036854775807,
                 1,
                 1000,
                 1000000,
-                1000000000
+                1000000000,
+                60000000000,
+                3600000000000,
+                -9223372036854775808,
+                9223372036854775807,
+                1,
+                1000,
+                1000000,
+                1000000000,
+                60000000000,
+                3600000000000
             ],
             "x-enum-varnames": [
+                "minDuration",
+                "maxDuration",
                 "Nanosecond",
                 "Microsecond",
                 "Millisecond",
-                "Second"
+                "Second",
+                "Minute",
+                "Hour",
+                "minDuration",
+                "maxDuration",
+                "Nanosecond",
+                "Microsecond",
+                "Millisecond",
+                "Second",
+                "Minute",
+                "Hour"
             ]
         }
     }

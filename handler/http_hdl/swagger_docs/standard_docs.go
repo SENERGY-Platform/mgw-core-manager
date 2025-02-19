@@ -692,6 +692,17 @@ const docTemplatestandard = `{
         }
     },
     "definitions": {
+        "github_com_SENERGY-Platform_mgw-core-manager_lib_model.Image": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                }
+            }
+        },
         "lib.Job": {
             "type": "object",
             "properties": {
@@ -771,7 +782,7 @@ const docTemplatestandard = `{
                     "$ref": "#/definitions/model.SrvContainer"
                 },
                 "image": {
-                    "type": "string"
+                    "$ref": "#/definitions/github_com_SENERGY-Platform_mgw-core-manager_lib_model.Image"
                 },
                 "name": {
                     "type": "string"

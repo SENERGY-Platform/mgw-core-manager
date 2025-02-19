@@ -25,6 +25,7 @@ import (
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"gopkg.in/yaml.v3"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -43,7 +44,8 @@ type Handler struct {
 type service struct {
 	Name          string
 	ContainerName string
-	Image         string
+	ImageName     string
+	ImageTag      string
 	CtrHandler    *CtrHandler
 }
 
@@ -75,10 +77,12 @@ func (h *Handler) Init(composePath string) error {
 	}
 	h.services = make(map[string]service)
 	for name, srv := range cFile.Services {
+		imgName, imgTag := parseImageStr(srv.Image)
 		h.services[name] = service{
 			Name:          name,
 			ContainerName: srv.ContainerName,
-			Image:         srv.Image,
+			ImageName:     imgName,
+			ImageTag:      imgTag,
 			CtrHandler: &CtrHandler{
 				cewClient:     h.cewClient,
 				srvName:       name,
@@ -113,7 +117,10 @@ func (h *Handler) List(ctx context.Context) (map[string]lib_model.CoreService, e
 		cs := lib_model.CoreService{
 			Name:      name,
 			Container: lib_model.SrvContainer{Name: srv.ContainerName},
-			Image:     srv.Image,
+			Image: lib_model.Image{
+				Repository: srv.ImageName,
+				Tag:        srv.ImageTag,
+			},
 		}
 		ctr, ok := ctrMap[srv.ContainerName]
 		if !ok {
@@ -135,7 +142,10 @@ func (h *Handler) Get(ctx context.Context, name string) (lib_model.CoreService, 
 	cs := lib_model.CoreService{
 		Name:      srv.Name,
 		Container: lib_model.SrvContainer{Name: srv.ContainerName},
-		Image:     srv.Image,
+		Image: lib_model.Image{
+			Repository: srv.ImageName,
+			Tag:        srv.ImageTag,
+		},
 	}
 	ctxWt, cf := context.WithTimeout(ctx, h.httpTimeout)
 	defer cf()
@@ -167,4 +177,15 @@ func (h *Handler) GetCtrHandler(name string) (*CtrHandler, error) {
 		return nil, fmt.Errorf("service '%s' not defined", name)
 	}
 	return srv.CtrHandler, nil
+}
+
+func parseImageStr(s string) (name, tag string) {
+	parts := strings.Split(s, ":")
+	if len(parts) > 0 {
+		name = parts[0]
+		if len(parts) > 1 {
+			tag = parts[1]
+		}
+	}
+	return
 }

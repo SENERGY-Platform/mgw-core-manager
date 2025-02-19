@@ -1,5 +1,12 @@
 basePath: /restricted
 definitions:
+  github_com_SENERGY-Platform_mgw-core-manager_lib_model.Image:
+    properties:
+      repository:
+        type: string
+      tag:
+        type: string
+    type: object
   lib.Job:
     properties:
       canceled:
@@ -52,7 +59,7 @@ definitions:
       container:
         $ref: '#/definitions/model.SrvContainer'
       image:
-        type: string
+        $ref: '#/definitions/github_com_SENERGY-Platform_mgw-core-manager_lib_model.Image'
       name:
         type: string
     type: object
@@ -145,16 +152,40 @@ definitions:
     type: object
   time.Duration:
     enum:
+    - -9223372036854775808
+    - 9223372036854775807
     - 1
     - 1000
     - 1000000
     - 1000000000
+    - 60000000000
+    - 3600000000000
+    - -9223372036854775808
+    - 9223372036854775807
+    - 1
+    - 1000
+    - 1000000
+    - 1000000000
+    - 60000000000
+    - 3600000000000
     type: integer
     x-enum-varnames:
+    - minDuration
+    - maxDuration
     - Nanosecond
     - Microsecond
     - Millisecond
     - Second
+    - Minute
+    - Hour
+    - minDuration
+    - maxDuration
+    - Nanosecond
+    - Microsecond
+    - Millisecond
+    - Second
+    - Minute
+    - Hour
 info:
   contact: {}
   description: Provides access to selected management functions for the multi-gateway

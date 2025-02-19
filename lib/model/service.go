@@ -19,7 +19,12 @@ package model
 type CoreService struct {
 	Name      string       `json:"name"`
 	Container SrvContainer `json:"container"`
-	Image     string       `json:"image"`
+	Image     Image        `json:"image"`
+}
+
+type Image struct {
+	Repository string `json:"repository"`
+	Tag        string `json:"tag"`
 }
 
 type SrvContainer struct {
