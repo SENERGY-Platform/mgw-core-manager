@@ -22,7 +22,7 @@ import (
 	"io"
 )
 
-func (c *Client) ListLogs(_ context.Context) (map[string]model.Log, error) {
+func (c *Client) ListLogs(_ context.Context) ([]model.Log, error) {
 	panic("not implemented")
 }
 
