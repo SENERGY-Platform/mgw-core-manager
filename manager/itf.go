@@ -44,6 +44,6 @@ type CleanupHandler interface {
 }
 
 type LogHandler interface {
-	List(ctx context.Context) (map[string]lib_model.Log, error)
+	List(ctx context.Context) ([]lib_model.Log, error)
 	GetReader(ctx context.Context, id string, numOfLines int) (io.ReadCloser, error)
 }

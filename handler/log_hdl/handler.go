@@ -52,13 +52,13 @@ func New(logs []Log, bufferSize int) (*Handler, error) {
 	}, nil
 }
 
-func (h *Handler) List(_ context.Context) (map[string]lib_model.Log, error) {
-	logs := make(map[string]lib_model.Log)
+func (h *Handler) List(_ context.Context) ([]lib_model.Log, error) {
+	var logs []lib_model.Log
 	for id, log := range h.logs {
-		logs[id] = lib_model.Log{
+		logs = append(logs, lib_model.Log{
 			ID:          id,
 			ServiceName: log.Name,
-		}
+		})
 	}
 	return logs, nil
 }

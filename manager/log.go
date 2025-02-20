@@ -22,7 +22,7 @@ import (
 	"io"
 )
 
-func (m *Manager) ListLogs(ctx context.Context) (map[string]lib_model.Log, error) {
+func (m *Manager) ListLogs(ctx context.Context) ([]lib_model.Log, error) {
 	return m.logHandler.List(ctx)
 }
 
