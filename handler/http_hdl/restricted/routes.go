@@ -39,7 +39,7 @@ var routes = gin_mw.Routes[lib.Api]{
 // @description Provides access to selected management functions for the multi-gateway core.
 // @license.name Apache-2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @BasePath /restricted
+// @BasePath /
 func SetRoutes(e *gin.Engine, a lib.Api) error {
 	rg := e.Group(lib_model.RestrictedPath)
 	routes = append(routes, shared.Routes...)
