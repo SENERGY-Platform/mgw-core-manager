@@ -18,8 +18,8 @@ package client
 
 import (
 	"context"
-	job_hdl_lib "github.com/SENERGY-Platform/go-service-base/job-hdl/lib"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+	job_hdl_lib "github.com/SENERGY-Platform/mgw-go-service-base/job-hdl/lib"
 	"net/http"
 	"net/url"
 	"strings"
