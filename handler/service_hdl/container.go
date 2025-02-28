@@ -19,11 +19,11 @@ package service_hdl
 import (
 	"context"
 	"errors"
-	job_hdl_lib "github.com/SENERGY-Platform/go-service-base/job-hdl/lib"
 	cew_lib "github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib"
 	cew_model "github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib/model"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
+	job_hdl_lib "github.com/SENERGY-Platform/mgw-go-service-base/job-hdl/lib"
 	"net/http"
 	"sync"
 	"time"
