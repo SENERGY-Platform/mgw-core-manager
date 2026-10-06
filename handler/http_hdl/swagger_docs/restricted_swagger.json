@@ -544,6 +544,76 @@
                     }
                 }
             }
+        },
+        "/oidc": {
+            "get": {
+                "description": "Get the OpenID Connect login settings of the identity server. The client secret is never returned.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get OIDC settings",
+                "responses": {
+                    "200": {
+                        "description": "settings",
+                        "schema": {
+                            "$ref": "#/definitions/model.OIDCSettings"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Store the OpenID Connect login settings and restart the identity server. An empty client secret keeps the stored one unless the issuer URL or client ID changes, an empty scope keeps the stored one or defaults to openid.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Set OIDC settings",
+                "parameters": [
+                    {
+                        "description": "settings",
+                        "name": "settings",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.OIDCSettingsReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "job ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -717,6 +787,64 @@
                 },
                 "service_name": {
                     "type": "string"
+                }
+            }
+        },
+        "model.OIDCSettings": {
+            "type": "object",
+            "properties": {
+                "client_id": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "external_url": {
+                    "type": "string"
+                },
+                "has_secret": {
+                    "type": "boolean"
+                },
+                "issuer_url": {
+                    "type": "string"
+                },
+                "provider_id": {
+                    "description": "read-only, derived from issuer_url; part of the callback URL",
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "model.OIDCSettingsReq": {
+            "type": "object",
+            "properties": {
+                "client_id": {
+                    "type": "string"
+                },
+                "client_secret": {
+                    "description": "empty -\u003e keep stored secret; required when issuer_url or client_id changes",
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "external_url": {
+                    "type": "string"
+                },
+                "issuer_url": {
+                    "type": "string"
+                },
+                "scope": {
+                    "description": "empty -\u003e keep stored scope, [\"openid\"] if none is stored",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

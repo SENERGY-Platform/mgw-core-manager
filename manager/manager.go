@@ -26,16 +26,20 @@ type Manager struct {
 	gwEndpointHdl GatewayEndpointHandler
 	cleanupHdl    CleanupHandler
 	logHandler    LogHandler
+	kratosHdl     KratosHandler
+	kratosSrvName string
 	jobHandler    job_hdl.JobHandler
 	srvInfoHdl    srv_info_hdl.SrvInfoHandler
 }
 
-func New(coreServiceHandler CoreServiceHandler, gwEndpointHdl GatewayEndpointHandler, cleanupHdl CleanupHandler, logHandler LogHandler, jobHandler job_hdl.JobHandler, srvInfoHandler srv_info_hdl.SrvInfoHandler) *Manager {
+func New(coreServiceHandler CoreServiceHandler, gwEndpointHdl GatewayEndpointHandler, cleanupHdl CleanupHandler, logHandler LogHandler, kratosHdl KratosHandler, kratosSrvName string, jobHandler job_hdl.JobHandler, srvInfoHandler srv_info_hdl.SrvInfoHandler) *Manager {
 	return &Manager{
 		coreSrvHdl:    coreServiceHandler,
 		gwEndpointHdl: gwEndpointHdl,
 		cleanupHdl:    cleanupHdl,
 		logHandler:    logHandler,
+		kratosHdl:     kratosHdl,
+		kratosSrvName: kratosSrvName,
 		jobHandler:    jobHandler,
 		srvInfoHdl:    srvInfoHandler,
 	}

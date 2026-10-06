@@ -94,7 +94,7 @@ func main() {
 	wtchdg := watchdog.New(syscall.SIGINT, syscall.SIGTERM)
 
 	kratosCtx, kratosCf := context.WithCancel(context.Background())
-	kratosHdl, err := kratos_hdl.New(kratosCtx, config.Kratos.Version, config.Kratos.ConfigPath, config.Kratos.SecretLength, time.Duration(config.Kratos.SecretMaxAge), time.Duration(config.Kratos.Interval))
+	kratosHdl, err := kratos_hdl.New(kratosCtx, config.Kratos.Version, config.Kratos.ConfigPath, config.Kratos.SecretLength, time.Duration(config.Kratos.SecretMaxAge), time.Duration(config.Kratos.Interval), config.Kratos.FileUID, config.Kratos.FileGID)
 	if err != nil {
 		util.Logger.Error(err)
 		ec = 1
@@ -183,7 +183,7 @@ func main() {
 		return nil
 	})
 
-	coreManager := manager.New(coreServiceHdl, gwEndpointHdl, cleanupHdl, logHdl, jobHandler, srvInfoHdl)
+	coreManager := manager.New(coreServiceHdl, gwEndpointHdl, cleanupHdl, logHdl, kratosHdl, config.CoreService.KratosSrvName, jobHandler, srvInfoHdl)
 
 	httpHandler, err := http_hdl.New(coreManager, map[string]string{
 		lib_model.HeaderApiVer:  srvInfoHdl.GetVersion(),

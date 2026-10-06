@@ -114,6 +114,46 @@ definitions:
       service_name:
         type: string
     type: object
+  model.OIDCSettings:
+    properties:
+      client_id:
+        type: string
+      enabled:
+        type: boolean
+      external_url:
+        type: string
+      has_secret:
+        type: boolean
+      issuer_url:
+        type: string
+      provider_id:
+        description: read-only, derived from issuer_url; part of the callback URL
+        type: string
+      scope:
+        items:
+          type: string
+        type: array
+    type: object
+  model.OIDCSettingsReq:
+    properties:
+      client_id:
+        type: string
+      client_secret:
+        description: empty -> keep stored secret; required when issuer_url or client_id
+          changes
+        type: string
+      enabled:
+        type: boolean
+      external_url:
+        type: string
+      issuer_url:
+        type: string
+      scope:
+        description: empty -> keep stored scope, ["openid"] if none is stored
+        items:
+          type: string
+        type: array
+    type: object
   model.ProxyConfig:
     properties:
       headers:
@@ -522,4 +562,53 @@ paths:
       summary: Get Log
       tags:
       - Logs
+  /oidc:
+    get:
+      description: Get the OpenID Connect login settings of the identity server. The
+        client secret is never returned.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: settings
+          schema:
+            $ref: '#/definitions/model.OIDCSettings'
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Get OIDC settings
+      tags:
+      - Authentication
+    put:
+      consumes:
+      - application/json
+      description: Store the OpenID Connect login settings and restart the identity
+        server. An empty client secret keeps the stored one unless the issuer URL
+        or client ID changes, an empty scope keeps the stored one or defaults to openid.
+      parameters:
+      - description: settings
+        in: body
+        name: settings
+        required: true
+        schema:
+          $ref: '#/definitions/model.OIDCSettingsReq'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: job ID
+          schema:
+            type: string
+        "400":
+          description: error message
+          schema:
+            type: string
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Set OIDC settings
+      tags:
+      - Authentication
 swagger: "2.0"

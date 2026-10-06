@@ -35,6 +35,7 @@ const (
 	JobsPath           = "jobs"
 	JobsCancelPath     = "cancel"
 	SrvInfoPath        = "info"
+	OIDCPath           = "oidc"
 )
 
 const (

@@ -43,6 +43,7 @@ type HttpClientConfig struct {
 
 type CoreServiceConfig struct {
 	GatewaySrvName string `json:"gateway_srv_name" env_var:"CORE_GATEWAY_SRV_NAME"`
+	KratosSrvName  string `json:"kratos_srv_name" env_var:"CORE_KRATOS_SRV_NAME"`
 }
 
 type SocketConfig struct {
@@ -67,6 +68,8 @@ type KratosConfig struct {
 	SecretLength int    `json:"secret_length" env_var:"KRATOS_SECRET_LENGTH"`
 	SecretMaxAge int64  `json:"secret_max_age" env_var:"KRATOS_SECRET_MAX_AGE"`
 	Interval     int64  `json:"interval" env_var:"KRATOS_INTERVAL"`
+	FileUID      int    `json:"file_uid" env_var:"KRATOS_FILE_UID"`
+	FileGID      int    `json:"file_gid" env_var:"KRATOS_FILE_GID"`
 }
 
 type LogHandlerConfig struct {
@@ -110,6 +113,9 @@ func NewConfig(path string) (*Config, error) {
 			PJHInterval: 300000000000,
 			MaxAge:      172800000000000,
 		},
+		CoreService: CoreServiceConfig{
+			KratosSrvName: "kratos",
+		},
 		HttpClient: HttpClientConfig{
 			CewSocketPath: "./ce_wrapper.sock",
 			Timeout:       10000000000,
@@ -118,6 +124,8 @@ func NewConfig(path string) (*Config, error) {
 			SecretLength: 32,
 			SecretMaxAge: int64(time.Hour * 168),
 			Interval:     int64(time.Hour),
+			FileUID:      -1,
+			FileGID:      -1,
 		},
 		ImgPurgeDelay: int64(time.Minute),
 		LogHandler: LogHandlerConfig{

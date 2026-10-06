@@ -39,6 +39,8 @@ type Api interface {
 	PurgeImages(ctx context.Context, repository, excludeTag string) (string, error)
 	ListLogs(ctx context.Context) ([]model.Log, error)
 	GetLog(ctx context.Context, id string, numOfLines int) (io.ReadCloser, error)
+	GetOIDCSettings(ctx context.Context) (model.OIDCSettings, error)
+	SetOIDCSettings(ctx context.Context, settings model.OIDCSettingsReq) (string, error)
 	job_hdl_lib.Api
 	srv_info_lib.Api
 }

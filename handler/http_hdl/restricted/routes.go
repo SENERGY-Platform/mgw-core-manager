@@ -31,6 +31,8 @@ import (
 var routes = gin_mw.Routes[lib.Api]{
 	DeleteEndpointH,
 	DeleteEndpointBatchH,
+	GetOIDCSettingsH,
+	PutOIDCSettingsH,
 }
 
 // SetRoutes

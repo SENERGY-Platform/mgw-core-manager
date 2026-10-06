@@ -18,9 +18,9 @@ package kratos_hdl
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
+	"math/rand"
 	"os"
 	"path"
 	"sync"
@@ -35,13 +35,17 @@ type Handler struct {
 	secretLen int
 	maxAge    time.Duration
 	interval  time.Duration
+	fileUID   int
+	fileGID   int
+	fileMu    sync.Mutex
 	running   bool
 	loopMu    sync.RWMutex
 	dChan     chan struct{}
 	ctx       context.Context
 }
 
-func New(ctx context.Context, kratosVer, configPath string, secretLen int, maxAge, interval time.Duration) (*Handler, error) {
+// New creates a handler for the dynamic Kratos config. A fileUID or fileGID below zero leaves that owner unchanged.
+func New(ctx context.Context, kratosVer, configPath string, secretLen int, maxAge, interval time.Duration, fileUID, fileGID int) (*Handler, error) {
 	if !path.IsAbs(configPath) {
 		return nil, errors.New(configPath + " is not an absolute path")
 	}
@@ -51,27 +55,32 @@ func New(ctx context.Context, kratosVer, configPath string, secretLen int, maxAg
 		secretLen: secretLen,
 		maxAge:    maxAge,
 		interval:  interval,
+		fileUID:   fileUID,
+		fileGID:   fileGID,
 		dChan:     make(chan struct{}),
 		ctx:       ctx,
 	}, nil
 }
 
 func (h *Handler) Init() error {
-	if _, err := os.Stat(h.path); err != nil {
+	h.fileMu.Lock()
+	defer h.fileMu.Unlock()
+	fileInfo, err := os.Stat(h.path)
+	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return writeConfig(h.path, newConf(h.kratosVer, h.secretLen))
+			return h.write(newDocument(h.kratosVer, newRand(), h.secretLen), time.Time{})
 		}
 		return err
 	}
-	config, err := readConfig(h.path)
+	d, err := readConfig(h.path)
 	if err != nil {
 		return err
 	}
-	if config.Version != h.kratosVer {
-		config.Version = h.kratosVer
-		return writeConfig(h.path, config)
+	if d[versionKey] != h.kratosVer {
+		d[versionKey] = h.kratosVer
+		return h.write(d, fileInfo.ModTime())
 	}
-	return nil
+	return h.protectFile()
 }
 
 func (h *Handler) Start() {
@@ -89,30 +98,24 @@ func (h *Handler) Wait() {
 }
 
 func (h *Handler) refreshSecrets() error {
+	h.fileMu.Lock()
+	defer h.fileMu.Unlock()
 	fileInfo, err := os.Stat(h.path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return writeConfig(h.path, newConf(h.kratosVer, h.secretLen))
+			return h.write(newDocument(h.kratosVer, newRand(), h.secretLen), time.Time{})
 		}
 		return err
 	}
 	if time.Since(fileInfo.ModTime()) > h.maxAge {
-		oldConfig, err := readConfig(h.path)
+		d, err := readConfig(h.path)
 		if err != nil {
 			return err
 		}
-		newConfig := newConf(h.kratosVer, h.secretLen)
-		if len(oldConfig.Secrets.Default) > 0 {
-			newConfig.Secrets.Default = append(newConfig.Secrets.Default, oldConfig.Secrets.Default[0])
-		}
-		if len(oldConfig.Secrets.Cookie) > 0 {
-			newConfig.Secrets.Cookie = append(newConfig.Secrets.Cookie, oldConfig.Secrets.Cookie[0])
-		}
-		if len(oldConfig.Secrets.Cipher) > 0 {
-			newConfig.Secrets.Cipher = append(newConfig.Secrets.Cipher, oldConfig.Secrets.Cipher[0])
-		}
+		d[versionKey] = h.kratosVer
+		rotateSecrets(d, newRand(), h.secretLen)
 		util.Logger.Debug(logPrefix, " rotating secrets and keys ...")
-		return writeConfig(h.path, newConfig)
+		return h.write(d, time.Time{})
 	}
 	return nil
 }
@@ -148,24 +151,32 @@ func (h *Handler) run() {
 	h.dChan <- struct{}{}
 }
 
-func writeConfig(p string, c conf) error {
-	file, err := os.OpenFile(p, os.O_CREATE|os.O_WRONLY, 0666)
-	if err != nil {
+// write must be called with fileMu held. The file's mtime marks the last secret rotation, so writes that do not
+// rotate pass the previous mtime to restore it; a zero modTime leaves the new mtime in place.
+func (h *Handler) write(d document, modTime time.Time) error {
+	if err := writeConfig(h.path, d, fileMode(h.fileUID, h.fileGID), h.fileUID, h.fileGID); err != nil {
 		return err
 	}
-	defer file.Close()
-	return json.NewEncoder(file).Encode(c)
+	if !modTime.IsZero() {
+		if err := os.Chtimes(h.path, time.Time{}, modTime); err != nil {
+			util.Logger.Errorf("%s restoring modification time: %s", logPrefix, err)
+		}
+	}
+	return nil
 }
 
-func readConfig(p string) (conf, error) {
-	file, err := os.Open(p)
-	if err != nil {
-		return conf{}, err
+// protectFile applies a configured owner and mode to an existing file, so a newly set owner takes effect at
+// startup and not only at the next write.
+func (h *Handler) protectFile() error {
+	if h.fileUID < 0 && h.fileGID < 0 {
+		return nil
 	}
-	defer file.Close()
-	var c conf
-	if err = json.NewDecoder(file).Decode(&c); err != nil {
-		return conf{}, err
+	if err := os.Chown(h.path, h.fileUID, h.fileGID); err != nil {
+		return err
 	}
-	return c, nil
+	return os.Chmod(h.path, fileMode(h.fileUID, h.fileGID))
+}
+
+func newRand() *rand.Rand {
+	return rand.New(rand.NewSource(time.Now().UnixNano()))
 }

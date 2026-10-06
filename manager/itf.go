@@ -43,6 +43,11 @@ type CleanupHandler interface {
 	PurgeImages(ctx context.Context, repository, excludeTag string) error
 }
 
+type KratosHandler interface {
+	GetOIDC(ctx context.Context) (lib_model.OIDCSettings, error)
+	SetOIDC(ctx context.Context, req lib_model.OIDCSettingsReq) error
+}
+
 type LogHandler interface {
 	List(ctx context.Context) ([]lib_model.Log, error)
 	GetReader(ctx context.Context, id string, numOfLines int) (io.ReadCloser, error)
