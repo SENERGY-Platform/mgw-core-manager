@@ -18,6 +18,8 @@ package kratos_hdl
 
 import (
 	"context"
+	crand "crypto/rand"
+	"encoding/binary"
 	"errors"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"math/rand"
@@ -177,6 +179,24 @@ func (h *Handler) protectFile() error {
 	return os.Chmod(h.path, fileMode(h.fileUID, h.fileGID))
 }
 
+// newRand draws from crypto/rand: the generated values become Kratos' cookie
+// and cipher secrets, so a time-seeded source would make them guessable.
 func newRand() *rand.Rand {
-	return rand.New(rand.NewSource(time.Now().UnixNano()))
+	return rand.New(cryptoSource{})
 }
+
+type cryptoSource struct{}
+
+func (cryptoSource) Int63() int64 {
+	return int64(cryptoSource{}.Uint64() & (1<<63 - 1))
+}
+
+func (cryptoSource) Uint64() uint64 {
+	var b [8]byte
+	if _, err := crand.Read(b[:]); err != nil {
+		panic(err)
+	}
+	return binary.LittleEndian.Uint64(b[:])
+}
+
+func (cryptoSource) Seed(int64) {}
