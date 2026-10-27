@@ -45,6 +45,6 @@ type UpdateStatus struct {
 	ToVersion   string `json:"to_version"`
 	Started     string `json:"started"`
 	Finished    string `json:"finished"`
-	Result      string `json:"result"` // success or failed
+	Result      string `json:"result"` // success, failed or running (interrupted if it persists)
 	Step        string `json:"step"`   // last step the update reached
 }

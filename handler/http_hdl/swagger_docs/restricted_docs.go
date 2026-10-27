@@ -996,7 +996,7 @@ const docTemplaterestricted = `{
                     "type": "string"
                 },
                 "result": {
-                    "description": "success or failed",
+                    "description": "success, failed or running (interrupted if it persists)",
                     "type": "string"
                 },
                 "started": {
