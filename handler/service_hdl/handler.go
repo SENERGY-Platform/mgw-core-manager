@@ -38,6 +38,7 @@ type Handler struct {
 	cewClient   cew_lib.Api
 	services    map[string]service
 	coreID      string
+	installPath string
 	httpTimeout time.Duration
 }
 
@@ -46,6 +47,7 @@ type service struct {
 	ContainerName string
 	ImageName     string
 	ImageTag      string
+	OneShot       bool
 	CtrHandler    *CtrHandler
 }
 
@@ -53,13 +55,15 @@ type composeFile struct {
 	Services map[string]struct {
 		ContainerName string `yaml:"container_name"`
 		Image         string `yaml:"image"`
+		Restart       string `yaml:"restart"`
 	} `yaml:"services"`
 }
 
-func New(cewClient cew_lib.Api, coreID string, httpTimeout time.Duration) *Handler {
+func New(cewClient cew_lib.Api, coreID, installPath string, httpTimeout time.Duration) *Handler {
 	return &Handler{
 		cewClient:   cewClient,
 		coreID:      coreID,
+		installPath: installPath,
 		httpTimeout: httpTimeout,
 	}
 }
@@ -83,6 +87,7 @@ func (h *Handler) Init(composePath string) error {
 			ContainerName: srv.ContainerName,
 			ImageName:     imgName,
 			ImageTag:      imgTag,
+			OneShot:       isOneShot(srv.Restart),
 			CtrHandler: &CtrHandler{
 				cewClient:     h.cewClient,
 				srvName:       name,
@@ -188,4 +193,9 @@ func parseImageStr(s string) (name, tag string) {
 		}
 	}
 	return
+}
+
+// isOneShot reports whether a compose restart policy marks a service that runs once and stops (on-failure, with or without a retry count).
+func isOneShot(restart string) bool {
+	return restart == "on-failure" || strings.HasPrefix(restart, "on-failure:")
 }

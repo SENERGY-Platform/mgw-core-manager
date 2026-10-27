@@ -54,6 +54,25 @@ definitions:
       version:
         type: string
     type: object
+  model.CoreHealth:
+    properties:
+      services:
+        description: all services of the compose file
+        items:
+          $ref: '#/definitions/model.CoreServiceHealth'
+        type: array
+      state:
+        description: 1 healthy, 2 unhealthy, 0 undetermined (container engine not
+          reachable)
+        type: integer
+      update:
+        allOf:
+        - $ref: '#/definitions/model.UpdateStatus'
+        description: null if no .update_status exists or it cannot be parsed
+      version:
+        description: content of .version, empty if not readable
+        type: string
+    type: object
   model.CoreService:
     properties:
       container:
@@ -61,6 +80,25 @@ definitions:
       image:
         $ref: '#/definitions/github_com_SENERGY-Platform_mgw-core-manager_lib_model.Image'
       name:
+        type: string
+    type: object
+  model.CoreServiceHealth:
+    properties:
+      health:
+        description: container health from the container engine wrapper, null if the
+          image defines no healthcheck
+        type: string
+      name:
+        type: string
+      ok:
+        type: boolean
+      one_shot:
+        description: service runs once and is expected to stop (compose restart policy
+          on-failure)
+        type: boolean
+      state:
+        description: container state from the container engine wrapper, null if the
+          container is missing or the wrapper is unreachable
         type: string
     type: object
   model.Endpoint:
@@ -170,6 +208,23 @@ definitions:
       replace_once:
         description: false -> replace repeatedly
         type: boolean
+    type: object
+  model.UpdateStatus:
+    properties:
+      finished:
+        type: string
+      from_version:
+        type: string
+      result:
+        description: success or failed
+        type: string
+      started:
+        type: string
+      step:
+        description: last step the update reached
+        type: string
+      to_version:
+        type: string
     type: object
   time.Duration:
     enum:
@@ -473,6 +528,24 @@ paths:
       summary: Create endpoint alias
       tags:
       - HTTP Endpoints
+  /health:
+    get:
+      description: Get the health of the core services, the installed version and
+        the status of the last update.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: core health
+          schema:
+            $ref: '#/definitions/model.CoreHealth'
+        "500":
+          description: error message
+          schema:
+            type: string
+      summary: Get core health
+      tags:
+      - Health
   /info:
     get:
       description: Get basic service and runtime information.

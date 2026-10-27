@@ -87,6 +87,7 @@ type Config struct {
 	EndpointsConfPath string            `json:"endpoints_conf_path" env_var:"ENDPOINTS_CONF_PATH"`
 	ComposeFilePath   string            `json:"compose_file_path" env_var:"COMPOSE_FILE_PATH"`
 	CoreID            string            `json:"core_id" env_var:"CORE_ID"`
+	InstallPath       string            `json:"install_path" env_var:"INSTALL_PATH"`
 	ImgPurgeDelay     int64             `json:"img_purge_delay" env_var:"IMG_PURGE_DELAY"`
 	LogHandler        LogHandlerConfig  `json:"log_handler" env_var:"LOG_HANDLER_CONFIG"`
 }

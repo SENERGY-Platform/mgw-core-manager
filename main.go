@@ -116,7 +116,7 @@ func main() {
 
 	cewClient := cew_client.New(httpClient, "http://unix")
 
-	coreServiceHdl := service_hdl.New(cewClient, config.CoreID, time.Duration(config.HttpClient.Timeout))
+	coreServiceHdl := service_hdl.New(cewClient, config.CoreID, config.InstallPath, time.Duration(config.HttpClient.Timeout))
 	if err = coreServiceHdl.Init(config.ComposeFilePath); err != nil {
 		util.Logger.Error(err)
 		ec = 1

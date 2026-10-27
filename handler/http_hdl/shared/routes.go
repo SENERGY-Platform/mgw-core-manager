@@ -34,4 +34,5 @@ var Routes = gin_mw.Routes[lib.Api]{
 	GetLogsH,
 	GetLogH,
 	GetSrvInfo,
+	GetHealthH,
 }

@@ -30,6 +30,10 @@ func (m *Manager) GetCoreService(ctx context.Context, name string) (model.CoreSe
 	return m.coreSrvHdl.Get(ctx, name)
 }
 
+func (m *Manager) GetCoreHealth(ctx context.Context) (model.CoreHealth, error) {
+	return m.coreSrvHdl.Health(ctx)
+}
+
 func (m *Manager) RestartCoreService(ctx context.Context, name string) (string, error) {
 	return m.jobHandler.Create(ctx, fmt.Sprintf("restart core service '%s'", name), func(ctx context.Context, cf context.CancelFunc) (any, error) {
 		defer cf()

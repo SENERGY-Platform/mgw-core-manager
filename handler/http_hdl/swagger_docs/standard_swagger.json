@@ -438,6 +438,32 @@
                 }
             }
         },
+        "/health": {
+            "get": {
+                "description": "Get the health of the core services, the installed version and the status of the last update.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Get core health",
+                "responses": {
+                    "200": {
+                        "description": "core health",
+                        "schema": {
+                            "$ref": "#/definitions/model.CoreHealth"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/info": {
             "get": {
                 "description": "Get basic service and runtime information.",
@@ -768,6 +794,34 @@
                 }
             }
         },
+        "model.CoreHealth": {
+            "type": "object",
+            "properties": {
+                "services": {
+                    "description": "all services of the compose file",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.CoreServiceHealth"
+                    }
+                },
+                "state": {
+                    "description": "1 healthy, 2 unhealthy, 0 undetermined (container engine not reachable)",
+                    "type": "integer"
+                },
+                "update": {
+                    "description": "null if no .update_status exists or it cannot be parsed",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.UpdateStatus"
+                        }
+                    ]
+                },
+                "version": {
+                    "description": "content of .version, empty if not readable",
+                    "type": "string"
+                }
+            }
+        },
         "model.CoreService": {
             "type": "object",
             "properties": {
@@ -778,6 +832,29 @@
                     "$ref": "#/definitions/github_com_SENERGY-Platform_mgw-core-manager_lib_model.Image"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CoreServiceHealth": {
+            "type": "object",
+            "properties": {
+                "health": {
+                    "description": "container health from the container engine wrapper, null if the image defines no healthcheck",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ok": {
+                    "type": "boolean"
+                },
+                "one_shot": {
+                    "description": "service runs once and is expected to stop (compose restart policy on-failure)",
+                    "type": "boolean"
+                },
+                "state": {
+                    "description": "container state from the container engine wrapper, null if the container is missing or the wrapper is unreachable",
                     "type": "string"
                 }
             }
@@ -941,6 +1018,31 @@
                 "replace_once": {
                     "description": "false -\u003e replace repeatedly",
                     "type": "boolean"
+                }
+            }
+        },
+        "model.UpdateStatus": {
+            "type": "object",
+            "properties": {
+                "finished": {
+                    "type": "string"
+                },
+                "from_version": {
+                    "type": "string"
+                },
+                "result": {
+                    "description": "success or failed",
+                    "type": "string"
+                },
+                "started": {
+                    "type": "string"
+                },
+                "step": {
+                    "description": "last step the update reached",
+                    "type": "string"
+                },
+                "to_version": {
+                    "type": "string"
                 }
             }
         },

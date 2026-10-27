@@ -37,6 +37,7 @@ type CoreServiceHandler interface {
 	List(ctx context.Context) (map[string]lib_model.CoreService, error)
 	Get(ctx context.Context, name string) (lib_model.CoreService, error)
 	Restart(ctx context.Context, name string) error
+	Health(ctx context.Context) (lib_model.CoreHealth, error)
 }
 
 type CleanupHandler interface {
