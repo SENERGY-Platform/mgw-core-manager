@@ -19,6 +19,8 @@ package client
 import (
 	"context"
 	"github.com/SENERGY-Platform/mgw-core-manager/lib/model"
+	"net/http"
+	"net/url"
 )
 
 func (c *Client) GetCoreServices(ctx context.Context) (map[string]model.CoreService, error) {
@@ -31,4 +33,21 @@ func (c *Client) GetCoreService(ctx context.Context, name string) (model.CoreSer
 
 func (c *Client) RestartCoreService(ctx context.Context, name string) (string, error) {
 	panic("not implemented")
+}
+
+func (c *Client) GetCoreHealth(ctx context.Context) (model.CoreHealth, error) {
+	u, err := url.JoinPath(c.baseUrl, model.RestrictedPath, model.HealthPath)
+	if err != nil {
+		return model.CoreHealth{}, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return model.CoreHealth{}, err
+	}
+	var health model.CoreHealth
+	err = c.baseClient.ExecRequestJSON(req, &health)
+	if err != nil {
+		return model.CoreHealth{}, err
+	}
+	return health, nil
 }
