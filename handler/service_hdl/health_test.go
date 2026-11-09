@@ -22,12 +22,12 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
 	cew_lib "github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib"
 	cew_model "github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib/model"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/state_hdl"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	log_level "github.com/y-du/go-log-level"
@@ -53,8 +53,8 @@ func (f *fakeCew) GetContainers(_ context.Context, _ cew_model.ContainerFilter) 
 
 func strPtr(s string) *string { return &s }
 
-func newHandler(c cew_lib.Api, installPath string, services ...service) *Handler {
-	h := New(c, "core", installPath, time.Second)
+func newHandler(c cew_lib.Api, statePaths state_hdl.Paths, services ...service) *Handler {
+	h := New(c, "core", statePaths, time.Second)
 	h.services = make(map[string]service)
 	for _, s := range services {
 		h.services[s.Name] = s
@@ -97,7 +97,7 @@ func TestHealth(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			h := newHandler(&fakeCew{containers: c.containers, err: c.cewErr}, "", c.services...)
+			h := newHandler(&fakeCew{containers: c.containers, err: c.cewErr}, state_hdl.Paths{}, c.services...)
 			got, err := h.Health(context.Background())
 			if err != nil {
 				t.Fatal(err)
@@ -108,82 +108,53 @@ func TestHealth(t *testing.T) {
 			if !reflect.DeepEqual(got.Services, c.want) {
 				t.Errorf("services = %+v, want %+v", got.Services, c.want)
 			}
-			if got.Version != "" || got.Update != nil {
-				t.Errorf("version = %q, update = %+v, want empty without install path", got.Version, got.Update)
+			if got.Version != "" || got.Update != nil || got.Check != nil {
+				t.Errorf("version = %q, update = %+v, check = %+v, want empty without state file paths", got.Version, got.Update, got.Check)
 			}
 		})
 	}
 }
 
-func TestHealthReadsInstallPath(t *testing.T) {
+func TestHealthReadsStateFiles(t *testing.T) {
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, ".version"), []byte("v2.13.2\n"), 0o600); err != nil {
-		t.Fatal(err)
+	paths := state_hdl.Paths{
+		Version: filepath.Join(dir, "version"),
+		Update:  filepath.Join(dir, "update"),
+		Check:   filepath.Join(dir, "check"),
 	}
-	if err := os.WriteFile(filepath.Join(dir, ".update_status"), []byte(`{"from_version":"v2.13.1","to_version":"v2.13.2","started":"2026-10-27T10:00:00Z","finished":"2026-10-27T10:03:12Z","result":"success","step":"starting components"}`), 0o600); err != nil {
-		t.Fatal(err)
+	files := map[string]string{
+		paths.Version: "v2.13.2\n",
+		paths.Update:  "from_version=v2.13.1\nto_version=v2.13.2\nstarted=2026-10-27T10:00:00Z\nfinished=2026-10-27T10:03:12Z\nresult=success\nphase=done\nkind=update\nstep=cleaning up\n",
+		paths.Check:   "check_time=2026-10-27T09:59:58Z\ncheck_result=update_available\ncheck_version=v2.13.2\n",
 	}
-	h := newHandler(&fakeCew{}, dir)
-	got, err := h.Health(context.Background())
+	for p, content := range files {
+		if err := os.WriteFile(p, []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got, err := newHandler(&fakeCew{}, paths).Health(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := &lib_model.UpdateStatus{FromVersion: "v2.13.1", ToVersion: "v2.13.2", Started: "2026-10-27T10:00:00Z", Finished: "2026-10-27T10:03:12Z", Result: "success", Step: "starting components"}
-	if got.Version != "v2.13.2" || !reflect.DeepEqual(got.Update, want) {
-		t.Errorf("version = %q, update = %+v", got.Version, got.Update)
+	wantUpdate := &lib_model.UpdateStatus{FromVersion: "v2.13.1", ToVersion: "v2.13.2", Started: "2026-10-27T10:00:00Z", Finished: "2026-10-27T10:03:12Z", Result: "success", Phase: "done", Kind: "update", Step: "cleaning up"}
+	wantCheck := &lib_model.CheckStatus{Time: "2026-10-27T09:59:58Z", Result: "update_available", Version: "v2.13.2"}
+	if got.Version != "v2.13.2" || !reflect.DeepEqual(got.Update, wantUpdate) || !reflect.DeepEqual(got.Check, wantCheck) {
+		t.Errorf("version = %q, update = %+v, check = %+v", got.Version, got.Update, got.Check)
 	}
 	if got.State != lib_model.HealthHealthy || got.Services == nil || len(got.Services) != 0 {
 		t.Errorf("state = %d, services = %#v", got.State, got.Services)
 	}
 }
 
-func TestHealthMissingVersionFile(t *testing.T) {
-	got, err := newHandler(&fakeCew{}, t.TempDir()).Health(context.Background())
+func TestHealthMissingStateFiles(t *testing.T) {
+	dir := t.TempDir()
+	paths := state_hdl.Paths{Version: filepath.Join(dir, "version"), Update: filepath.Join(dir, "update"), Check: filepath.Join(dir, "check")}
+	got, err := newHandler(&fakeCew{}, paths).Health(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Version != "" || got.Update != nil {
-		t.Errorf("version = %q, update = %+v", got.Version, got.Update)
-	}
-}
-
-func TestReadUpdateStatus(t *testing.T) {
-	cases := []struct {
-		name    string
-		content *string
-		want    *lib_model.UpdateStatus
-	}{
-		{"missing file", nil, nil},
-		{"valid", strPtr(`{"from_version":"v1","to_version":"v2","started":"s","finished":"f","result":"failed","step":"pull"}`),
-			&lib_model.UpdateStatus{FromVersion: "v1", ToVersion: "v2", Started: "s", Finished: "f", Result: "failed", Step: "pull"}},
-		{"missing fields", strPtr(`{"result":"failed"}`), &lib_model.UpdateStatus{Result: "failed"}},
-		{"invalid json", strPtr(`{"result":`), nil},
-		{"wrong field type", strPtr(`{"result":1}`), nil},
-		{"null", strPtr("null"), nil},
-		{"oversized", strPtr(`{"step":"` + strings.Repeat("a", maxStatusFileLen) + `"}`), nil},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			dir := t.TempDir()
-			if c.content != nil {
-				if err := os.WriteFile(filepath.Join(dir, ".update_status"), []byte(*c.content), 0o600); err != nil {
-					t.Fatal(err)
-				}
-			}
-			if got := readUpdateStatus(dir); !reflect.DeepEqual(got, c.want) {
-				t.Errorf("got %+v, want %+v", got, c.want)
-			}
-		})
-	}
-}
-
-func TestReadVersionOversized(t *testing.T) {
-	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, ".version"), []byte(strings.Repeat("v", maxStatusFileLen+1)), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	if got := readVersion(dir); got != "" {
-		t.Errorf("got %d bytes, want empty", len(got))
+	if got.Version != "" || got.Update != nil || got.Check != nil {
+		t.Errorf("version = %q, update = %+v, check = %+v", got.Version, got.Update, got.Check)
 	}
 }
 
@@ -209,7 +180,7 @@ func TestInitMarksOneShotServices(t *testing.T) {
 	if err := os.WriteFile(p, []byte(compose), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	h := New(&fakeCew{}, "core", "", time.Second)
+	h := New(&fakeCew{}, "core", state_hdl.Paths{}, time.Second)
 	if err := h.Init(p); err != nil {
 		t.Fatal(err)
 	}

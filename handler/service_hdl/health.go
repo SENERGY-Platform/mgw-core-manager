@@ -18,24 +18,11 @@ package service_hdl
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
 	cew_model "github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib/model"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/state_hdl"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
-	"io"
-	"io/fs"
-	"os"
-	"path"
 	"sort"
-	"strings"
-)
-
-const (
-	versionFile      = ".version"
-	updateStatusFile = ".update_status"
-	maxStatusFileLen = 64 * 1024
 )
 
 func (h *Handler) Health(ctx context.Context) (lib_model.CoreHealth, error) {
@@ -72,10 +59,9 @@ func (h *Handler) Health(ctx context.Context) (lib_model.CoreHealth, error) {
 		return health.Services[i].Name < health.Services[j].Name
 	})
 	health.State = deriveState(ctrMap != nil, health.Services)
-	if h.installPath != "" {
-		health.Version = readVersion(h.installPath)
-		health.Update = readUpdateStatus(h.installPath)
-	}
+	health.Version = state_hdl.ReadVersion(h.statePaths.Version)
+	health.Update = state_hdl.ReadUpdate(h.statePaths.Update)
+	health.Check = state_hdl.ReadCheck(h.statePaths.Check)
 	return health, nil
 }
 
@@ -111,49 +97,4 @@ func deriveState(reachable bool, services []lib_model.CoreServiceHealth) int {
 		}
 	}
 	return lib_model.HealthHealthy
-}
-
-func readVersion(installPath string) string {
-	b, err := readLimited(path.Join(installPath, versionFile))
-	if err != nil {
-		util.Logger.Warningf("reading %s failed: %s", versionFile, err)
-		return ""
-	}
-	return strings.TrimSpace(string(b))
-}
-
-// readUpdateStatus returns nil if the file does not exist or cannot be parsed.
-func readUpdateStatus(installPath string) *lib_model.UpdateStatus {
-	b, err := readLimited(path.Join(installPath, updateStatusFile))
-	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			util.Logger.Debugf("no %s", updateStatusFile)
-		} else {
-			util.Logger.Warningf("reading %s failed: %s", updateStatusFile, err)
-		}
-		return nil
-	}
-	var status *lib_model.UpdateStatus
-	if err = json.Unmarshal(b, &status); err != nil {
-		util.Logger.Warningf("parsing %s failed: %s", updateStatusFile, err)
-		return nil
-	}
-	return status
-}
-
-// readLimited fails instead of truncating if the file exceeds maxStatusFileLen.
-func readLimited(p string) ([]byte, error) {
-	file, err := os.Open(p)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	b, err := io.ReadAll(io.LimitReader(file, maxStatusFileLen+1))
-	if err != nil {
-		return nil, err
-	}
-	if len(b) > maxStatusFileLen {
-		return nil, fmt.Errorf("file exceeds %d bytes", maxStatusFileLen)
-	}
-	return b, nil
 }

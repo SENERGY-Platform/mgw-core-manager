@@ -794,9 +794,45 @@
                 }
             }
         },
+        "model.CheckStatus": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "description": "up_to_date, update_available, skipped or failed",
+                    "type": "string"
+                },
+                "step": {
+                    "description": "human-readable description of what failed, informational only, must not be evaluated",
+                    "type": "string"
+                },
+                "time": {
+                    "description": "when the check ran",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "the newer release found, empty if up to date",
+                    "type": "string"
+                },
+                "warnings": {
+                    "description": "things that went wrong without failing the check, informational only",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "model.CoreHealth": {
             "type": "object",
             "properties": {
+                "check": {
+                    "description": "null if there is no version check record or it cannot be read",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.CheckStatus"
+                        }
+                    ]
+                },
                 "services": {
                     "description": "all services of the compose file",
                     "type": "array",
@@ -809,7 +845,7 @@
                     "type": "integer"
                 },
                 "update": {
-                    "description": "null if no .update_status exists or it cannot be parsed",
+                    "description": "null if there is no update record or it cannot be read",
                     "allOf": [
                         {
                             "$ref": "#/definitions/model.UpdateStatus"
@@ -817,7 +853,7 @@
                     ]
                 },
                 "version": {
-                    "description": "content of .version, empty if not readable",
+                    "description": "version of the installed core release, empty if not readable",
                     "type": "string"
                 }
             }
@@ -1030,19 +1066,42 @@
                 "from_version": {
                     "type": "string"
                 },
-                "result": {
-                    "description": "success, failed or running (interrupted if it persists)",
+                "interrupted": {
+                    "description": "the attempt was killed or hit a power loss and was recovered later",
+                    "type": "boolean"
+                },
+                "kind": {
+                    "description": "update or migration",
                     "type": "string"
+                },
+                "phase": {
+                    "description": "stage the update reached, evaluated by consumers",
+                    "type": "string"
+                },
+                "result": {
+                    "description": "running, success or failed",
+                    "type": "string"
+                },
+                "rolled_back": {
+                    "description": "the previous version was restored after a failure",
+                    "type": "boolean"
                 },
                 "started": {
                     "type": "string"
                 },
                 "step": {
-                    "description": "last step the update reached",
+                    "description": "human-readable description of the step reached, informational only, must not be evaluated",
                     "type": "string"
                 },
                 "to_version": {
                     "type": "string"
+                },
+                "warnings": {
+                    "description": "things that went wrong without failing the update, informational only",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -1052,13 +1111,17 @@
                 1,
                 1000,
                 1000000,
-                1000000000
+                1000000000,
+                60000000000,
+                3600000000000
             ],
             "x-enum-varnames": [
                 "Nanosecond",
                 "Microsecond",
                 "Millisecond",
-                "Second"
+                "Second",
+                "Minute",
+                "Hour"
             ]
         }
     }

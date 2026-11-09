@@ -77,6 +77,14 @@ type LogHandlerConfig struct {
 	BufferSize int    `json:"buffer_size" env_var:"LOG_HANDLER_BUFFER_SIZE"`
 }
 
+// StateFilesConfig holds the paths of the installer's state files reported by the health endpoint. An empty
+// path is not read.
+type StateFilesConfig struct {
+	VersionPath string `json:"version_path" env_var:"STATE_FILES_VERSION_PATH"`
+	UpdatePath  string `json:"update_path" env_var:"STATE_FILES_UPDATE_PATH"`
+	CheckPath   string `json:"check_path" env_var:"STATE_FILES_CHECK_PATH"`
+}
+
 type Config struct {
 	Logger            LoggerConfig      `json:"logger" env_var:"LOGGER_CONFIG"`
 	Socket            SocketConfig      `json:"socket" env_var:"SOCKET_CONFIG"`
@@ -87,7 +95,7 @@ type Config struct {
 	EndpointsConfPath string            `json:"endpoints_conf_path" env_var:"ENDPOINTS_CONF_PATH"`
 	ComposeFilePath   string            `json:"compose_file_path" env_var:"COMPOSE_FILE_PATH"`
 	CoreID            string            `json:"core_id" env_var:"CORE_ID"`
-	InstallPath       string            `json:"install_path" env_var:"INSTALL_PATH"`
+	StateFiles        StateFilesConfig  `json:"state_files" env_var:"STATE_FILES_CONFIG"`
 	ImgPurgeDelay     int64             `json:"img_purge_delay" env_var:"IMG_PURGE_DELAY"`
 	LogHandler        LogHandlerConfig  `json:"log_handler" env_var:"LOG_HANDLER_CONFIG"`
 }

@@ -21,6 +21,7 @@ import (
 	"fmt"
 	cew_lib "github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib"
 	cew_model "github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib/model"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/state_hdl"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
 	"gopkg.in/yaml.v3"
@@ -38,7 +39,7 @@ type Handler struct {
 	cewClient   cew_lib.Api
 	services    map[string]service
 	coreID      string
-	installPath string
+	statePaths  state_hdl.Paths
 	httpTimeout time.Duration
 }
 
@@ -59,11 +60,11 @@ type composeFile struct {
 	} `yaml:"services"`
 }
 
-func New(cewClient cew_lib.Api, coreID, installPath string, httpTimeout time.Duration) *Handler {
+func New(cewClient cew_lib.Api, coreID string, statePaths state_hdl.Paths, httpTimeout time.Duration) *Handler {
 	return &Handler{
 		cewClient:   cewClient,
 		coreID:      coreID,
-		installPath: installPath,
+		statePaths:  statePaths,
 		httpTimeout: httpTimeout,
 	}
 }

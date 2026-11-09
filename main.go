@@ -29,6 +29,7 @@ import (
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/log_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/nginx_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/service_hdl"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/state_hdl"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/manager"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
@@ -116,7 +117,11 @@ func main() {
 
 	cewClient := cew_client.New(httpClient, "http://unix")
 
-	coreServiceHdl := service_hdl.New(cewClient, config.CoreID, config.InstallPath, time.Duration(config.HttpClient.Timeout))
+	coreServiceHdl := service_hdl.New(cewClient, config.CoreID, state_hdl.Paths{
+		Version: config.StateFiles.VersionPath,
+		Update:  config.StateFiles.UpdatePath,
+		Check:   config.StateFiles.CheckPath,
+	}, time.Duration(config.HttpClient.Timeout))
 	if err = coreServiceHdl.Init(config.ComposeFilePath); err != nil {
 		util.Logger.Error(err)
 		ec = 1
