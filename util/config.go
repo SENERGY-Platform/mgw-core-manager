@@ -108,7 +108,6 @@ type Config struct {
 	CoreID            string            `json:"core_id" env_var:"CORE_ID"`
 	StateFiles        StateFilesConfig  `json:"state_files" env_var:"STATE_FILES_CONFIG"`
 	Containers        ContainersConfig  `json:"containers" env_var:"CONTAINERS_CONFIG"`
-	ImgPurgeDelay     int64             `json:"img_purge_delay" env_var:"IMG_PURGE_DELAY"`
 	LogHandler        LogHandlerConfig  `json:"log_handler" env_var:"LOG_HANDLER_CONFIG"`
 }
 
@@ -154,7 +153,6 @@ func NewConfig(path string) (*Config, error) {
 			StopTimeout:   int64(2 * time.Minute),
 			StartAttempts: 12,
 		},
-		ImgPurgeDelay: int64(time.Minute),
 		LogHandler: LogHandlerConfig{
 			BufferSize: 32768,
 		},

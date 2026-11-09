@@ -21,8 +21,6 @@ import (
 	"errors"
 	"fmt"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
-	"github.com/SENERGY-Platform/mgw-core-manager/util"
-	"time"
 )
 
 func (m *Manager) PurgeImages(ctx context.Context, repository, excludeTag string) (string, error) {
@@ -37,44 +35,4 @@ func (m *Manager) PurgeImages(ctx context.Context, repository, excludeTag string
 		}
 		return nil, err
 	})
-}
-
-func (m *Manager) PurgeCoreImages(delay time.Duration) error {
-	_, err := m.jobHandler.Create(context.Background(), fmt.Sprintf("purge old core images (delay=%d)", delay), func(ctx context.Context, cf context.CancelFunc) (any, error) {
-		defer cf()
-		err := m.purgeCoreImages(ctx, delay)
-		if err == nil {
-			err = ctx.Err()
-		}
-		return nil, err
-	})
-	return err
-}
-
-func (m *Manager) purgeCoreImages(ctx context.Context, delay time.Duration) error {
-	timer := time.NewTimer(delay)
-	select {
-	case <-timer.C:
-		break
-	case <-ctx.Done():
-		return ctx.Err()
-	}
-	defer func() {
-		if !timer.Stop() {
-			select {
-			case <-timer.C:
-			default:
-			}
-		}
-	}()
-	services, err := m.coreSrvHdl.List(ctx)
-	if err != nil {
-		return err
-	}
-	for _, service := range services {
-		if err = m.cleanupHdl.PurgeImages(ctx, service.Image.Repository, service.Image.Tag); err != nil {
-			util.Logger.Error("purge core images:", err)
-		}
-	}
-	return nil
 }

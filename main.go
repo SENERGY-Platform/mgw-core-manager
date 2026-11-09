@@ -253,10 +253,6 @@ func main() {
 
 	purgeJobsHdl.Start(jobCtx)
 
-	if err = coreManager.PurgeCoreImages(time.Duration(config.ImgPurgeDelay)); err != nil {
-		util.Logger.Error(err)
-	}
-
 	go func() {
 		defer srvCF()
 		util.Logger.Info("starting http server ...")
