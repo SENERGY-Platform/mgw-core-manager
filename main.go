@@ -26,6 +26,7 @@ import (
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/cleanup_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/kratos_hdl"
+	"github.com/SENERGY-Platform/mgw-core-manager/handler/lifecycle_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/log_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/nginx_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/service_hdl"
@@ -128,6 +129,8 @@ func main() {
 		ec = 1
 		return
 	}
+
+	containersHdl := lifecycle_hdl.New(config.ComposeFilePath, config.Containers.DockerPath, config.Containers.WaitSockets, time.Duration(config.Containers.StartTimeout), time.Duration(config.Containers.StopTimeout), config.Containers.StartAttempts)
 
 	gwCtrHdl, err := coreServiceHdl.GetCtrHandler(config.CoreService.GatewaySrvName)
 	if err != nil {
@@ -235,6 +238,8 @@ func main() {
 		return nil
 	})
 
+	wtchdg.RegisterStopFunc(containersHdl.Stop)
+
 	kratosHdl.Start()
 
 	wtchdg.Start()
@@ -261,6 +266,9 @@ func main() {
 			return
 		}
 	}()
+
+	// After the kratos secrets and the gateway's endpoint config are written: the containers mount them.
+	containersHdl.Start()
 
 	ec = wtchdg.Join()
 }

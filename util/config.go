@@ -86,6 +86,16 @@ type StateFilesConfig struct {
 	LockPath    string `json:"lock_path" env_var:"STATE_FILES_LOCK_PATH"`
 }
 
+// ContainersConfig controls starting and stopping the core containers of the compose file at compose_file_path.
+// Timeouts are in nanoseconds.
+type ContainersConfig struct {
+	DockerPath    string   `json:"docker_path" env_var:"CONTAINERS_DOCKER_PATH"`
+	WaitSockets   []string `json:"wait_sockets" env_var:"CONTAINERS_WAIT_SOCKETS"`   // unix sockets that must accept connections before the containers start
+	StartTimeout  int64    `json:"start_timeout" env_var:"CONTAINERS_START_TIMEOUT"` // per attempt, including the wait for the sockets
+	StopTimeout   int64    `json:"stop_timeout" env_var:"CONTAINERS_STOP_TIMEOUT"`
+	StartAttempts int      `json:"start_attempts" env_var:"CONTAINERS_START_ATTEMPTS"`
+}
+
 type Config struct {
 	Logger            LoggerConfig      `json:"logger" env_var:"LOGGER_CONFIG"`
 	Socket            SocketConfig      `json:"socket" env_var:"SOCKET_CONFIG"`
@@ -97,6 +107,7 @@ type Config struct {
 	ComposeFilePath   string            `json:"compose_file_path" env_var:"COMPOSE_FILE_PATH"`
 	CoreID            string            `json:"core_id" env_var:"CORE_ID"`
 	StateFiles        StateFilesConfig  `json:"state_files" env_var:"STATE_FILES_CONFIG"`
+	Containers        ContainersConfig  `json:"containers" env_var:"CONTAINERS_CONFIG"`
 	ImgPurgeDelay     int64             `json:"img_purge_delay" env_var:"IMG_PURGE_DELAY"`
 	LogHandler        LogHandlerConfig  `json:"log_handler" env_var:"LOG_HANDLER_CONFIG"`
 }
@@ -136,6 +147,12 @@ func NewConfig(path string) (*Config, error) {
 			Interval:     int64(time.Hour),
 			FileUID:      -1,
 			FileGID:      -1,
+		},
+		Containers: ContainersConfig{
+			DockerPath:    "docker",
+			StartTimeout:  int64(10 * time.Minute),
+			StopTimeout:   int64(2 * time.Minute),
+			StartAttempts: 12,
 		},
 		ImgPurgeDelay: int64(time.Minute),
 		LogHandler: LogHandlerConfig{
