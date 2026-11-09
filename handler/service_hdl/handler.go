@@ -33,6 +33,8 @@ import (
 const (
 	CoreIDLabel  = "mgw_cid"
 	CoreSrvLabel = "core_srv"
+	// OneShotLabel set to "true" marks a service that runs once and stops, e.g. a database migration.
+	OneShotLabel = "core_srv_oneshot"
 )
 
 type Handler struct {
@@ -54,10 +56,35 @@ type service struct {
 
 type composeFile struct {
 	Services map[string]struct {
-		ContainerName string `yaml:"container_name"`
-		Image         string `yaml:"image"`
-		Restart       string `yaml:"restart"`
+		ContainerName string        `yaml:"container_name"`
+		Image         string        `yaml:"image"`
+		Labels        composeLabels `yaml:"labels"`
 	} `yaml:"services"`
+}
+
+// composeLabels reads the labels of a compose service in both of compose's forms: a map (key: value) or a list
+// ("key=value").
+type composeLabels map[string]string
+
+func (l *composeLabels) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.SequenceNode {
+		var list []string
+		if err := value.Decode(&list); err != nil {
+			return err
+		}
+		*l = make(composeLabels, len(list))
+		for _, item := range list {
+			key, val, _ := strings.Cut(item, "=")
+			(*l)[key] = val
+		}
+		return nil
+	}
+	var m map[string]string
+	if err := value.Decode(&m); err != nil {
+		return err
+	}
+	*l = m
+	return nil
 }
 
 func New(cewClient cew_lib.Api, coreID string, statePaths state_hdl.Paths, httpTimeout time.Duration) *Handler {
@@ -88,7 +115,7 @@ func (h *Handler) Init(composePath string) error {
 			ContainerName: srv.ContainerName,
 			ImageName:     imgName,
 			ImageTag:      imgTag,
-			OneShot:       isOneShot(srv.Restart),
+			OneShot:       srv.Labels[OneShotLabel] == "true",
 			CtrHandler: &CtrHandler{
 				cewClient:     h.cewClient,
 				srvName:       name,
@@ -194,9 +221,4 @@ func parseImageStr(s string) (name, tag string) {
 		}
 	}
 	return
-}
-
-// isOneShot reports whether a compose restart policy marks a service that runs once and stops (on-failure, with or without a retry count).
-func isOneShot(restart string) bool {
-	return restart == "on-failure" || strings.HasPrefix(restart, "on-failure:")
 }

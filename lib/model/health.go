@@ -37,7 +37,7 @@ type CoreServiceHealth struct {
 	Name    string  `json:"name"`
 	State   *string `json:"state"`    // container state from the container engine wrapper, null if the container is missing or the wrapper is unreachable
 	Health  *string `json:"health"`   // container health from the container engine wrapper, null if the image defines no healthcheck
-	OneShot bool    `json:"one_shot"` // service runs once and is expected to stop (compose restart policy on-failure)
+	OneShot bool    `json:"one_shot"` // service runs once and is expected to stop (label core_srv_oneshot "true" in the compose file)
 	Ok      bool    `json:"ok"`
 }
 

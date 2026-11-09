@@ -833,7 +833,7 @@ const docTemplaterestricted = `{
                     "type": "boolean"
                 },
                 "one_shot": {
-                    "description": "service runs once and is expected to stop (compose restart policy on-failure)",
+                    "description": "service runs once and is expected to stop (label core_srv_oneshot \"true\" in the compose file)",
                     "type": "boolean"
                 },
                 "state": {

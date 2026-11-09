@@ -175,15 +175,29 @@ func TestInitMarksOneShotServices(t *testing.T) {
   gateway:
     image: example/gateway:1.0
     container_name: gw
-    restart: always
+    labels:
+      core_srv: "true"
   migrate:
     image: example/migrate:1.0
     container_name: mig
+    labels:
+      core_srv: "true"
+      core_srv_oneshot: "true"
+  listed:
+    image: example/listed:1.0
+    container_name: lst
+    labels:
+      - core_srv=true
+      - core_srv_oneshot=true
+  not_true:
+    image: example/not_true:1.0
+    container_name: nt
+    labels:
+      core_srv_oneshot: "false"
+  restart_policy_only:
+    image: example/restart:1.0
+    container_name: rst
     restart: on-failure
-  limited:
-    image: example/limited:1.0
-    container_name: lim
-    restart: "on-failure:3"
   plain:
     image: example/plain:1.0
     container_name: plain
@@ -196,7 +210,7 @@ func TestInitMarksOneShotServices(t *testing.T) {
 	if err := h.Init(p); err != nil {
 		t.Fatal(err)
 	}
-	want := map[string]bool{"gateway": false, "migrate": true, "limited": true, "plain": false}
+	want := map[string]bool{"gateway": false, "migrate": true, "listed": true, "not_true": false, "restart_policy_only": false, "plain": false}
 	got := make(map[string]bool)
 	for name, s := range h.services {
 		got[name] = s.OneShot
