@@ -60,6 +60,7 @@ func TestGetHealthResponseShape(t *testing.T) {
 		"services": []any{map[string]any{"name": "gw", "state": nil, "health": nil, "one_shot": false, "ok": false}},
 		"update":   nil,
 		"check":    nil,
+		"lock":     nil,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("body = %v, want %v", got, want)

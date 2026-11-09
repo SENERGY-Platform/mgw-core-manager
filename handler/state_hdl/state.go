@@ -40,6 +40,7 @@ type Paths struct {
 	Version string
 	Update  string
 	Check   string
+	Lock    string
 }
 
 // ReadVersion returns the trimmed content of the version file, empty if it can't be read.
@@ -138,7 +139,11 @@ func readLimited(p string) ([]byte, error) {
 		return nil, err
 	}
 	defer file.Close()
-	b, err := io.ReadAll(io.LimitReader(file, maxFileLen+1))
+	return readAllLimited(file)
+}
+
+func readAllLimited(r io.Reader) ([]byte, error) {
+	b, err := io.ReadAll(io.LimitReader(r, maxFileLen+1))
 	if err != nil {
 		return nil, err
 	}

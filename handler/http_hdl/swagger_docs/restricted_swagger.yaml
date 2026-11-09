@@ -82,6 +82,10 @@ definitions:
         allOf:
         - $ref: '#/definitions/model.CheckStatus'
         description: null if there is no version check record or it cannot be read
+      lock:
+        allOf:
+        - $ref: '#/definitions/model.LockStatus'
+        description: null if the installer's lock is not held or that cannot be determined
       services:
         description: all services of the compose file
         items:
@@ -171,6 +175,18 @@ definitions:
     - StandardEndpoint
     - AliasEndpoint
     - DefaultGuiEndpoint
+  model.LockStatus:
+    properties:
+      holder:
+        description: update or ctrl.sh
+        type: string
+      pid:
+        description: process id of the holder
+        type: string
+      since:
+        description: when the holder took the lock
+        type: string
+    type: object
   model.Log:
     properties:
       id:

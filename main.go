@@ -121,6 +121,7 @@ func main() {
 		Version: config.StateFiles.VersionPath,
 		Update:  config.StateFiles.UpdatePath,
 		Check:   config.StateFiles.CheckPath,
+		Lock:    config.StateFiles.LockPath,
 	}, time.Duration(config.HttpClient.Timeout))
 	if err = coreServiceHdl.Init(config.ComposeFilePath); err != nil {
 		util.Logger.Error(err)

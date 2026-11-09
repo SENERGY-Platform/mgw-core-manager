@@ -772,6 +772,14 @@ const docTemplaterestricted = `{
                         }
                     ]
                 },
+                "lock": {
+                    "description": "null if the installer's lock is not held or that cannot be determined",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.LockStatus"
+                        }
+                    ]
+                },
                 "services": {
                     "description": "all services of the compose file",
                     "type": "array",
@@ -898,6 +906,23 @@ const docTemplaterestricted = `{
                 "AliasEndpoint",
                 "DefaultGuiEndpoint"
             ]
+        },
+        "model.LockStatus": {
+            "type": "object",
+            "properties": {
+                "holder": {
+                    "description": "update or ctrl.sh",
+                    "type": "string"
+                },
+                "pid": {
+                    "description": "process id of the holder",
+                    "type": "string"
+                },
+                "since": {
+                    "description": "when the holder took the lock",
+                    "type": "string"
+                }
+            }
         },
         "model.Log": {
             "type": "object",

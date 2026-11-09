@@ -77,12 +77,13 @@ type LogHandlerConfig struct {
 	BufferSize int    `json:"buffer_size" env_var:"LOG_HANDLER_BUFFER_SIZE"`
 }
 
-// StateFilesConfig holds the paths of the installer's state files reported by the health endpoint. An empty
-// path is not read.
+// StateFilesConfig holds the paths of the installer's state files and lock reported by the health endpoint. An
+// empty path is not read.
 type StateFilesConfig struct {
 	VersionPath string `json:"version_path" env_var:"STATE_FILES_VERSION_PATH"`
 	UpdatePath  string `json:"update_path" env_var:"STATE_FILES_UPDATE_PATH"`
 	CheckPath   string `json:"check_path" env_var:"STATE_FILES_CHECK_PATH"`
+	LockPath    string `json:"lock_path" env_var:"STATE_FILES_LOCK_PATH"`
 }
 
 type Config struct {

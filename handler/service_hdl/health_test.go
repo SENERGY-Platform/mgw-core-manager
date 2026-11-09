@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"syscall"
 	"testing"
 	"time"
 
@@ -108,8 +109,8 @@ func TestHealth(t *testing.T) {
 			if !reflect.DeepEqual(got.Services, c.want) {
 				t.Errorf("services = %+v, want %+v", got.Services, c.want)
 			}
-			if got.Version != "" || got.Update != nil || got.Check != nil {
-				t.Errorf("version = %q, update = %+v, check = %+v, want empty without state file paths", got.Version, got.Update, got.Check)
+			if got.Version != "" || got.Update != nil || got.Check != nil || got.Lock != nil {
+				t.Errorf("version = %q, update = %+v, check = %+v, lock = %+v, want empty without state file paths", got.Version, got.Update, got.Check, got.Lock)
 			}
 		})
 	}
@@ -121,16 +122,26 @@ func TestHealthReadsStateFiles(t *testing.T) {
 		Version: filepath.Join(dir, "version"),
 		Update:  filepath.Join(dir, "update"),
 		Check:   filepath.Join(dir, "check"),
+		Lock:    filepath.Join(dir, "lock"),
 	}
 	files := map[string]string{
 		paths.Version: "v2.13.2\n",
 		paths.Update:  "from_version=v2.13.1\nto_version=v2.13.2\nstarted=2026-10-27T10:00:00Z\nfinished=2026-10-27T10:03:12Z\nresult=success\nphase=done\nkind=update\nstep=cleaning up\n",
 		paths.Check:   "check_time=2026-10-27T09:59:58Z\ncheck_result=update_available\ncheck_version=v2.13.2\n",
+		paths.Lock:    "holder=ctrl.sh\npid=4321\nsince=2026-10-27T10:05:00Z\n",
 	}
 	for p, content := range files {
 		if err := os.WriteFile(p, []byte(content), 0o600); err != nil {
 			t.Fatal(err)
 		}
+	}
+	lockFile, err := os.Open(paths.Lock)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer lockFile.Close()
+	if err := syscall.Flock(int(lockFile.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
+		t.Fatal(err)
 	}
 	got, err := newHandler(&fakeCew{}, paths).Health(context.Background())
 	if err != nil {
@@ -138,8 +149,9 @@ func TestHealthReadsStateFiles(t *testing.T) {
 	}
 	wantUpdate := &lib_model.UpdateStatus{FromVersion: "v2.13.1", ToVersion: "v2.13.2", Started: "2026-10-27T10:00:00Z", Finished: "2026-10-27T10:03:12Z", Result: "success", Phase: "done", Kind: "update", Step: "cleaning up"}
 	wantCheck := &lib_model.CheckStatus{Time: "2026-10-27T09:59:58Z", Result: "update_available", Version: "v2.13.2"}
-	if got.Version != "v2.13.2" || !reflect.DeepEqual(got.Update, wantUpdate) || !reflect.DeepEqual(got.Check, wantCheck) {
-		t.Errorf("version = %q, update = %+v, check = %+v", got.Version, got.Update, got.Check)
+	wantLock := &lib_model.LockStatus{Holder: "ctrl.sh", Pid: "4321", Since: "2026-10-27T10:05:00Z"}
+	if got.Version != "v2.13.2" || !reflect.DeepEqual(got.Update, wantUpdate) || !reflect.DeepEqual(got.Check, wantCheck) || !reflect.DeepEqual(got.Lock, wantLock) {
+		t.Errorf("version = %q, update = %+v, check = %+v, lock = %+v", got.Version, got.Update, got.Check, got.Lock)
 	}
 	if got.State != lib_model.HealthHealthy || got.Services == nil || len(got.Services) != 0 {
 		t.Errorf("state = %d, services = %#v", got.State, got.Services)
@@ -148,13 +160,13 @@ func TestHealthReadsStateFiles(t *testing.T) {
 
 func TestHealthMissingStateFiles(t *testing.T) {
 	dir := t.TempDir()
-	paths := state_hdl.Paths{Version: filepath.Join(dir, "version"), Update: filepath.Join(dir, "update"), Check: filepath.Join(dir, "check")}
+	paths := state_hdl.Paths{Version: filepath.Join(dir, "version"), Update: filepath.Join(dir, "update"), Check: filepath.Join(dir, "check"), Lock: filepath.Join(dir, "lock")}
 	got, err := newHandler(&fakeCew{}, paths).Health(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Version != "" || got.Update != nil || got.Check != nil {
-		t.Errorf("version = %q, update = %+v, check = %+v", got.Version, got.Update, got.Check)
+	if got.Version != "" || got.Update != nil || got.Check != nil || got.Lock != nil {
+		t.Errorf("version = %q, update = %+v, check = %+v, lock = %+v", got.Version, got.Update, got.Check, got.Lock)
 	}
 }
 

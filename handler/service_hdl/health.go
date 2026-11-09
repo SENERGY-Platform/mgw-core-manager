@@ -62,6 +62,7 @@ func (h *Handler) Health(ctx context.Context) (lib_model.CoreHealth, error) {
 	health.Version = state_hdl.ReadVersion(h.statePaths.Version)
 	health.Update = state_hdl.ReadUpdate(h.statePaths.Update)
 	health.Check = state_hdl.ReadCheck(h.statePaths.Check)
+	health.Lock = state_hdl.ReadLock(h.statePaths.Lock)
 	return health, nil
 }
 

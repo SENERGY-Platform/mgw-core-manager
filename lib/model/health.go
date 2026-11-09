@@ -29,6 +29,7 @@ type CoreHealth struct {
 	Services []CoreServiceHealth `json:"services"` // all services of the compose file
 	Update   *UpdateStatus       `json:"update"`   // null if there is no update record or it cannot be read
 	Check    *CheckStatus        `json:"check"`    // null if there is no version check record or it cannot be read
+	Lock     *LockStatus         `json:"lock"`     // null if the installer's lock is not held or that cannot be determined
 }
 
 // CoreServiceHealth describes the health of a single core service.
@@ -62,4 +63,12 @@ type CheckStatus struct {
 	Version  string   `json:"version"`  // the newer release found, empty if up to date
 	Step     string   `json:"step"`     // human-readable description of what failed, informational only, must not be evaluated
 	Warnings []string `json:"warnings"` // things that went wrong without failing the check, informational only
+}
+
+// LockStatus describes who holds the installer's lock, as written by the holder. Reported only while the lock is
+// held. Any field may be empty.
+type LockStatus struct {
+	Holder string `json:"holder"` // update or ctrl.sh
+	Pid    string `json:"pid"`    // process id of the holder
+	Since  string `json:"since"`  // when the holder took the lock
 }
