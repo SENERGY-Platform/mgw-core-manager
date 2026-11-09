@@ -74,7 +74,7 @@ func (f *fakeJobHdl) Create(ctx context.Context, _ string, tFunc job_hdl.TargetF
 func newTestManager(known string, kratosErr error) (*Manager, *fakeCoreSrvHdl, *fakeKratosHdl) {
 	srv := &fakeCoreSrvHdl{known: known}
 	kratos := &fakeKratosHdl{err: kratosErr}
-	return New(srv, nil, nil, nil, kratos, "kratos", &fakeJobHdl{}, nil), srv, kratos
+	return New(srv, nil, nil, kratos, "kratos", &fakeJobHdl{}, nil), srv, kratos
 }
 
 func TestSetOIDCSettingsRestartsKratos(t *testing.T) {

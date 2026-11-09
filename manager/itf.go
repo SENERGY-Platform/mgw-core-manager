@@ -40,10 +40,6 @@ type CoreServiceHandler interface {
 	Health(ctx context.Context) (lib_model.CoreHealth, error)
 }
 
-type CleanupHandler interface {
-	PurgeImages(ctx context.Context, repository, excludeTag string) error
-}
-
 type KratosHandler interface {
 	GetOIDC(ctx context.Context) (lib_model.OIDCSettings, error)
 	SetOIDC(ctx context.Context, req lib_model.OIDCSettingsReq) error

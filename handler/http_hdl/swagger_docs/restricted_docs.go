@@ -1105,7 +1105,11 @@ const docTemplaterestricted = `{
                 1000000,
                 1000000000,
                 60000000000,
-                3600000000000
+                3600000000000,
+                1,
+                1000,
+                1000000,
+                1000000000
             ],
             "x-enum-varnames": [
                 "minDuration",
@@ -1115,7 +1119,11 @@ const docTemplaterestricted = `{
                 "Millisecond",
                 "Second",
                 "Minute",
-                "Hour"
+                "Hour",
+                "Nanosecond",
+                "Microsecond",
+                "Millisecond",
+                "Second"
             ]
         }
     }

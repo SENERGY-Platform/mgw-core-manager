@@ -23,7 +23,6 @@ import (
 	"github.com/SENERGY-Platform/go-cc-job-handler/ccjh"
 	sb_logger "github.com/SENERGY-Platform/go-service-base/logger"
 	cew_client "github.com/SENERGY-Platform/mgw-container-engine-wrapper/client"
-	"github.com/SENERGY-Platform/mgw-core-manager/handler/cleanup_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/http_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/kratos_hdl"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/lifecycle_hdl"
@@ -159,8 +158,6 @@ func main() {
 		return
 	}
 
-	cleanupHdl := cleanup_hdl.New(cewClient, time.Duration(config.HttpClient.Timeout))
-
 	ccHandler := ccjh.New(config.Jobs.BufferSize)
 
 	job_hdl.Logger = util.Logger
@@ -192,7 +189,7 @@ func main() {
 		return nil
 	})
 
-	coreManager := manager.New(coreServiceHdl, gwEndpointHdl, cleanupHdl, logHdl, kratosHdl, config.CoreService.KratosSrvName, jobHandler, srvInfoHdl)
+	coreManager := manager.New(coreServiceHdl, gwEndpointHdl, logHdl, kratosHdl, config.CoreService.KratosSrvName, jobHandler, srvInfoHdl)
 
 	httpHandler, err := http_hdl.New(coreManager, map[string]string{
 		lib_model.HeaderApiVer:  srvInfoHdl.GetVersion(),

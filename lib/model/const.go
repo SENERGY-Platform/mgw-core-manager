@@ -29,8 +29,6 @@ const (
 	EndpointsPath      = "endpoints"
 	EndpointsBatchPath = "endpoints-batch"
 	AliasPath          = "alias"
-	CleanupPath        = "cleanup"
-	ImagesPath         = "images"
 	LogsPath           = "logs"
 	JobsPath           = "jobs"
 	JobsCancelPath     = "cancel"

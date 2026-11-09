@@ -32,7 +32,6 @@ var routes = gin_mw.Routes[lib.Api]{
 	DeleteEndpointH,
 	PostEndpointBatchH,
 	DeleteEndpointBatchH,
-	PatchPurgeImagesH,
 }
 
 // SetRoutes

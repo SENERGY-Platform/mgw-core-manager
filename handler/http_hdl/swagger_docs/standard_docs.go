@@ -19,53 +19,6 @@ const docTemplatestandard = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/cleanup/images": {
-            "patch": {
-                "description": "Purge unused images of a repository.",
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Docker"
-                ],
-                "summary": "Purge images",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "docker repository name",
-                        "name": "repository",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "image tag name to exclude",
-                        "name": "exclude_tag",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "job ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "error message",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "error message",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/core-services": {
             "get": {
                 "description": "List core services including image and container information.",

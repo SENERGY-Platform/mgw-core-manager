@@ -313,37 +313,6 @@ info:
   title: Core Manager API
   version: 0.8.2
 paths:
-  /cleanup/images:
-    patch:
-      description: Purge unused images of a repository.
-      parameters:
-      - description: docker repository name
-        in: query
-        name: repository
-        required: true
-        type: string
-      - description: image tag name to exclude
-        in: query
-        name: exclude_tag
-        type: string
-      produces:
-      - text/plain
-      responses:
-        "200":
-          description: job ID
-          schema:
-            type: string
-        "400":
-          description: error message
-          schema:
-            type: string
-        "500":
-          description: error message
-          schema:
-            type: string
-      summary: Purge images
-      tags:
-      - Docker
   /core-services:
     get:
       description: List core services including image and container information.
