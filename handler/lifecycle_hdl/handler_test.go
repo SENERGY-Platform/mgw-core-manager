@@ -48,6 +48,7 @@ type fake struct {
 	sleeps       []time.Duration
 	startResults []error
 	blockStart   bool // "compose start" blocks until its context ends
+	monitorRuns  bool // the monitor waits until its context ends instead of ending at once
 	unreachable  map[string]int
 }
 
@@ -69,7 +70,20 @@ func (f *fake) run(ctx context.Context, name string, args ...string) error {
 	return err
 }
 
+// checkInterval is the monitor's interval in tests. Unless a test runs the monitor (monitorRuns), the fake ends the
+// monitor at its first wait, so a successful start ends the start loop.
+const checkInterval = 7 * time.Second
+
+var errMonitorOff = errors.New("monitor off in this test")
+
 func (f *fake) sleep(ctx context.Context, d time.Duration) error {
+	if d == checkInterval {
+		if !f.monitorRuns {
+			return errMonitorOff
+		}
+		<-ctx.Done()
+		return ctx.Err()
+	}
 	f.mu.Lock()
 	f.sleeps = append(f.sleeps, d)
 	f.mu.Unlock()
@@ -88,7 +102,17 @@ func (f *fake) dial(_ context.Context, p string) error {
 }
 
 func newHandler(f *fake, sockets []string, maxAttempts int) *Handler {
-	h := New("/core/docker-compose.yml", "docker", sockets, time.Minute, time.Minute, maxAttempts)
+	h := New(Config{
+		ComposePath:   "/core/docker-compose.yml",
+		DockerPath:    "docker",
+		WaitSockets:   sockets,
+		StartTimeout:  time.Minute,
+		StopTimeout:   time.Minute,
+		StartAttempts: maxAttempts,
+		CheckInterval: checkInterval,
+		RestartLimit:  3,
+		RestartWindow: 10 * time.Minute,
+	}, &fakeContainers{})
 	h.run, h.sleep, h.dial = f.run, f.sleep, f.dial
 	return h
 }
@@ -148,7 +172,7 @@ func TestStartWaitsForTheSockets(t *testing.T) {
 func TestStartRetriesIfASocketStaysUnreachable(t *testing.T) {
 	f := &fake{unreachable: map[string]int{"/s/a.sock": 1 << 30}}
 	h := newHandler(f, []string{"/s/a.sock"}, 2)
-	h.startTimeout = 20 * time.Millisecond
+	h.cfg.StartTimeout = 20 * time.Millisecond
 	h.sleep = func(ctx context.Context, d time.Duration) error {
 		if d == time.Second {
 			<-ctx.Done() // the attempt's timeout ends the wait for the socket
@@ -175,6 +199,19 @@ func TestStopEndsARunningStartAndStopsTheContainers(t *testing.T) {
 	}
 	if !reflect.DeepEqual(f.commands, []string{composeStart, composeStop}) || len(f.sleeps) != 0 {
 		t.Errorf("commands = %q, sleeps = %v, want no retry after stop", f.commands, f.sleeps)
+	}
+}
+
+func TestStopEndsTheMonitorAndStopsTheContainers(t *testing.T) {
+	f := &fake{monitorRuns: true}
+	h := newHandler(f, nil, 3)
+	h.Start()
+	waitFor(t, func() bool { f.mu.Lock(); defer f.mu.Unlock(); return len(f.commands) == 1 })
+	if err := h.Stop(); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(f.commands, []string{composeStart, composeStop}) {
+		t.Errorf("commands = %q", f.commands)
 	}
 }
 

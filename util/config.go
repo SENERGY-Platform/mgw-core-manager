@@ -86,7 +86,8 @@ type StateFilesConfig struct {
 	LockPath    string `json:"lock_path" env_var:"STATE_FILES_LOCK_PATH"`
 }
 
-// ContainersConfig controls starting and stopping the core containers of the compose file at compose_file_path.
+// ContainersConfig controls starting, restarting and stopping the core containers of the compose file at
+// compose_file_path.
 // Timeouts are in nanoseconds.
 type ContainersConfig struct {
 	DockerPath    string   `json:"docker_path" env_var:"CONTAINERS_DOCKER_PATH"`
@@ -94,6 +95,9 @@ type ContainersConfig struct {
 	StartTimeout  int64    `json:"start_timeout" env_var:"CONTAINERS_START_TIMEOUT"` // per attempt, including the wait for the sockets
 	StopTimeout   int64    `json:"stop_timeout" env_var:"CONTAINERS_STOP_TIMEOUT"`
 	StartAttempts int      `json:"start_attempts" env_var:"CONTAINERS_START_ATTEMPTS"`
+	CheckInterval int64    `json:"check_interval" env_var:"CONTAINERS_CHECK_INTERVAL"` // how often crashed containers are looked for
+	RestartLimit  int      `json:"restart_limit" env_var:"CONTAINERS_RESTART_LIMIT"`   // restarts of a container within restart_window before giving up on it
+	RestartWindow int64    `json:"restart_window" env_var:"CONTAINERS_RESTART_WINDOW"`
 }
 
 type Config struct {
@@ -152,6 +156,9 @@ func NewConfig(path string) (*Config, error) {
 			StartTimeout:  int64(10 * time.Minute),
 			StopTimeout:   int64(2 * time.Minute),
 			StartAttempts: 12,
+			CheckInterval: int64(5 * time.Second),
+			RestartLimit:  5,
+			RestartWindow: int64(10 * time.Minute),
 		},
 		LogHandler: LogHandlerConfig{
 			BufferSize: 32768,

@@ -26,22 +26,9 @@ import (
 )
 
 func (h *Handler) Health(ctx context.Context) (lib_model.CoreHealth, error) {
-	ctxWt, cf := context.WithTimeout(ctx, h.httpTimeout)
-	defer cf()
-	ctrList, err := h.cewClient.GetContainers(ctxWt, cew_model.ContainerFilter{
-		Labels: map[string]string{
-			CoreIDLabel:  h.coreID,
-			CoreSrvLabel: "true",
-		},
-	})
-	var ctrMap map[string]cew_model.Container
+	ctrMap, err := h.coreContainers(ctx)
 	if err != nil {
 		util.Logger.Error(err)
-	} else {
-		ctrMap = make(map[string]cew_model.Container, len(ctrList))
-		for _, ctr := range ctrList {
-			ctrMap[ctr.Name] = ctr
-		}
 	}
 	health := lib_model.CoreHealth{
 		Services: make([]lib_model.CoreServiceHealth, 0, len(h.services)),

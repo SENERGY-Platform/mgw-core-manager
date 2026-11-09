@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	cew_lib "github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib"
-	cew_model "github.com/SENERGY-Platform/mgw-container-engine-wrapper/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/handler/state_hdl"
 	lib_model "github.com/SENERGY-Platform/mgw-core-manager/lib/model"
 	"github.com/SENERGY-Platform/mgw-core-manager/util"
@@ -128,22 +127,9 @@ func (h *Handler) Init(composePath string) error {
 }
 
 func (h *Handler) List(ctx context.Context) (map[string]lib_model.CoreService, error) {
-	var ctrMap map[string]cew_model.Container
-	ctxWt, cf := context.WithTimeout(ctx, h.httpTimeout)
-	defer cf()
-	ctrList, err := h.cewClient.GetContainers(ctxWt, cew_model.ContainerFilter{
-		Labels: map[string]string{
-			CoreIDLabel:  h.coreID,
-			CoreSrvLabel: "true",
-		},
-	})
+	ctrMap, err := h.coreContainers(ctx)
 	if err != nil {
 		util.Logger.Error(err)
-	} else {
-		ctrMap = make(map[string]cew_model.Container)
-		for _, ctr := range ctrList {
-			ctrMap[ctr.Name] = ctr
-		}
 	}
 	services := make(map[string]lib_model.CoreService)
 	for name, srv := range h.services {

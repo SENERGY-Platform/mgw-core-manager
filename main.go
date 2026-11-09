@@ -129,7 +129,17 @@ func main() {
 		return
 	}
 
-	containersHdl := lifecycle_hdl.New(config.ComposeFilePath, config.Containers.DockerPath, config.Containers.WaitSockets, time.Duration(config.Containers.StartTimeout), time.Duration(config.Containers.StopTimeout), config.Containers.StartAttempts)
+	containersHdl := lifecycle_hdl.New(lifecycle_hdl.Config{
+		ComposePath:   config.ComposeFilePath,
+		DockerPath:    config.Containers.DockerPath,
+		WaitSockets:   config.Containers.WaitSockets,
+		StartTimeout:  time.Duration(config.Containers.StartTimeout),
+		StopTimeout:   time.Duration(config.Containers.StopTimeout),
+		StartAttempts: config.Containers.StartAttempts,
+		CheckInterval: time.Duration(config.Containers.CheckInterval),
+		RestartLimit:  config.Containers.RestartLimit,
+		RestartWindow: time.Duration(config.Containers.RestartWindow),
+	}, coreServiceHdl)
 
 	gwCtrHdl, err := coreServiceHdl.GetCtrHandler(config.CoreService.GatewaySrvName)
 	if err != nil {
