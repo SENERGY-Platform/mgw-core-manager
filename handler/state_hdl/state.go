@@ -63,17 +63,18 @@ func ReadUpdate(p string) *lib_model.UpdateStatus {
 		return nil
 	}
 	return &lib_model.UpdateStatus{
-		FromVersion: rec.values["from_version"],
-		ToVersion:   rec.values["to_version"],
-		Started:     rec.values["started"],
-		Finished:    rec.values["finished"],
-		Result:      rec.values["result"],
-		Phase:       rec.values["phase"],
-		Kind:        rec.values["kind"],
-		RolledBack:  rec.values["rolled_back"] == "true",
-		Interrupted: rec.values["interrupted"] == "true",
-		Step:        rec.values["step"],
-		Warnings:    rec.warnings,
+		FromVersion:    rec.values["from_version"],
+		ToVersion:      rec.values["to_version"],
+		Started:        rec.values["started"],
+		Finished:       rec.values["finished"],
+		Result:         rec.values["result"],
+		Phase:          rec.values["phase"],
+		Kind:           rec.values["kind"],
+		RolledBack:     rec.values["rolled_back"] == "true",
+		Interrupted:    rec.values["interrupted"] == "true",
+		RecoveryFailed: rec.values["recovery_failed"] == "true",
+		Step:           rec.values["step"],
+		Warnings:       rec.warnings,
 	}
 }
 

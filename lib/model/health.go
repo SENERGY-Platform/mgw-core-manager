@@ -43,17 +43,20 @@ type CoreServiceHealth struct {
 
 // UpdateStatus is the record of the last update attempt as written by the installer. Any field may be empty.
 type UpdateStatus struct {
-	FromVersion string   `json:"from_version"`
-	ToVersion   string   `json:"to_version"`
-	Started     string   `json:"started"`
-	Finished    string   `json:"finished"`
-	Result      string   `json:"result"`      // running, success or failed
-	Phase       string   `json:"phase"`       // stage the update reached, evaluated by consumers
-	Kind        string   `json:"kind"`        // update or migration
-	RolledBack  bool     `json:"rolled_back"` // the previous version was restored after a failure
-	Interrupted bool     `json:"interrupted"` // the attempt was killed or hit a power loss and was recovered later
-	Step        string   `json:"step"`        // human-readable description of the step reached, informational only, must not be evaluated
-	Warnings    []string `json:"warnings"`    // things that went wrong without failing the update, informational only
+	FromVersion string `json:"from_version"`
+	ToVersion   string `json:"to_version"`
+	Started     string `json:"started"`
+	Finished    string `json:"finished"`
+	Result      string `json:"result"`      // running, success or failed
+	Phase       string `json:"phase"`       // stage the update reached, evaluated by consumers
+	Kind        string `json:"kind"`        // update or migration
+	RolledBack  bool   `json:"rolled_back"` // the previous version was restored after a failure
+	Interrupted bool   `json:"interrupted"` // the attempt was killed or hit a power loss and was recovered later
+	// RecoveryFailed: the error handling or the recovery of this update failed; nothing more is
+	// attempted automatically and the core needs a repair with restore.sh. Updates stop until then.
+	RecoveryFailed bool     `json:"recovery_failed"`
+	Step           string   `json:"step"`     // human-readable description of the step reached, informational only, must not be evaluated
+	Warnings       []string `json:"warnings"` // things that went wrong without failing the update, informational only
 }
 
 // CheckStatus is the record of the last check for a new release as written by the installer. Any field may be empty.

@@ -1068,6 +1068,10 @@ const docTemplaterestricted = `{
                     "description": "stage the update reached, evaluated by consumers",
                     "type": "string"
                 },
+                "recovery_failed": {
+                    "description": "RecoveryFailed: the error handling or the recovery of this update failed; nothing more is\nattempted automatically and the core needs a repair with restore.sh. Updates stop until then.",
+                    "type": "boolean"
+                },
                 "result": {
                     "description": "running, success or failed",
                     "type": "string"
@@ -1098,32 +1102,20 @@ const docTemplaterestricted = `{
         "time.Duration": {
             "type": "integer",
             "enum": [
-                -9223372036854775808,
-                9223372036854775807,
                 1,
                 1000,
                 1000000,
                 1000000000,
                 60000000000,
-                3600000000000,
-                1,
-                1000,
-                1000000,
-                1000000000
+                3600000000000
             ],
             "x-enum-varnames": [
-                "minDuration",
-                "maxDuration",
                 "Nanosecond",
                 "Microsecond",
                 "Millisecond",
                 "Second",
                 "Minute",
-                "Hour",
-                "Nanosecond",
-                "Microsecond",
-                "Millisecond",
-                "Second"
+                "Hour"
             ]
         }
     }
