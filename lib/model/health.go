@@ -54,9 +54,12 @@ type UpdateStatus struct {
 	Interrupted bool   `json:"interrupted"` // the attempt was killed or hit a power loss and was recovered later
 	// RecoveryFailed: the error handling or the recovery of this update failed; nothing more is
 	// attempted automatically and the core needs a repair with restore.sh. Updates stop until then.
-	RecoveryFailed bool     `json:"recovery_failed"`
-	Step           string   `json:"step"`     // human-readable description of the step reached, informational only, must not be evaluated
-	Warnings       []string `json:"warnings"` // things that went wrong without failing the update, informational only
+	RecoveryFailed bool `json:"recovery_failed"`
+	// Restored: the core was repaired with restore.sh after this update failed; the record still
+	// explains the failure, but it no longer blocks the core.
+	Restored bool     `json:"restored"`
+	Step     string   `json:"step"`     // human-readable description of the step reached, informational only, must not be evaluated
+	Warnings []string `json:"warnings"` // things that went wrong without failing the update, informational only
 }
 
 // CheckStatus is the record of the last check for a new release as written by the installer. Any field may be empty.

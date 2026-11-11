@@ -1072,6 +1072,10 @@ const docTemplaterestricted = `{
                     "description": "RecoveryFailed: the error handling or the recovery of this update failed; nothing more is\nattempted automatically and the core needs a repair with restore.sh. Updates stop until then.",
                     "type": "boolean"
                 },
+                "restored": {
+                    "description": "Restored: the core was repaired with restore.sh after this update failed; the record still\nexplains the failure, but it no longer blocks the core.",
+                    "type": "boolean"
+                },
                 "result": {
                     "description": "running, success or failed",
                     "type": "string"
@@ -1102,6 +1106,8 @@ const docTemplaterestricted = `{
         "time.Duration": {
             "type": "integer",
             "enum": [
+                -9223372036854775808,
+                9223372036854775807,
                 1,
                 1000,
                 1000000,
@@ -1110,6 +1116,8 @@ const docTemplaterestricted = `{
                 3600000000000
             ],
             "x-enum-varnames": [
+                "minDuration",
+                "maxDuration",
                 "Nanosecond",
                 "Microsecond",
                 "Millisecond",

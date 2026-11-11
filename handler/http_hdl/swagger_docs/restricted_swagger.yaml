@@ -291,6 +291,11 @@ definitions:
           RecoveryFailed: the error handling or the recovery of this update failed; nothing more is
           attempted automatically and the core needs a repair with restore.sh. Updates stop until then.
         type: boolean
+      restored:
+        description: |-
+          Restored: the core was repaired with restore.sh after this update failed; the record still
+          explains the failure, but it no longer blocks the core.
+        type: boolean
       result:
         description: running, success or failed
         type: string
@@ -314,6 +319,8 @@ definitions:
     type: object
   time.Duration:
     enum:
+    - -9223372036854775808
+    - 9223372036854775807
     - 1
     - 1000
     - 1000000
@@ -322,6 +329,8 @@ definitions:
     - 3600000000000
     type: integer
     x-enum-varnames:
+    - minDuration
+    - maxDuration
     - Nanosecond
     - Microsecond
     - Millisecond

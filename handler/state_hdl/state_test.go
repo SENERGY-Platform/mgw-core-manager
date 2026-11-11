@@ -52,13 +52,13 @@ func TestReadUpdate(t *testing.T) {
 		want    *lib_model.UpdateStatus
 	}{
 		{"all fields",
-			"format=1\nwriter=v1_3_0\nfrom_version=v1.2.3\nto_version=v1.3.0\nstarted=s\nfinished=f\nresult=failed\nphase=switching\nkind=update\nrolled_back=true\ninterrupted=true\nrecovery_failed=true\nstep=reconciling /etc links\nwarning=avahi reload failed\n",
-			&lib_model.UpdateStatus{FromVersion: "v1.2.3", ToVersion: "v1.3.0", Started: "s", Finished: "f", Result: "failed", Phase: "switching", Kind: "update", RolledBack: true, Interrupted: true, RecoveryFailed: true, Step: "reconciling /etc links", Warnings: []string{"avahi reload failed"}}},
+			"format=1\nwriter=v1_3_0\nfrom_version=v1.2.3\nto_version=v1.3.0\nstarted=s\nfinished=f\nresult=failed\nphase=switching\nkind=update\nrolled_back=true\ninterrupted=true\nrecovery_failed=true\nrestored=true\nstep=reconciling /etc links\nwarning=avahi reload failed\n",
+			&lib_model.UpdateStatus{FromVersion: "v1.2.3", ToVersion: "v1.3.0", Started: "s", Finished: "f", Result: "failed", Phase: "switching", Kind: "update", RolledBack: true, Interrupted: true, RecoveryFailed: true, Restored: true, Step: "reconciling /etc links", Warnings: []string{"avahi reload failed"}}},
 		{"missing fields stay empty", "result=running\n", &lib_model.UpdateStatus{Result: "running"}},
 		{"empty file", "", &lib_model.UpdateStatus{}},
 		{"unknown keys are ignored", "result=success\nadded_by_a_newer_installer=x\n", &lib_model.UpdateStatus{Result: "success"}},
 		{"unknown values are kept as they are", "phase=a_phase_added_later\n", &lib_model.UpdateStatus{Phase: "a_phase_added_later"}},
-		{"booleans other than true are false", "rolled_back=yes\ninterrupted=1\nrecovery_failed=TRUE\n", &lib_model.UpdateStatus{}},
+		{"booleans other than true are false", "rolled_back=yes\ninterrupted=1\nrecovery_failed=TRUE\nrestored=yes\n", &lib_model.UpdateStatus{}},
 		{"a repeated key keeps its last value", "result=running\nresult=success\n", &lib_model.UpdateStatus{Result: "success"}},
 		{"warnings are collected in order", "warning=first\nwarning=second\n", &lib_model.UpdateStatus{Warnings: []string{"first", "second"}}},
 		{"a value may contain '='", "step=set a=b\n", &lib_model.UpdateStatus{Step: "set a=b"}},

@@ -73,6 +73,7 @@ func ReadUpdate(p string) *lib_model.UpdateStatus {
 		RolledBack:     rec.values["rolled_back"] == "true",
 		Interrupted:    rec.values["interrupted"] == "true",
 		RecoveryFailed: rec.values["recovery_failed"] == "true",
+		Restored:       rec.values["restored"] == "true",
 		Step:           rec.values["step"],
 		Warnings:       rec.warnings,
 	}
