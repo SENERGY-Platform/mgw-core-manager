@@ -75,6 +75,11 @@ definitions:
         items:
           type: string
         type: array
+      warnings_omitted:
+        description: |-
+          WarningsOmitted: warnings beyond those in Warnings, which the record leaves out; the installer's log
+          (core-installer) has all of them in full. 0 if none or not readable.
+        type: integer
     type: object
   model.CoreHealth:
     properties:
@@ -298,6 +303,11 @@ definitions:
         items:
           type: string
         type: array
+      warnings_omitted:
+        description: |-
+          WarningsOmitted: warnings beyond those in Warnings, which the record leaves out; the installer's log
+          (core-installer) has all of them in full. 0 if none or not readable.
+        type: integer
     type: object
   time.Duration:
     enum:

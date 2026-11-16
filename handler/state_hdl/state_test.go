@@ -61,6 +61,10 @@ func TestReadUpdate(t *testing.T) {
 		{"booleans other than true are false", "rolled_back=yes\ninterrupted=1\nrecovery_failed=TRUE\nrestored=yes\n", &lib_model.UpdateStatus{}},
 		{"a repeated key keeps its last value", "result=running\nresult=success\n", &lib_model.UpdateStatus{Result: "success"}},
 		{"warnings are collected in order", "warning=first\nwarning=second\n", &lib_model.UpdateStatus{Warnings: []string{"first", "second"}}},
+		{"omitted warnings are counted", "warnings_omitted=3\nwarning=first\n", &lib_model.UpdateStatus{Warnings: []string{"first"}, WarningsOmitted: 3}},
+		{"an omitted count that isn't a number is 0", "warnings_omitted=x\n", &lib_model.UpdateStatus{}},
+		{"a negative omitted count is 0", "warnings_omitted=-1\n", &lib_model.UpdateStatus{}},
+		{"an empty omitted count is 0", "warnings_omitted=\n", &lib_model.UpdateStatus{}},
 		{"a value may contain '='", "step=set a=b\n", &lib_model.UpdateStatus{Step: "set a=b"}},
 		{"comments, empty lines and lines without '=' are ignored", "# comment\n\nno separator\nresult=failed\n", &lib_model.UpdateStatus{Result: "failed"}},
 		{"windows line endings", "result=success\r\nphase=done\r\n", &lib_model.UpdateStatus{Result: "success", Phase: "done"}},
@@ -105,8 +109,8 @@ func TestReadUpdateReadsAFileOfExactlyTheMaximumSize(t *testing.T) {
 }
 
 func TestReadCheck(t *testing.T) {
-	p := writeFile(t, "check_time=2026-11-09T03:00:00Z\ncheck_result=failed\ncheck_version=v1.3.0\ncheck_step=downloading release v1.3.0\nwarning=could not delete /tmp/mgw\nunknown=x\n")
-	want := &lib_model.CheckStatus{Time: "2026-11-09T03:00:00Z", Result: "failed", Version: "v1.3.0", Step: "downloading release v1.3.0", Warnings: []string{"could not delete /tmp/mgw"}}
+	p := writeFile(t, "check_time=2026-11-09T03:00:00Z\ncheck_result=failed\ncheck_version=v1.3.0\ncheck_step=downloading release v1.3.0\nwarnings_omitted=2\nwarning=could not delete /tmp/mgw\nunknown=x\n")
+	want := &lib_model.CheckStatus{Time: "2026-11-09T03:00:00Z", Result: "failed", Version: "v1.3.0", Step: "downloading release v1.3.0", Warnings: []string{"could not delete /tmp/mgw"}, WarningsOmitted: 2}
 	if got := ReadCheck(p); !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v, want %+v", got, want)
 	}

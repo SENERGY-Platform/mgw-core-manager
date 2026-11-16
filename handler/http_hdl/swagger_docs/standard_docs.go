@@ -779,6 +779,10 @@ const docTemplatestandard = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "warnings_omitted": {
+                    "description": "WarningsOmitted: warnings beyond those in Warnings, which the record leaves out; the installer's log\n(core-installer) has all of them in full. 0 if none or not readable.",
+                    "type": "integer"
                 }
             }
         },
@@ -1095,6 +1099,10 @@ const docTemplatestandard = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "warnings_omitted": {
+                    "description": "WarningsOmitted: warnings beyond those in Warnings, which the record leaves out; the installer's log\n(core-installer) has all of them in full. 0 if none or not readable.",
+                    "type": "integer"
                 }
             }
         },

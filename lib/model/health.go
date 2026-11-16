@@ -60,6 +60,9 @@ type UpdateStatus struct {
 	Restored bool     `json:"restored"`
 	Step     string   `json:"step"`     // human-readable description of the step reached, informational only, must not be evaluated
 	Warnings []string `json:"warnings"` // things that went wrong without failing the update, informational only
+	// WarningsOmitted: warnings beyond those in Warnings, which the record leaves out; the installer's log
+	// (core-installer) has all of them in full. 0 if none or not readable.
+	WarningsOmitted int `json:"warnings_omitted"`
 }
 
 // CheckStatus is the record of the last check for a new release as written by the installer. Any field may be empty.
@@ -69,6 +72,9 @@ type CheckStatus struct {
 	Version  string   `json:"version"`  // the newer release found, empty if up to date
 	Step     string   `json:"step"`     // human-readable description of what failed, informational only, must not be evaluated
 	Warnings []string `json:"warnings"` // things that went wrong without failing the check, informational only
+	// WarningsOmitted: warnings beyond those in Warnings, which the record leaves out; the installer's log
+	// (core-installer) has all of them in full. 0 if none or not readable.
+	WarningsOmitted int `json:"warnings_omitted"`
 }
 
 // LockStatus describes who holds the installer's lock, as written by the holder. Reported only while the lock is

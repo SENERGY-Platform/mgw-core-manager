@@ -56,8 +56,9 @@ files:
 
 - `version`: the content of the version file
 - `update`, `check`: the last update and version check. The files are read tolerantly: unknown keys are
-  ignored, missing keys stay empty, `warning=` lines are collected. `null` if there is no record, or the file
-  can't be read or is larger than 64 KiB.
+  ignored, missing keys stay empty, `warning=` lines are collected. `warnings_omitted` counts the warnings the
+  record left out (the installer keeps 20); the installer's log (`core-installer`) has all of them. `null` if
+  there is no record, or the file can't be read or is larger than 64 KiB.
 - `lock`: who holds the installer's lock (`holder`, `pid`, `since`). Reported only while the lock is held: the
   core-manager tries a non-blocking shared lock and releases it at once. `/proc/locks` can't be used, because it
   hides a lock once the `flock` command that took it has exited.

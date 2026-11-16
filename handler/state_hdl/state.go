@@ -27,6 +27,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -63,19 +64,20 @@ func ReadUpdate(p string) *lib_model.UpdateStatus {
 		return nil
 	}
 	return &lib_model.UpdateStatus{
-		FromVersion:    rec.values["from_version"],
-		ToVersion:      rec.values["to_version"],
-		Started:        rec.values["started"],
-		Finished:       rec.values["finished"],
-		Result:         rec.values["result"],
-		Phase:          rec.values["phase"],
-		Kind:           rec.values["kind"],
-		RolledBack:     rec.values["rolled_back"] == "true",
-		Interrupted:    rec.values["interrupted"] == "true",
-		RecoveryFailed: rec.values["recovery_failed"] == "true",
-		Restored:       rec.values["restored"] == "true",
-		Step:           rec.values["step"],
-		Warnings:       rec.warnings,
+		FromVersion:     rec.values["from_version"],
+		ToVersion:       rec.values["to_version"],
+		Started:         rec.values["started"],
+		Finished:        rec.values["finished"],
+		Result:          rec.values["result"],
+		Phase:           rec.values["phase"],
+		Kind:            rec.values["kind"],
+		RolledBack:      rec.values["rolled_back"] == "true",
+		Interrupted:     rec.values["interrupted"] == "true",
+		RecoveryFailed:  rec.values["recovery_failed"] == "true",
+		Restored:        rec.values["restored"] == "true",
+		Step:            rec.values["step"],
+		Warnings:        rec.warnings,
+		WarningsOmitted: count(rec.values["warnings_omitted"]),
 	}
 }
 
@@ -86,12 +88,22 @@ func ReadCheck(p string) *lib_model.CheckStatus {
 		return nil
 	}
 	return &lib_model.CheckStatus{
-		Time:     rec.values["check_time"],
-		Result:   rec.values["check_result"],
-		Version:  rec.values["check_version"],
-		Step:     rec.values["check_step"],
-		Warnings: rec.warnings,
+		Time:            rec.values["check_time"],
+		Result:          rec.values["check_result"],
+		Version:         rec.values["check_version"],
+		Step:            rec.values["check_step"],
+		Warnings:        rec.warnings,
+		WarningsOmitted: count(rec.values["warnings_omitted"]),
 	}
+}
+
+// count returns the non-negative number in s, 0 if s is empty or not such a number.
+func count(s string) int {
+	n, err := strconv.Atoi(s)
+	if err != nil || n < 0 {
+		return 0
+	}
+	return n
 }
 
 type record struct {
