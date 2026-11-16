@@ -74,7 +74,7 @@ type CheckStatus struct {
 // LockStatus describes who holds the installer's lock, as written by the holder. Reported only while the lock is
 // held. Any field may be empty.
 type LockStatus struct {
-	Holder string `json:"holder"` // update or ctrl.sh
+	Holder string `json:"holder"` // the installer script holding it: update, migration, recover, install, setup.sh, ctrl.sh, restore.sh or uninstall.sh
 	Pid    string `json:"pid"`    // process id of the holder
 	Since  string `json:"since"`  // when the holder took the lock
 }

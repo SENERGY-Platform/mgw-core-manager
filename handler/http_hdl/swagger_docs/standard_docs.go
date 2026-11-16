@@ -964,7 +964,7 @@ const docTemplatestandard = `{
             "type": "object",
             "properties": {
                 "holder": {
-                    "description": "update or ctrl.sh",
+                    "description": "the installer script holding it: update, migration, recover, install, setup.sh, ctrl.sh, restore.sh or uninstall.sh",
                     "type": "string"
                 },
                 "pid": {
